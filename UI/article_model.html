@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Saved Articles Modal - QuantiConstruct</title>
+<!-- Tailwind CSS v3 CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style data-purpose="custom-scrollbar">
+    /* Custom scrollbar for the modal body to keep it clean */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+<style data-purpose="layout-tweaks">
+    .modal-overlay {
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+    }
+  </style>
+</head>
+<body class="bg-[#f3f4f6] font-sans antialiased">
+<!-- BEGIN: Background Content (Profile Page Mockup) -->
+<!-- This represents the screen from the snapshot being obscured by the modal -->
+<div aria-hidden="true" class="min-h-screen filter blur-sm pointer-events-none">
+<header class="bg-white border-b px-8 py-4 flex justify-between items-center">
+<div class="flex items-center space-x-2">
+<div class="w-8 h-8 bg-blue-700 flex items-center justify-center rounded">
+<span class="text-white font-bold text-xs">Q</span>
+</div>
+<span class="font-bold text-xl text-[#1e293b]">QuantiConstruct</span>
+</div>
+<div class="flex items-center space-x-4">
+<button class="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+<span>AI Assistant</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">JD</div>
+</div>
+</header>
+<main class="max-w-5xl mx-auto py-8 px-4">
+<div class="bg-white rounded-xl shadow-sm p-8 mb-8 border border-gray-100"></div>
+</main>
+</div>
+<!-- END: Background Content -->
+<!-- BEGIN: Modal Overlay Container -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay" data-purpose="modal-container">
+<!-- BEGIN: Main Modal Dialog -->
+<div aria-labelledby="modal-title" aria-modal="true" class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]" role="dialog">
+<!-- BEGIN: Modal Header -->
+<div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10">
+<div class="flex items-center space-x-2">
+<svg class="w-5 h-5 text-blue-700" fill="currentColor" viewbox="0 0 20 20">
+<path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"></path>
+</svg>
+<h2 class="text-xl font-bold text-gray-900" id="modal-title">Saved Articles</h2>
+</div>
+<button aria-label="Close modal" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+<svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+<!-- END: Modal Header -->
+<!-- BEGIN: Modal Search Bar -->
+<div class="px-6 py-4 bg-[#f9fafb] border-b border-gray-100">
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<input class="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg bg-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Search within saved articles..." type="text"/>
+</div>
+</div>
+<!-- END: Modal Search Bar -->
+<!-- BEGIN: Scrollable Article List -->
+<div class="flex-1 overflow-y-auto p-6 bg-[#f9fafb] custom-scrollbar" data-purpose="article-list">
+<div class="space-y-4">
+<!-- Article Row 1 -->
+<div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between group">
+<div class="flex items-center space-x-4">
+<img alt="Sustainable Concrete Trends" class="w-16 h-16 rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYdwEzqSIVZa7BFdcAEK0RAKH6wvhz8MbXANSw2pumgB_9wdN6rkgFppvyFVtyQJ62gPZKPkN4GZ341kj_GuoK_aClaPs-0imUnCR3zRUU_eYqj_o9YxHjFXSAM0_4Atsd2VP9Fb1LhR2_DFdVzbuCeAHAcMk39gUgh8g44gh4eLrf2TDXs6cLteYRbN7rbASOxuHjYYWf1RJZFDPlCFU0cJbDw9xzz99Q1ifxjqxsCQgaRrjxpkpBtCV29ac-aQyGJBp7BE9uk7Y"/>
+<div>
+<h3 class="font-semibold text-gray-900">Sustainable Concrete Trends</h3>
+<div class="flex items-center space-x-2 mt-1">
+<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-50 text-purple-600 uppercase">Blog</span>
+<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-600 uppercase">Published</span>
+</div>
+</div>
+</div>
+<button class="text-sm font-medium text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-all flex items-center space-x-1" data-purpose="action-button">
+<span>Unsave</span>
+</button>
+</div>
+<!-- Article Row 2 -->
+<div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between group">
+<div class="flex items-center space-x-4">
+<img alt="2024 Safety Regulations" class="w-16 h-16 rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8QLs3tNN1KrFhCGtzjTQlZ7XYOeEinfUTXYlMpgqxVt4uB4YoPhDiDAmm4SCcBH-vnlDgILX0dyaC_cnk8NtDATDW-bvJOnXM15kDUvoWUGBVQz45Q00Jj_B21ZyluiP_FASKKp6RI_ShHbQUg3yHmiXBkECNMTnDmwo3vk6Kg1jMZvx9m8ZA7pk80s3CsSTz8qcw4JU22geUeVRhrS5DrmfdAMc06FW43QYFbzOtqcLJUV-UMI9bo64jWyGRIroYJSoW7AZYHjg"/>
+<div>
+<h3 class="font-semibold text-gray-900">2024 Safety Regulations</h3>
+<div class="flex items-center space-x-2 mt-1">
+<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 uppercase">Actualite</span>
+<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-100 text-gray-600 uppercase">Draft</span>
+</div>
+</div>
+</div>
+<button class="text-sm font-medium text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-all flex items-center space-x-1" data-purpose="action-button">
+<span>Unsave</span>
+</button>
+</div>
+<!-- Article Row 3 -->
+<div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between group">
+<div class="flex items-center space-x-4">
+<img alt="BIM Integration 101" class="w-16 h-16 rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDn-qpYdTVZPB65mfNLKCpICP2R66D3JFv0RTicwt9ojdqMnYraa8YF6M_wyLtliRhQKLOT-vWaVKz49gFNHLx8q1bVtSCPpX4iYpYrhIU2WwC-SJLHdcvZuhr7H1SMPHF-p8G6nVJm1JgXitJR3UEJJ3ZVEovzmLYTkIJPzqOgx7vcYiJK5rWNu7pLHPWE4ZB5JX_i_CtT_tdnbCQTK32VNcfwbLqKUvDedh7j3F7abmgECrGc1qa97nJOksfeNbnxas6w4_ucne8"/>
+<div>
+<h3 class="font-semibold text-gray-900">BIM Integration 101</h3>
+<div class="flex items-center space-x-2 mt-1">
+<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-50 text-purple-600 uppercase">Blog</span>
+<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-600 uppercase">Published</span>
+</div>
+</div>
+</div>
+<button class="text-sm font-medium text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-all flex items-center space-x-1" data-purpose="action-button">
+<span>Unsave</span>
+</button>
+</div>
+<!-- Article Row 4 -->
+<div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between group">
+<div class="flex items-center space-x-4">
+<img alt="Urban Development News" class="w-16 h-16 rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCY_6w8iRxp_Kd-dfxE5Tlkm6_xwbC9g5uK0TBHrlKxZMQ-8pZIqZRSlD31zwlWqBuHnG1UpdmdXvuf3nOf2twgaPk2ROl81k2y-0W5Jfz_6BPn-JAZAFuE9LqiBrWzoDdIbUJzkJtwvhixUHCbxHPHmDA3Kzu2m4G_8bfjT0iqcGHFr7IE9GuuAT-JBDcUUN0i33g-O3fISSYIGxebQrh4vJYZUJFmyOKszF2vJeuF_y6wDEnptFkG5iMpDnbCqjuHnln-86IGIBk"/>
+<div>
+<h3 class="font-semibold text-gray-900">Urban Development News</h3>
+<div class="flex items-center space-x-2 mt-1">
+<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 uppercase">Actualite</span>
+<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-600 uppercase">Published</span>
+</div>
+</div>
+</div>
+<button class="text-sm font-medium text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-all flex items-center space-x-1" data-purpose="action-button">
+<span>Unsave</span>
+</button>
+</div>
+<!-- Article Row 5 (Extra for scroll visual) -->
+<div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between group">
+<div class="flex items-center space-x-4">
+<img alt="Cost Optimization Hacks" class="w-16 h-16 rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBe5J2iLzfwWKIB0_gDrgXDphX0yNMH3dNyssdp_ZVVOFPkHabF_wdQRXfoCtfN-9ZqZI2XrVDGOALCHGPeP4EqcP9IyKdmTLDLdAAThGAkD78nwmrDKM2WBV2dy9ytHsF7WBQjKFqUm-7NYIU3A_nYVXlVia1m4COj9oOnI2RJw0zFosYsHZ9SQP2AlfY0JDt_Nh8vlO6TOAIboheztOOzjU02LcNHlCLyGshT2d5vZ3mjBoMILY9GXhkTJESE1GVqxs_LHPykEJ0"/>
+<div>
+<h3 class="font-semibold text-gray-900">Cost Optimization Hacks</h3>
+<div class="flex items-center space-x-2 mt-1">
+<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 uppercase">Actualite</span>
+<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-600 uppercase">Published</span>
+</div>
+</div>
+</div>
+<button class="text-sm font-medium text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-all flex items-center space-x-1" data-purpose="action-button">
+<span>Unsave</span>
+</button>
+</div>
+</div>
+</div>
+<!-- END: Scrollable Article List -->
+<!-- BEGIN: Modal Footer / Pagination -->
+<div class="px-6 py-4 border-t border-gray-100 bg-white flex justify-center">
+<button class="px-6 py-2 border border-blue-600 text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors text-sm" data-purpose="load-more">
+          Load More Articles
+        </button>
+</div>
+<!-- END: Modal Footer -->
+</div>
+<!-- END: Main Modal Dialog -->
+</div>
+<!-- END: Modal Overlay Container -->
+<!-- BEGIN: Footer Placeholder -->
+<footer class="fixed bottom-0 w-full py-4 text-center text-xs text-gray-400 bg-transparent pointer-events-none">
+    © 2024 QuantiConstruct. All rights reserved. User: JD-88219
+  </footer>
+<!-- END: Footer Placeholder -->
+</body></html>

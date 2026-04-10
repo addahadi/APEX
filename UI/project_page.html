@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>QuantiConstruct | Project Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1152d4",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .dot-grid {
+            background-image: radial-gradient(circle, #cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .dark .dot-grid {
+            background-image: radial-gradient(circle, #1e293b 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex min-h-screen flex-col dot-grid">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md px-6 py-3 lg:px-20">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="bg-primary p-1.5 rounded-lg text-white">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1">architecture</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-xl font-bold tracking-tight">QuantiConstruct</h2>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white font-semibold text-sm hover:bg-primary/90 transition-all shadow-sm shadow-primary/20">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1">smart_toy</span>
+<span>AI Assistant</span>
+</button>
+<div class="h-10 w-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary/20 transition-all">
+<img alt="User avatar" data-alt="Portrait of a professional project manager" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4JPEPT6jgcwVc36f3jlgO0EHY_R_0HhkCJk-CkmURiQSd0MG21aF_Hf-BO8WNeCKFKiwKylR39u62hvNTCplEtkqz0BbrGnb-dthsGEiGZXzrCHJQQqlSSPPCSE_QYljkdBShSlBkPymBUBhzMszWHaERyhM2DbkxFHHu-DLoJZ4LGaqc81ZEgmVi4kFeRoYWZPHbQPNGnQ_K8MvrgdR9p2ikyO-FzddkjkjFzHqp0IaNNFPYOoeNPgIGpxZNvS6LNE37bdsxcQA"/>
+</div>
+</div>
+</header>
+<main class="flex-1 px-6 py-8 lg:px-20 max-w-7xl mx-auto w-full">
+<!-- Hero Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2 text-primary font-semibold text-sm uppercase tracking-wider">
+<span class="material-symbols-outlined text-sm">dashboard</span>
+                        Workspace Dashboard
+                    </div>
+<h1 class="text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Active Projects</h1>
+<p class="text-slate-500 dark:text-slate-400 max-w-lg">
+                        Manage your architectural portfolio. Monitor status and project metadata as defined in the system registry.
+                    </p>
+</div>
+<button class="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-white font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/25">
+<span class="material-symbols-outlined">add_circle</span>
+                    Create Project
+                </button>
+</div>
+<!-- Stats Bar -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+<div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+<div class="bg-primary/10 p-3 rounded-lg text-primary">
+<span class="material-symbols-outlined text-3xl">construction</span>
+</div>
+<div>
+<p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Active Status</p>
+<p class="text-2xl font-bold">12 Projects</p>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+<div class="bg-emerald-100 p-3 rounded-lg text-emerald-600">
+<span class="material-symbols-outlined text-3xl">verified</span>
+</div>
+<div>
+<p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Completed</p>
+<p class="text-2xl font-bold">48 Units</p>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+<div class="bg-amber-100 p-3 rounded-lg text-amber-600">
+<span class="material-symbols-outlined text-3xl">folder_shared</span>
+</div>
+<div>
+<p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Categories</p>
+<p class="text-2xl font-bold">8 Groups</p>
+</div>
+</div>
+</div>
+<!-- Filter Tabs -->
+<div class="border-b border-slate-200 dark:border-slate-800 mb-8">
+<div class="flex gap-8">
+<button class="border-b-2 border-primary text-primary pb-4 font-bold text-sm">All Projects</button>
+<button class="border-b-2 border-transparent text-slate-500 dark:text-slate-400 pb-4 font-bold text-sm hover:text-slate-900 dark:hover:text-slate-200 transition-colors">Active</button>
+<button class="border-b-2 border-transparent text-slate-500 dark:text-slate-400 pb-4 font-bold text-sm hover:text-slate-900 dark:hover:text-slate-200 transition-colors">Completed</button>
+</div>
+</div>
+<!-- Project Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Project Card 1 (Active) -->
+<div class="group flex flex-col bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-xl transition-all border-b-4 border-b-primary/40">
+<div class="relative h-48 overflow-hidden">
+<img alt="Skyline Tower" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="High-rise modern skyscraper under construction with cranes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmKj9HeVar9msl6uvNyWVEwHkkSkSbxCx8rkhNxiu69KfUryelDBEf9j6rTJu_OLn2DVMQYdrtCNd71bQuzViVjLO-C654RBxelLh481vhc0gGiw0HK2UZezchlMuQZfbF2zptK3UQKhN7sS7WqhC7JUDIrAspbQmoCcMkF7DePPE5Zv_sy4xmKjYt0lV2Bb2e1dOxmcLaLIt1uZYdVBXCvkjUqkp-WjjM_v_YXDjHnApfOh0Ht-BBzSTua7fL5OKQHce3_zT2ClQ"/>
+<div class="absolute top-4 right-4">
+<span class="inline-flex items-center gap-1.5 rounded-full bg-primary/20 backdrop-blur-md px-3 py-1 text-xs font-bold text-primary border border-primary/30">
+<span class="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>
+                                ACTIVE
+                            </span>
+</div>
+</div>
+<div class="p-6 flex flex-col flex-1">
+<div class="mb-4">
+<div class="flex justify-between items-start">
+<h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors">Skyline Tower</h3>
+<span class="text-[10px] font-mono text-slate-400">UUID: 8f2-a91</span>
+</div>
+<p class="text-sm text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">High-rise luxury residential complex with sustainable architecture and smart energy systems.</p>
+</div>
+<div class="mt-auto">
+<div class="mt-2 flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-sm">person</span>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-300">Apex Corp</span>
+</div>
+<span class="text-xs font-medium text-slate-400">Due Dec 2024</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Project Card 2 (Completed) -->
+<div class="group flex flex-col bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-xl transition-all border-b-4 border-b-emerald-500/40">
+<div class="relative h-48 overflow-hidden">
+<img alt="Riverfront Plaza" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Modern office building plaza by a river" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBw3UkEFZoFdB3sYbUxIwFnrJ8skq7g9ohgATKrFPIXupKJO2xSl9t70bkkXqQF71Spea3pWMFK143VuKY_w20FaE8wSTRSl1QBDHkalNDsT0Ist-xl3riQE5Bxf8rVhlfajEsUPbN9a1a7TCUwsgnQUkF2wC717ynEBbQGU5VtbwrmrFktwZpmR-MRqQziGt8l2a1JDBaVAWePiCkNHWFZjc0KgTsnFRaYEoIfWnFaOyXDffnjU469W2BvRZcGDCwLHG6a-uH9p7E"/>
+<div class="absolute top-4 right-4">
+<span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-600 border border-emerald-200">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                COMPLETED
+                            </span>
+</div>
+</div>
+<div class="p-6 flex flex-col flex-1">
+<div class="mb-4">
+<div class="flex justify-between items-start">
+<h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 transition-colors">Riverfront Plaza</h3>
+<span class="text-[10px] font-mono text-slate-400">UUID: 4d1-c32</span>
+</div>
+<p class="text-sm text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">Public-private partnership for waterfront development including recreational and office spaces.</p>
+</div>
+<div class="mt-auto">
+<div class="mt-2 flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-sm">person</span>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-300">Metro City</span>
+</div>
+<span class="text-xs font-medium text-slate-400">Finished Aug 2023</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Project Card 3 (Active) -->
+<div class="group flex flex-col bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-xl transition-all border-b-4 border-b-primary/40">
+<div class="relative h-48 overflow-hidden">
+<img alt="Oakwood Medical" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Clean architectural design of a modern hospital" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClbYrFQuTVuahNlALurQmqv0KcomNxKmY0Ce3Xa92BWy6W-6UzyMPrt5E75v_5kbGFHxrvho6gWrxjN7S9rp0ISeAH7EFcbV60wjjNpABfEZValXm7rbaTKPuALJsRGZU5kHsib6kiZab1J1j0jmEpCPM4S-9zdlruLMCat183g2DLU-Pepi7lxcVn0rUg5W23rbyod83UE2DTxUTK9t2RADwA3az8tOPD-Eg9TkNuRnU1HVLEJWUCwqAUAGgLutOdgyVshAdl-Lc"/>
+<div class="absolute top-4 right-4">
+<span class="inline-flex items-center gap-1.5 rounded-full bg-primary/20 backdrop-blur-md px-3 py-1 text-xs font-bold text-primary border border-primary/30">
+<span class="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>
+                                ACTIVE
+                            </span>
+</div>
+</div>
+<div class="p-6 flex flex-col flex-1">
+<div class="mb-4">
+<div class="flex justify-between items-start">
+<h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors">Oakwood Medical</h3>
+<span class="text-[10px] font-mono text-slate-400">UUID: 2b5-e77</span>
+</div>
+<p class="text-sm text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">State-of-the-art medical facility focusing on diagnostic excellence and patient comfort.</p>
+</div>
+<div class="mt-auto">
+<div class="mt-2 flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-sm">person</span>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-300">HealthFirst</span>
+</div>
+<span class="text-xs font-medium text-slate-400">Due Mar 2025</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Empty State Card / Add New -->
+<button class="group flex flex-col items-center justify-center bg-slate-100/50 dark:bg-slate-800/30 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 min-h-[400px] hover:bg-slate-100 dark:hover:bg-slate-800 transition-all hover:border-primary">
+<div class="flex flex-col items-center gap-4 text-slate-400 group-hover:text-primary transition-colors">
+<div class="h-16 w-16 rounded-full bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center">
+<span class="material-symbols-outlined text-4xl">add</span>
+</div>
+<div class="text-center px-6">
+<p class="text-lg font-bold">Create Project</p>
+<p class="text-sm">Initiate project creation process</p>
+</div>
+</div>
+</button>
+</div>
+<!-- Dashboard Footer/Pagination -->
+<div class="mt-12 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-slate-200 dark:border-slate-800 pt-8 pb-12">
+<p class="text-sm text-slate-500 dark:text-slate-400">Showing 3 of 12 registered Project entities</p>
+<div class="flex gap-2">
+<button class="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-bold hover:bg-white dark:hover:bg-slate-800 transition-colors">Previous</button>
+<button class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow-sm">1</button>
+<button class="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-bold hover:bg-white dark:hover:bg-slate-800 transition-colors">2</button>
+<button class="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-bold hover:bg-white dark:hover:bg-slate-800 transition-colors">Next</button>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

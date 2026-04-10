@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1D4ED8",
+                        "background-light": "#f9fafb",
+                        "background-dark": "#111827",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Public Sans', sans-serif;
+        }
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background: #e5e7eb;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<div class="flex h-screen">
+<!-- Sidebar -->
+<aside class="w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col z-50">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
+<div class="bg-primary p-1.5 rounded-lg text-white">
+<span class="material-symbols-outlined text-2xl">architecture</span>
+</div>
+<div>
+<h1 class="font-bold text-lg leading-none text-slate-900 dark:text-white">QuantiConstruct</h1>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Category Browser</p>
+</div>
+</div>
+<div class="p-4 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">SKYLINE TOWER</h3>
+</div>
+<nav class="flex-1 overflow-y-auto p-4 space-y-1 sidebar-scroll">
+<!-- Grand Travaux Category Folder -->
+<div class="space-y-1">
+<div class="flex items-center gap-2 px-3 py-2 text-primary bg-primary/5 rounded-lg cursor-pointer group">
+<span class="material-symbols-outlined text-sm">keyboard_arrow_down</span>
+<span class="material-symbols-outlined text-sm">folder</span>
+<span class="text-sm font-bold">Grand Travaux</span>
+</div>
+<div class="ml-4 space-y-1 border-l-2 border-slate-100 dark:border-slate-800 pl-2">
+<!-- Gros Oeuvre (Expanded based on current screen) -->
+<div class="space-y-1">
+<div class="flex items-center gap-2 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-sm">keyboard_arrow_down</span>
+<span class="material-symbols-outlined text-sm text-slate-400">folder</span>
+<span class="text-sm font-medium">Gros Oeuvre</span>
+</div>
+<div class="ml-4 space-y-1 border-l-2 border-slate-100 dark:border-slate-800 pl-2">
+<!-- Leaves with status dots matching description icons -->
+<div class="flex items-center justify-between px-3 py-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer group">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">description</span>
+<span class="text-sm">Béton Armé</span>
+</div>
+<span class="h-1.5 w-1.5 rounded-full bg-[#10b981]"></span>
+</div>
+<div class="flex items-center justify-between px-3 py-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer group">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">description</span>
+<span class="text-sm">Dalles</span>
+</div>
+<span class="h-1.5 w-1.5 rounded-full border border-slate-300"></span>
+</div>
+</div>
+</div>
+<!-- Collapsed Items -->
+<div class="flex items-center gap-2 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-sm">keyboard_arrow_right</span>
+<span class="material-symbols-outlined text-sm">folder</span>
+<span class="text-sm font-medium">Fondations</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-sm">keyboard_arrow_right</span>
+<span class="material-symbols-outlined text-sm">folder</span>
+<span class="text-sm font-medium">Maçonnerie</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-sm">keyboard_arrow_right</span>
+<span class="material-symbols-outlined text-sm">folder</span>
+<span class="text-sm font-medium">Charpente</span>
+</div>
+</div>
+</div>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-slate-800">
+<button class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-bold uppercase tracking-wide hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-base">unfold_less</span>
+                Réduire Tout
+            </button>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col overflow-hidden">
+<!-- Navbar -->
+<header class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-end px-8 sticky top-0 z-10">
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-200 shadow-sm shadow-primary/20">
+<span class="material-symbols-outlined text-xl">smart_toy</span>
+<span class="text-sm font-bold">Assistant IA</span>
+</button>
+<div class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden border-2 border-primary/20 cursor-pointer">
+<img alt="User profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsWapr1cUmomhNwbpBiqnj7b2G-8wNpmCNb8AjDd1TO2FqRv9fZPoaDlACyCXZPkwbuH5bN1C3DhwC_4vB1CGmPKjaw8v7QdzmkxfCJnqTYih9huu7JENmVLA1S6CAztyVAWrKxtzfJeoQqA-nOtC6SafKEHK6LQdm5NeqLVvjYyS9Dpl1NjJG_F8XKRW8GkJHKijDGOQ6AyeePawqAhy7f1wSpIagOJFANGYvvREMWLsFrlOPWrzxUFJW2M4oRblHOphEg-CMlxU"/>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<div class="flex-1 overflow-y-auto p-8">
+<div class="max-w-6xl mx-auto w-full">
+<!-- Breadcrumb -->
+<nav class="mb-6 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-primary transition-colors text-[18px]">arrow_back</span>
+<a class="hover:text-primary transition-colors" href="#">Projets</a>
+<span class="text-slate-300">/</span>
+<a class="hover:text-primary transition-colors" href="#">Skyline Tower</a>
+<span class="text-slate-300">/</span>
+<span class="text-slate-900 dark:text-white font-bold">Grand Travaux</span>
+</nav>
+<!-- Page Header -->
+<div class="mb-10">
+<h2 class="text-4xl font-extrabold text-slate-900 dark:text-white mb-3">Grand Travaux</h2>
+<p class="text-lg text-slate-600 dark:text-slate-400 max-w-3xl leading-relaxed">
+                        Management of heavy structural works, foundations, and core building components.
+                    </p>
+</div>
+<!-- Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Card 1 -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow cursor-pointer relative group">
+<div class="mb-4 bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">domain</span>
+</div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-primary transition-colors">Gros Oeuvre</h3>
+<p class="text-sm text-slate-600 dark:text-slate-400 mb-4 line-clamp-2">Complete structural frame including vertical elements and floors.</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 rounded">Concrete</span>
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 rounded">Beams</span>
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 rounded">Columns</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow cursor-pointer relative group">
+<div class="mb-4 bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">foundation</span>
+</div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-primary transition-colors">Fondations</h3>
+<p class="text-sm text-slate-600 dark:text-slate-400 mb-4 line-clamp-2">Substructure work including excavation and deep foundation piling.</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 rounded">Piles</span>
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 rounded">Excavation</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow cursor-pointer relative group">
+<div class="mb-4 bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">construction</span>
+</div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-primary transition-colors">Maçonnerie</h3>
+<p class="text-sm text-slate-600 dark:text-slate-400 mb-4 line-clamp-2">Brickwork, stone blocks and internal partitioning walls.</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 rounded">Brick</span>
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 rounded">Mortar</span>
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 rounded">Cladding</span>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow cursor-pointer relative group">
+<div class="mb-4 bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">account_tree</span>
+</div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-primary transition-colors">Charpente</h3>
+<p class="text-sm text-slate-600 dark:text-slate-400 mb-4 line-clamp-2">Heavy timber or steel structural framing for roofs and floors.</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 rounded">Steel</span>
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 rounded">Timber</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

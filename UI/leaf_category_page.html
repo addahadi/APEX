@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>QuantiConstruct - Category Calculator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1D4ED8",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .dot-grid {
+            background-image: radial-gradient(circle, #1D4ED811 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen overflow-hidden">
+<div class="flex h-screen">
+<!-- Persistent Left Sidebar: Element Types Tree -->
+<aside class="w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col z-50">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
+<div class="bg-primary p-1.5 rounded-lg text-white">
+<span class="material-symbols-outlined text-2xl" style="">architecture</span>
+</div>
+<div>
+<h1 class="font-bold text-lg leading-none" style="">QuantiConstruct</h1>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-1" style="">Category Browser</p>
+</div>
+</div>
+<div class="p-4 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest" style="">SKYLINE TOWER</h3>
+</div>
+<nav class="flex-1 overflow-y-auto p-4 space-y-1">
+<!-- Grand Travaux Category Folder -->
+<div class="space-y-1">
+<div class="flex items-center gap-2 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer group">
+<span class="material-symbols-outlined text-sm" style="">keyboard_arrow_down</span>
+<span class="material-symbols-outlined text-sm" style="">folder</span>
+<span class="text-sm font-bold text-slate-700 dark:text-slate-300" style="">Grand Travaux</span>
+</div>
+<div class="ml-4 space-y-1 border-l-2 border-slate-100 dark:border-slate-800 pl-2">
+<!-- Foundations (Expanded) -->
+<div class="space-y-1">
+<div class="flex items-center gap-2 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer group">
+<span class="material-symbols-outlined text-sm" style="">keyboard_arrow_down</span>
+<span class="material-symbols-outlined text-sm" style="">foundation</span>
+<span class="text-sm font-medium" style="">Foundations</span>
+</div>
+<div class="ml-4 space-y-1 border-l-2 border-slate-100 dark:border-slate-800 pl-2">
+<!-- Isolated Footing (Selected) -->
+<div class="flex items-center justify-between px-3 py-2 bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer">
+<span class="text-sm font-semibold text-primary" style="">Isolated Footing</span>
+<span class="text-[9px] font-bold px-1.5 py-0.5 bg-primary/20 text-primary rounded" style="">LEAF</span>
+</div>
+<!-- Strip Foundation -->
+<div class="flex items-center justify-between px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer group">
+<span class="text-sm font-medium" style="">Strip Foundation</span>
+<span class="text-[9px] font-bold px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-slate-400" style="">LEAF</span>
+</div>
+<!-- Raft Foundation -->
+<div class="flex items-center justify-between px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer group">
+<span class="text-sm font-medium" style="">Raft Foundation</span>
+<span class="text-[9px] font-bold px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-slate-400" style="">LEAF</span>
+</div>
+<!-- Pile Cap -->
+<div class="flex items-center justify-between px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer group">
+<span class="text-sm font-medium" style="">Pile Cap</span>
+<span class="text-[9px] font-bold px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-slate-400" style="">LEAF</span>
+</div>
+</div>
+</div>
+<!-- Columns (Collapsed) -->
+<div class="flex items-center gap-2 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-sm" style="">keyboard_arrow_right</span>
+<span class="material-symbols-outlined text-sm" style="">view_column</span>
+<span class="text-sm font-medium" style="">Columns</span>
+</div>
+<!-- Beams (Collapsed) -->
+<div class="flex items-center gap-2 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-sm" style="">keyboard_arrow_right</span>
+<span class="material-symbols-outlined text-sm" style="">horizontal_distribute</span>
+<span class="text-sm font-medium" style="">Beams</span>
+</div>
+<!-- Earthworks (Collapsed) -->
+<div class="flex items-center gap-2 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-sm" style="">keyboard_arrow_right</span>
+<span class="material-symbols-outlined text-sm" style="">layers</span>
+<span class="text-sm font-medium" style="">Earthworks</span>
+</div>
+</div>
+</div>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-slate-800">
+<button class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-bold uppercase tracking-wide hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" style="">
+<span class="material-symbols-outlined text-base" style="">unfold_less</span>
+                Collapse All
+            </button>
+</div>
+</aside>
+<!-- Main Workspace -->
+<div class="flex-1 flex flex-col overflow-hidden dot-grid">
+<!-- Top Navigation Bar -->
+<header class="h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-8 flex items-center justify-end shrink-0">
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-200 shadow-sm shadow-primary/20" style="">
+<span class="material-symbols-outlined text-xl" style="">smart_toy</span>
+<span class="text-sm font-bold" style="">AI Assistant</span>
+</button>
+<div class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden border-2 border-primary/20 cursor-pointer">
+<img alt="User profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsWapr1cUmomhNwbpBiqnj7b2G-8wNpmCNb8AjDd1TO2FqRv9fZPoaDlACyCXZPkwbuH5bN1C3DhwC_4vB1CGmPKjaw8v7QdzmkxfCJnqTYih9huu7JENmVLA1S6CAztyVAWrKxtzfJeoQqA-nOtC6SafKEHK6LQdm5NeqLVvjYyS9Dpl1NjJG_F8XKRW8GkJHKijDGOQ6AyeePawqAhy7f1wSpIagOJFANGYvvREMWLsFrlOPWrzxUFJW2M4oRblHOphEg-CMlxU" style=""/>
+</div>
+</div>
+</header>
+<!-- Scrollable Content -->
+<main class="flex-1 overflow-y-auto p-8">
+<div class="max-w-[1400px] mx-auto space-y-8">
+<!-- Title & Breadcrumb Section -->
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4 text-sm font-medium">
+<span class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-primary transition-colors" style="">arrow_back</span>
+<div class="flex items-center gap-2">
+<span class="text-slate-400 hover:text-slate-600 cursor-pointer" style="">Grand Travaux</span>
+<span class="text-slate-300" style="">/</span>
+<span class="text-slate-400 hover:text-slate-600 cursor-pointer" style="">Foundations</span>
+<span class="text-slate-300" style="">/</span>
+<span class="text-slate-900 dark:text-white font-bold" style="">Isolated Footing</span>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="p-2.5 text-slate-500 hover:text-primary hover:bg-primary/10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors" style="">
+<span class="material-symbols-outlined" style="">share</span>
+</button>
+<button class="p-2.5 text-slate-500 hover:text-primary hover:bg-primary/10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors" style="">
+<span class="material-symbols-outlined" style="">print</span>
+</button>
+</div>
+</div>
+<div>
+<h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight" style="">Isolated Footing</h2>
+<p class="text-sm text-slate-500 dark:text-slate-400 mt-1" style="">Configure and calculate structural quantities for reinforced concrete isolated footings.</p>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-8">
+<!-- Middle Column: Input Form -->
+<section class="col-span-12 lg:col-span-7 space-y-6">
+<!-- Input Dimensions -->
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between">
+<h3 class="font-bold flex items-center gap-2 text-slate-800 dark:text-slate-100 uppercase tracking-tight text-sm" style="">
+<span class="material-symbols-outlined text-primary" style="">straighten</span>
+                                    Input Dimensions
+                                </h3>
+<button class="text-slate-400 hover:text-primary transition-colors" style="">
+<span class="material-symbols-outlined" style="">bookmark</span>
+</button>
+</div>
+<div class="p-6 space-y-8">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="space-y-2">
+<label class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest" style="">Length (L)</label>
+<div class="relative">
+<input class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all text-lg font-mono" step="0.01" type="number" value="2.50"/>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs uppercase" style="">m</span>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest" style="">Width (W)</label>
+<div class="relative">
+<input class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all text-lg font-mono" step="0.01" type="number" value="2.50"/>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs uppercase" style="">m</span>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest" style="">Height (H)</label>
+<div class="relative">
+<input class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all text-lg font-mono" step="0.01" type="number" value="0.60"/>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs uppercase" style="">m</span>
+</div>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest" style="">Concrete Grade</label>
+<select class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary font-medium">
+<option>C25/30 - Standard Structural</option>
+<option>C30/37 - High Strength</option>
+<option>C20/25 - Mass Concrete</option>
+</select>
+</div>
+<div class="pt-2">
+<button class="w-full bg-primary hover:brightness-110 text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 text-lg shadow-xl shadow-primary/20 transition-all active:scale-[0.98]" style="">
+<span class="material-symbols-outlined" style="">calculate</span>
+                                        CALCULATE QUANTITIES
+                                    </button>
+<div class="mt-4 text-center">
+<button class="text-xs font-bold text-slate-400 hover:text-primary transition-colors flex items-center justify-center gap-1 mx-auto" style="">
+<span class="material-symbols-outlined text-sm" style="">restart_alt</span>
+                                            Reset Values
+                                        </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Material Cost Estimation Section -->
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex justify-between items-center">
+<h3 class="font-bold flex items-center gap-2 text-slate-800 dark:text-slate-100 uppercase tracking-tight text-sm" style="">
+<span class="material-symbols-outlined text-primary" style="">payments</span>
+                                    Material Cost Estimation
+                                </h3>
+<span class="text-[9px] font-black px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-slate-500 border border-slate-200 dark:border-slate-600" style="">OPTIONAL</span>
+</div>
+<div class="p-8 flex flex-col items-center justify-center text-center space-y-4">
+<p class="text-slate-500 dark:text-slate-400 text-sm max-w-sm font-medium" style="">
+                                    Get an automated cost estimate based on current market rates for concrete and reinforcement materials.
+                                </p>
+<button class="px-8 py-3 bg-white dark:bg-slate-800 border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all rounded-xl font-black shadow-sm flex items-center gap-2" style="">
+<span class="material-symbols-outlined text-xl" style="">account_balance_wallet</span>
+                                    Calculate Estimated Material Cost
+                                </button>
+</div>
+</div>
+</section>
+<!-- Right Column: Results & Formulas -->
+<aside class="col-span-12 lg:col-span-5 space-y-6">
+<!-- Calculation Results -->
+<div class="bg-primary text-white rounded-xl p-6 shadow-xl shadow-primary/30 relative overflow-hidden">
+<div class="absolute -right-8 -top-8 text-white/5 rotate-12">
+<span class="material-symbols-outlined text-[160px]" style="">precision_manufacturing</span>
+</div>
+<div class="flex items-center justify-between mb-6 relative z-10">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+<h3 class="text-white/80 font-black text-xs uppercase tracking-widest" style="">Grand Travaux</h3>
+</div>
+<span class="bg-white/20 text-white px-2 py-0.5 rounded-full text-[10px] font-bold" style="">SAVED</span>
+</div>
+<div class="space-y-3 relative z-10">
+<div class="p-4 bg-white/10 rounded-xl border border-white/5 backdrop-blur-sm group hover:bg-white/20 transition-all cursor-default">
+<p class="text-white/60 text-[10px] uppercase font-black tracking-widest mb-1" style="">Concrete Volume</p>
+<div class="flex items-baseline gap-2">
+<span class="text-4xl font-black tracking-tight" style="">3.75</span>
+<span class="text-lg font-bold opacity-60" style="">m³</span>
+</div>
+</div>
+<div class="p-4 bg-white/10 rounded-xl border border-white/5 backdrop-blur-sm group hover:bg-white/20 transition-all cursor-default">
+<p class="text-white/60 text-[10px] uppercase font-black tracking-widest mb-1" style="">Surface Area</p>
+<div class="flex items-baseline gap-2">
+<span class="text-4xl font-black tracking-tight" style="">6.25</span>
+<span class="text-lg font-bold opacity-60" style="">m²</span>
+</div>
+</div>
+<div class="p-4 bg-white/10 rounded-xl border border-white/5 backdrop-blur-sm group hover:bg-white/20 transition-all cursor-default">
+<p class="text-white/60 text-[10px] uppercase font-black tracking-widest mb-1" style="">Excavation</p>
+<div class="flex items-baseline gap-2">
+<span class="text-4xl font-black tracking-tight" style="">5.40</span>
+<span class="text-lg font-bold opacity-60" style="">m³</span>
+</div>
+</div>
+<div class="p-4 bg-white/10 rounded-xl border border-white/5 backdrop-blur-sm group hover:bg-white/20 transition-all cursor-default">
+<p class="text-white/60 text-[10px] uppercase font-black tracking-widest mb-1" style="">Steel (Estimated)</p>
+<div class="flex items-baseline gap-2">
+<span class="text-4xl font-black tracking-tight" style="">300.00</span>
+<span class="text-lg font-bold opacity-60" style="">kg</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Calculation Formulas -->
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
+<h4 class="font-black text-slate-800 dark:text-white mb-5 flex items-center gap-2 text-sm uppercase tracking-wide" style="">
+<span class="material-symbols-outlined text-primary" style="">functions</span>
+                                Calculation Formulas
+                            </h4>
+<div class="space-y-4">
+<div class="space-y-2">
+<label class="text-[10px] font-black text-slate-400 uppercase tracking-widest" style="">Volume Calculation Method</label>
+<select class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-primary focus:border-primary">
+<option>Standard Volume (Prismatic)</option>
+<option>Modified Volume (Inclined Sides)</option>
+</select>
+<div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 font-mono text-xs text-primary flex items-center gap-2">
+<span class="font-bold opacity-50" style="">PREVIEW:</span>
+<span class="" style="">V = L × W × H</span>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] font-black text-slate-400 uppercase tracking-widest" style="">Area Calculation Method</label>
+<select class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-primary focus:border-primary">
+<option>Standard Footprint Area</option>
+<option>Simplified Perimeter Area</option>
+</select>
+<div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 font-mono text-xs text-primary flex items-center gap-2">
+<span class="font-bold opacity-50" style="">PREVIEW:</span>
+<span class="" style="">S = L × W</span>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full flex items-center justify-center gap-2 px-4 py-4 border-2 border-dashed border-slate-300 dark:border-slate-700 text-slate-500 hover:text-primary hover:border-primary transition-all rounded-xl font-black text-xs uppercase tracking-widest" style="">
+<span class="material-symbols-outlined" style="">add_task</span>
+                            Save to Project BOM
+                        </button>
+</aside>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

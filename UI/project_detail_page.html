@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Project Details - QuantiConstruct</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1152d4",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="layout-container flex flex-col items-center w-full pb-20">
+<!-- Top Navigation / Header Section -->
+<div class="w-full max-w-6xl px-6 pt-6">
+<header class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 mb-4">
+<div class="flex items-center gap-4">
+<div class="bg-primary text-white p-2 rounded-lg">
+<span class="material-symbols-outlined block">architecture</span>
+</div>
+<h2 class="text-xl font-extrabold tracking-tight">QuantiConstruct</h2>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+<span>Edit</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-[20px]">ios_share</span>
+<span>Export Report</span>
+</button>
+<button class="p-2 bg-slate-200 dark:bg-slate-800 rounded-lg">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400">more_vert</span>
+</button>
+</div>
+</header>
+<!-- Breadcrumb & Back Action -->
+<div class="flex items-center gap-3 mb-6">
+<button class="flex items-center justify-center w-10 h-10 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<nav class="flex items-center gap-2 text-sm font-medium">
+<a class="text-slate-500 hover:text-primary transition-colors" href="#">Projects</a>
+<span class="text-slate-400">/</span>
+<span class="text-slate-900 dark:text-slate-100">Skyline Tower</span>
+</nav>
+</div>
+<!-- Project Identity Hero Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+<div class="space-y-1">
+<h1 class="text-5xl font-black tracking-tight text-slate-900 dark:text-white">Skyline Tower</h1>
+<div class="flex flex-wrap items-center gap-4 text-slate-500 dark:text-slate-400 text-sm">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">fingerprint</span>
+<span class="font-mono">8f2d-4b9a</span>
+</div>
+<span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">person</span>
+<span>Alex Morgan</span>
+</div>
+<span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span>Due Dec 2024</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="px-3 py-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-xs font-bold uppercase tracking-widest rounded-full border border-emerald-200 dark:border-emerald-800">
+                    Active
+                </span>
+</div>
+</div>
+<!-- Project Description Section -->
+<div class="mb-8 bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3">Project Overview</h3>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed">
+                The Skyline Tower is a flagship mixed-use development situated in the heart of the business district. This 45-story structure incorporates sustainable building practices, advanced structural engineering, and premium architectural finishes. The current phase focuses on core structural assessment and interior partition planning for the commercial levels.
+            </p>
+</div>
+<!-- Stats Row -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+<div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Total Calculations</p>
+<p class="text-3xl font-bold text-slate-900 dark:text-white">142</p>
+</div>
+<div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Active Categories</p>
+<p class="text-3xl font-bold text-slate-900 dark:text-white">3</p>
+</div>
+</div>
+<!-- Categories Section -->
+<section class="mb-12">
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-2xl font-bold tracking-tight">Categories</h2>
+<button class="text-primary text-sm font-semibold hover:underline">Manage All</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Category 1 -->
+<div class="group relative bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-amber-400 dark:hover:border-amber-500 transition-all cursor-pointer shadow-sm hover:shadow-md">
+<div class="flex items-start justify-between mb-4">
+<div class="w-12 h-12 flex items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400">
+<span class="material-symbols-outlined text-2xl">foundation</span>
+</div>
+<span class="text-sm font-bold text-slate-400 group-hover:text-amber-500 transition-colors">58 calcs</span>
+</div>
+<h3 class="text-xl font-bold mb-1">Grand Travaux</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm mb-6">Major structural works</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold rounded uppercase">Excavation</span>
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold rounded uppercase">Foundations</span>
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold rounded uppercase">Columns</span>
+</div>
+</div>
+<!-- Category 2 -->
+<div class="group relative bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-emerald-400 dark:hover:border-emerald-500 transition-all cursor-pointer shadow-sm hover:shadow-md">
+<div class="flex items-start justify-between mb-4">
+<div class="w-12 h-12 flex items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400">
+<span class="material-symbols-outlined text-2xl">palette</span>
+</div>
+<span class="text-sm font-bold text-slate-400 group-hover:text-emerald-500 transition-colors">42 calcs</span>
+</div>
+<h3 class="text-xl font-bold mb-1">Finition</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm mb-6">Finishing &amp; surface works</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold rounded uppercase">Tiling</span>
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold rounded uppercase">Painting</span>
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold rounded uppercase">Ceiling</span>
+</div>
+</div>
+<!-- Category 3 -->
+<div class="group relative bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-cyan-400 dark:hover:border-cyan-500 transition-all cursor-pointer shadow-sm hover:shadow-md">
+<div class="flex items-start justify-between mb-4">
+<div class="w-12 h-12 flex items-center justify-center rounded-xl bg-cyan-100 text-cyan-600 dark:bg-cyan-900/40 dark:text-cyan-400">
+<span class="material-symbols-outlined text-2xl">door_front</span>
+</div>
+<span class="text-sm font-bold text-slate-400 group-hover:text-cyan-500 transition-colors">42 calcs</span>
+</div>
+<h3 class="text-xl font-bold mb-1">Portes &amp; Fenêtres</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm mb-6">Doors &amp; windows</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold rounded uppercase">Windows</span>
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold rounded uppercase">Main Doors</span>
+<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold rounded uppercase">Internal Doors</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Recent Calculations Section -->
+<section>
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-2xl font-bold tracking-tight">Recent Calculations</h2>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+<th class="px-6 py-4 border-b border-slate-200 dark:border-slate-800">Category</th>
+<th class="px-6 py-4 border-b border-slate-200 dark:border-slate-800">Element</th>
+<th class="px-6 py-4 border-b border-slate-200 dark:border-slate-800">Key Result</th>
+<th class="px-6 py-4 border-b border-slate-200 dark:border-slate-800">Timestamp</th>
+<th class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<!-- Row 1 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-amber-500 text-[20px]">foundation</span>
+<span class="text-sm font-semibold">Grand Travaux</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-medium">Isolated Footing #12</td>
+<td class="px-6 py-4 text-sm font-bold text-primary">3.75 m³</td>
+<td class="px-6 py-4 text-sm text-slate-500">2 mins ago</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">open_in_new</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-cyan-500 text-[20px]">door_front</span>
+<span class="text-sm font-semibold">Portes &amp; Fenêtres</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-medium">Main Entrance Glass</td>
+<td class="px-6 py-4 text-sm font-bold text-primary">12.40 m²</td>
+<td class="px-6 py-4 text-sm text-slate-500">45 mins ago</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">open_in_new</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-emerald-500 text-[20px]">palette</span>
+<span class="text-sm font-semibold">Finition</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-medium">Lobby Wall Coating</td>
+<td class="px-6 py-4 text-sm font-bold text-primary">450.00 m²</td>
+<td class="px-6 py-4 text-sm text-slate-500">2 hours ago</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">open_in_new</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="p-4 bg-slate-50 dark:bg-slate-800/30 flex justify-center">
+<a class="text-sm font-bold text-primary hover:underline flex items-center gap-1" href="#">
+                        View all calculations
+                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</section>
+</div>
+</div>
+</body></html>
