@@ -50,16 +50,19 @@ import Units from "@/pages/Admin/Units";
 import { Outlet } from "react-router-dom";
 const CategoryTree = () => <Outlet />;
 
+import { AuthProvider, RequireAuth } from "@/contexts/AuthContext";
+
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route element={<PublicLayout />}>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route element={<PublicLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/articles" element={<PublicArticles />} />
             <Route path="/articles/:id" element={<ArticleView />} />
@@ -72,7 +75,7 @@ const App = () => (
           </Route>
           <Route path="/choose-plan" element={<Subscription />} />
 
-          <Route element={<UserLayout />}>
+          <Route element={<RequireAuth><UserLayout /></RequireAuth>}>
             <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/projects/:projectId" element={<ProjectOverview />} />
@@ -84,7 +87,7 @@ const App = () => (
             <Route path=":categoryId" element={<CategoryDetail />} />
           </Route>
 
-          <Route path="/admin" element={<AdminLayout />}>
+          <Route path="/admin" element={<RequireAuth><AdminLayout /></RequireAuth>}>
             <Route index element={<Dashboard />} />
             <Route path="users" element={<Users />} />
             
@@ -110,9 +113,10 @@ const App = () => (
               <Route path=":id" element={<Modules />} />
             </Route>
           </Route>
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

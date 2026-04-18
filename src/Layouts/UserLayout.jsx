@@ -2,9 +2,17 @@ import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { Bot as BotIcon } from "lucide-react";
 import AIChatbot from "@/components/AIChatbot";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 const UserLayout = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const { user } = useAuthContext();
+  
+  // Get initials from user's name (e.g. "Ahmed Karim" -> "AK")
+  const initials = user?.name
+    ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().substring(0, 2)
+    : "US";
+
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col font-sans transition-colors duration-300">
       {/* ─── STICKY USER HEADER ─── */}
@@ -25,8 +33,8 @@ const UserLayout = () => {
               <BotIcon className="w-4 h-4" />
               <span>AI Assistant</span>
             </button>
-            <div className="size-10 rounded-full bg-[#1D4ED8]/10 flex items-center justify-center text-[#1D4ED8] font-bold border border-[#1D4ED8]/20">
-              JD
+            <div className="size-10 rounded-full bg-[#1D4ED8]/10 flex items-center justify-center text-[#1D4ED8] font-bold border border-[#1D4ED8]/20" title={user?.name}>
+              {initials}
             </div>
           </div>
         </div>

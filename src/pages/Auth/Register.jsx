@@ -1,8 +1,13 @@
 import { useState } from "react";
 import { Eye, EyeOff, Mail, User } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+
+import { registerSchema } from "@/schemas/auth.schema";
+import { useRegister } from "@/hooks/useAuth";
+import { handleApiError } from "@/api/handelApiError";
+
 const Register = () => {
-  const navigate = useNavigate();
+  const registerMutation = useRegister();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -10,39 +15,57 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [agreed, setAgreed] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
   const [errors, setErrors] = useState({});
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setServerError("");
+    setErrors({});
 
-    if (!fullName || !email || !password || !confirmPassword) {
-      setErrors({
-        fullName: !fullName ? "Name required" : "",
-        email: !email ? "Email required" : "",
-        password: !password ? "Password required" : "",
-        confirmPassword: !confirmPassword ? "Confirm password required" : ""
+    // ── Zod validation ──────────────────────────────────────────────
+    const result = registerSchema.safeParse({
+      fullName,
+      email,
+      password,
+      confirmPassword,
+    });
+
+    if (!result.success) {
+      const fieldErrors = {};
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0];
+        if (!fieldErrors[field]) fieldErrors[field] = issue.message;
       });
+      setErrors(fieldErrors);
       return;
     }
 
-    if (password !== confirmPassword) {
-      setErrors({ confirmPassword: "Passwords do not match" });
-      return;
-    }
-
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      navigate("/dashboard", { replace: true });
-    }, 1000);
+    // ── API call ────────────────────────────────────────────────────
+    // Backend expects `name`, frontend uses `fullName`
+    registerMutation.mutate(
+      {
+        name: result.data.fullName,
+        email: result.data.email,
+        password: result.data.password,
+      },
+      {
+        onError: (err) => {
+          const handled = handleApiError(err);
+          if (handled.type === "field") {
+            setErrors(handled.fieldErrors);
+          } else {
+            setServerError(handled.message);
+          }
+        },
+      }
+    );
   };
 
   const handleChange = (field, setter) => (e) => {
     setter(e.target.value);
-    setErrors(prev => ({ ...prev, [field]: "" }));
+    setErrors((prev) => ({ ...prev, [field]: "" }));
+    setServerError("");
   };
 
   // كلاس الـ input المشترك - يتغير لون الـ border حسب وجود خطأ
@@ -77,12 +100,12 @@ const Register = () => {
 
         {/* الاسم الكامل */}
         <div className="space-y-1.5">
-          <label htmlFor="fullName" className="text-sm font-medium text-slate-700">
+          <label htmlFor="register-fullName" className="text-sm font-medium text-slate-700">
             Full Name
           </label>
           <div className="relative">
             <input
-              id="fullName"
+              id="register-fullName"
               type="text"
               value={fullName}
               onChange={handleChange("fullName", setFullName)}
@@ -96,12 +119,12 @@ const Register = () => {
 
         {/* البريد الإلكتروني */}
         <div className="space-y-1.5">
-          <label htmlFor="email" className="text-sm font-medium text-slate-700">
+          <label htmlFor="register-email" className="text-sm font-medium text-slate-700">
             Email Address
           </label>
           <div className="relative">
             <input
-              id="email"
+              id="register-email"
               type="email"
               value={email}
               onChange={handleChange("email", setEmail)}
@@ -118,12 +141,12 @@ const Register = () => {
 
           {/* كلمة المرور */}
           <div className="space-y-1.5">
-            <label htmlFor="password" className="text-sm font-medium text-slate-700">
+            <label htmlFor="register-password" className="text-sm font-medium text-slate-700">
               Password
             </label>
             <div className="relative">
               <input
-                id="password"
+                id="register-password"
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={handleChange("password", setPassword)}
@@ -143,12 +166,12 @@ const Register = () => {
 
           {/* تأكيد كلمة المرور */}
           <div className="space-y-1.5">
-            <label htmlFor="confirmPassword" className="text-sm font-medium text-slate-700">
+            <label htmlFor="register-confirmPassword" className="text-sm font-medium text-slate-700">
               Confirm Password
             </label>
             <div className="relative">
               <input
-                id="confirmPassword"
+                id="register-confirmPassword"
                 type="password"
                 value={confirmPassword}
                 onChange={handleChange("confirmPassword", setConfirmPassword)}
@@ -169,14 +192,14 @@ const Register = () => {
         {/* الموافقة على الشروط */}
         <div className="flex items-start gap-2.5">
           <input
-            id="terms"
+            id="register-terms"
             type="checkbox"
             checked={agreed}
             onChange={(e) => setAgreed(e.target.checked)}
             required
             className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-primary"
           />
-          <label htmlFor="terms" className="text-sm leading-relaxed text-slate-600">
+          <label htmlFor="register-terms" className="text-sm leading-relaxed text-slate-600">
             I agree to the{" "}
             <Link to="#" className="font-medium text-primary hover:underline">Terms and Conditions</Link>
             {" "}and{" "}
@@ -187,10 +210,10 @@ const Register = () => {
         {/* زر إنشاء الحساب */}
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={registerMutation.isPending}
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? (
+          {registerMutation.isPending ? (
             <>
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
               Creating account...

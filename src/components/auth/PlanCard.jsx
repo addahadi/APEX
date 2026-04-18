@@ -8,6 +8,8 @@ export default function PlanCard({
   features,
   buttonText,
   highlight,
+  onClick,
+  disabled,
 }) {
   return (
     <div
@@ -51,6 +53,8 @@ export default function PlanCard({
       </ul>
 
       <button
+        onClick={onClick}
+        disabled={disabled}
         style={{
           width: "100%",
           padding: "14px 0",
@@ -60,10 +64,11 @@ export default function PlanCard({
           fontSize: 16,
           fontWeight: 600,
           border: "none",
-          cursor: "pointer",
-          transition: "transform 0.15s ease",
+          cursor: disabled ? "not-allowed" : "pointer",
+          opacity: disabled ? 0.6 : 1,
+          transition: "transform 0.15s ease, opacity 0.15s ease",
         }}
-        onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.02)")}
+        onMouseEnter={(e) => !disabled && (e.currentTarget.style.transform = "scale(1.02)")}
         onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
       >
         {buttonText}

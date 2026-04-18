@@ -1,9 +1,15 @@
 import { useState } from "react";
 import { ArrowLeft, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
+
+import { forgotPasswordSchema } from "@/schemas/auth.schema";
+import { useForgotPassword } from "@/hooks/useAuth";
+import { handleApiError } from "@/api/handelApiError";
+
 const ForgetPassword = () => {
+  const forgotMutation = useForgotPassword();
+
   const [email, setEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverMessage, setServerMessage] = useState("");
   const [serverError, setServerError] = useState("");
   const [errors, setErrors] = useState({});
@@ -12,24 +18,42 @@ const ForgetPassword = () => {
     e.preventDefault();
     setServerError("");
     setServerMessage("");
+    setErrors({});
 
-    if (!email) {
-      setErrors({ email: "Email required" });
+    // ── Zod validation ──────────────────────────────────────────────
+    const result = forgotPasswordSchema.safeParse({ email });
+    if (!result.success) {
+      const fieldErrors = {};
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0];
+        if (!fieldErrors[field]) fieldErrors[field] = issue.message;
+      });
+      setErrors(fieldErrors);
       return;
     }
 
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setServerMessage(
-        "تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني. تحقق من صندوق الوارد أو البريد العشوائي.",
-      );
-    }, 1000);
+    // ── API call ────────────────────────────────────────────────────
+    forgotMutation.mutate(result.data, {
+      onSuccess: (data) => {
+        setServerMessage(
+          data.message || "If the email exists, a password reset link was sent. Check your inbox."
+        );
+      },
+      onError: (err) => {
+        const handled = handleApiError(err);
+        if (handled.type === "field") {
+          setErrors(handled.fieldErrors);
+        } else {
+          setServerError(handled.message);
+        }
+      },
+    });
   };
 
   const handleChange = (field, setter) => (e) => {
     setter(e.target.value);
-    setErrors(prev => ({ ...prev, [field]: "" }));
+    setErrors((prev) => ({ ...prev, [field]: "" }));
+    setServerError("");
   };
 
   return (
@@ -66,12 +90,12 @@ const ForgetPassword = () => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-3">
-          <label htmlFor="email" className="text-sm font-medium text-slate-700">
+          <label htmlFor="forgot-email" className="text-sm font-medium text-slate-700">
             Email Address
           </label>
           <div className="relative">
             <input
-              id="email"
+              id="forgot-email"
               type="email"
               value={email}
               onChange={handleChange("email", setEmail)}
@@ -89,10 +113,10 @@ const ForgetPassword = () => {
 
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={forgotMutation.isPending}
           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? (
+          {forgotMutation.isPending ? (
             <>
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
               Sending...
