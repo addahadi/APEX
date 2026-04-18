@@ -1,19 +1,40 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet, useParams, useNavigate } from "react-router-dom";
 import { Box, Sparkles, LogOut, ChevronRight, ChevronDown, Folder, Layers } from "lucide-react";
+
+// Helper to recursively find node
+function findNode(nodes, id) {
+  for (const node of nodes) {
+    if ((node.category_id || node.id) === id) return node;
+    if (node.children?.length) {
+      const found = findNode(node.children, id);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+// Helper to find root category
+function findRootCategory(nodes, targetId) {
+  for (const root of nodes) {
+    if (findNode([root], targetId)) return root;
+  }
+  return null;
+}
 
 /* ─── DYNAMIC TREE ROW (Sidebar Integration) ─── */
 function TreeRow({ node, depth, expanded, onToggle }) {
   const { categoryId, projectId } = useParams(); 
   const navigate = useNavigate();
   
-  const isLeaf = !node.children?.length;
-  const isExp = expanded.includes(node.id);
-  const isSel = categoryId === node.id; // User route uses categoryId
+  const id = node.category_id || node.id;
+  const isLeaf = !node.children?.length || node.category_level === "LEAF";
+  const isExp = expanded.includes(id);
+  const isSel = categoryId === id; // User route uses categoryId
 
   const handleRowClick = () => {
     // Navigate strictly within the user project hierarchy
-    navigate(`/projects/${projectId}/explorer/${node.id}`);
+    navigate(`/projects/${projectId}/explorer/${id}`);
   };
 
   return (
@@ -27,31 +48,32 @@ function TreeRow({ node, depth, expanded, onToggle }) {
           background: isSel ? "#104ED815" : "transparent",
           color: isSel ? "#104ED8" : "#475569",
           transition: "all .12s", position: "relative",
+          fontWeight: isSel ? 600 : 500,
         }}
         onMouseEnter={e => !isSel && (e.currentTarget.style.background = "#F8FAFC")}
         onMouseLeave={e => !isSel && (e.currentTarget.style.background = "transparent")}
       >
         <span
-          onClick={e => { e.stopPropagation(); if (!isLeaf) onToggle(node.id); }}
+          onClick={e => { e.stopPropagation(); if (!isLeaf) onToggle(id); }}
           style={{ color: "#94A3B8", cursor: isLeaf ? "default" : "pointer", display: "flex" }}
         >
           {!isLeaf ? (isExp ? <ChevronDown size={14} /> : <ChevronRight size={14} />) : <span style={{ width: 14 }} />}
         </span>
 
-        <span style={{ display: "flex", alignItems: "center", opacity: isSel ? 1 : 0.7 }}>
-          {isLeaf ? <Layers size={14} /> : <Folder size={14} fill={isExp ? "#F59E0B" : "none"} color={isExp ? "#F59E0B" : "currentColor"} />}
+        <span style={{ display: "flex", alignItems: "center", opacity: isSel ? 1 : 0.7, fontSize: 16 }}>
+          {node.icon || (isLeaf ? <Layers size={14} /> : <Folder size={14} fill={isExp ? "#F59E0B" : "none"} color={isExp ? "#F59E0B" : "currentColor"} />)}
         </span>
         
-        <span style={{ fontSize: 13, flex: 1, fontWeight: isSel ? 600 : 500 }}>
-          {node.name}
+        <span style={{ fontSize: 13, flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          {node.name_en || node.name}
         </span>
 
-        {isLeaf && <span style={{ fontSize: 9, fontWeight: 800, color: "#104ED8", background: "#EFF4FF", padding: "2px 4px", borderRadius: 4 }}>LEAF</span>}
+        {node.category_level === 'LEAF' && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', flexShrink: 0 }} />}
       </div>
 
       {/* Render Children if Expanded */}
       {!isLeaf && isExp && node.children?.map(c => (
-        <TreeRow key={c.id} node={c} depth={depth + 1} expanded={expanded} onToggle={onToggle} />
+        <TreeRow key={c.category_id || c.id} node={c} depth={depth + 1} expanded={expanded} onToggle={onToggle} />
       ))}
     </div>
   );
@@ -59,7 +81,20 @@ function TreeRow({ node, depth, expanded, onToggle }) {
 
 /* ─── PROJECT EXPLORER LAYOUT ─── */
 const ProjectExplorerLayout = ({ treeData = [] }) => {
+  const { categoryId } = useParams();
   const [expanded, setExpanded] = useState([]);
+
+  // Auto-expand the active tree hierarchy
+  useEffect(() => {
+    if (categoryId) {
+       // A very basic way to expand could be done here, but ignoring for brevity 
+       // unless requested, to keep navigation clean.
+       setExpanded(prev => prev.includes(categoryId) ? prev : [...prev, categoryId]);
+    }
+  }, [categoryId]);
+
+  const activeRoot = categoryId ? findRootCategory(treeData, categoryId) : null;
+  const nodesToRender = activeRoot ? [activeRoot] : treeData;
 
   const handleToggle = (id) => {
     setExpanded(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -89,9 +124,9 @@ const ProjectExplorerLayout = ({ treeData = [] }) => {
 
         {/* INLINE CATEGORY NAV (Directly in Sidebar) */}
         <nav className="flex-1 overflow-y-auto p-3">
-          {treeData.map(node => (
+          {nodesToRender.map(node => (
             <TreeRow 
-              key={node.id} 
+              key={node.category_id || node.id} 
               node={node} 
               depth={0} 
               expanded={expanded} 
@@ -125,7 +160,7 @@ const ProjectExplorerLayout = ({ treeData = [] }) => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-10">
+        <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>
       </div>

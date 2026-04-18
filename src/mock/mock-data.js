@@ -92,40 +92,143 @@ export const AI_USAGE = [
 ];
 
 export const INIT_TREE = [
-  { id:"gt", name:"Grand Travaux", name_en:"Grand Travaux", name_ar:"أعمال كبرى", slug:"grand-travaux", category_level:"MAIN", icon:"🏚️", isActive:true, type:"sub_category", children:[
-    { id:"gt-exc", name:"Excavation", name_en:"Excavation", name_ar:"الحفر", slug:"excavation", category_level:"SUB", icon:"⛏️", isActive:true, type:"leaf", children:[],
-      fields:[{id:"f1",label:"Length",type:"NUMBER",unit:"m",required:true},{id:"f2",label:"Width",type:"NUMBER",unit:"m",required:true},{id:"f3",label:"Depth",type:"NUMBER",unit:"m",required:true}],
-      formulas:[{id:"fo1",label:"Excavation Volume",expression:"L * W * D",outputUnit:"m³",formula_type:"NON_MATERIAL"},{id:"fo2",label:"Backfill Water",expression:"L * W * D * 0.1",outputUnit:"m³",formula_type:"NON_MATERIAL"}]
+  { category_id:"gt", parent_id: null, name_en:"Grand Travaux", name_ar:"أعمال كبرى", category_level:"ROOT", icon:"🏚️", sort_order:1, children:[
+    { category_id:"gt-exc", parent_id: "gt", name_en:"Excavation", name_ar:"الحفر", category_level:"LEAF", icon:"⛏️", sort_order:1, children:[],
+      configs: [ { config_id: "cfg1", name: "Standard Dig", description: "Default excavation settings" } ],
+      formulas:[
+        { formula_id:"fo1", name:"Excavation Volume", expression:"L * W * D", output_unit_symbol:"m³", version: 1, fields:[
+          { field_id:"f1", label:"Length", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
+          { field_id:"f2", label:"Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
+          { field_id:"f3", label:"Depth", unit_symbol:"m", required:true, default_value:0, sort_order: 3, is_computed: false }
+        ]},
+        { formula_id:"fo2", name:"Backfill Water", expression:"L * W * D * 0.1", output_unit_symbol:"m³", version: 1, fields:[
+          { field_id:"f1", label:"Length", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
+          { field_id:"f2", label:"Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
+          { field_id:"f3", label:"Depth", unit_symbol:"m", required:true, default_value:0, sort_order: 3, is_computed: false }
+        ]}
+      ]
     },
-    { id:"gt-found", name:"Foundations", name_en:"Foundations", name_ar:"الأساسات", slug:"foundations", category_level:"SUB", icon:"🏗️", isActive:true, type:"sub_category", children:[
-      { id:"gt-iso", name:"Isolated Footing", name_en:"Isolated Footing", name_ar:"قاعدة معزولة", slug:"isolated-footing", category_level:"ITEM", icon:"🟦", isActive:true, type:"leaf", children:[],
-        fields:[{id:"f4",label:"Length",type:"NUMBER",unit:"m",required:true},{id:"f5",label:"Width",type:"NUMBER",unit:"m",required:true},{id:"f6",label:"Thickness",type:"NUMBER",unit:"m",required:true}],
-        formulas:[{id:"fo3",label:"Concrete Volume",expression:"L * W * H",outputUnit:"m³",formula_type:"MATERIAL"},{id:"fo4",label:"Surface Area",expression:"L * W",outputUnit:"m²",formula_type:"NON_MATERIAL"}]
+    { category_id:"gt-found", parent_id: "gt", name_en:"Foundations", name_ar:"الأساسات", category_level:"BRANCH", icon:"🏗️", sort_order:2, children:[
+      { category_id:"gt-iso", parent_id: "gt-found", name_en:"Isolated Footing", name_ar:"قاعدة معزولة", category_level:"LEAF", icon:"🟦", sort_order:1, children:[],
+        configs: [],
+        formulas:[
+          { formula_id:"fo3", name:"Concrete Volume", expression:"L * W * H", output_unit_symbol:"m³", version: 1, fields:[
+            { field_id:"f4", label:"Length", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
+            { field_id:"f5", label:"Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
+            { field_id:"f6", label:"Thickness", unit_symbol:"m", required:true, default_value:0, sort_order: 3, is_computed: false }
+          ]},
+          { formula_id:"fo4", name:"Surface Area", expression:"L * W", output_unit_symbol:"m²", version: 1, fields:[
+            { field_id:"f4", label:"Length", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
+            { field_id:"f5", label:"Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false }
+          ]}
+        ]
       },
-      { id:"gt-raft", name:"Raft Slab", name_en:"Raft Slab", name_ar:"بلاطة حصيرة", slug:"raft-slab", category_level:"ITEM", icon:"⬛", isActive:true, type:"leaf", children:[],
-        fields:[{id:"f7",label:"Total Area",type:"NUMBER",unit:"m²",required:true},{id:"f8",label:"Thickness",type:"NUMBER",unit:"m",required:true}],
-        formulas:[{id:"fo5",label:"Concrete Volume",expression:"S * H",outputUnit:"m³",formula_type:"MATERIAL"}]
-      },
+      { category_id:"gt-raft", parent_id: "gt-found", name_en:"Raft Slab", name_ar:"بلاطة حصيرة", category_level:"LEAF", icon:"⬛", sort_order:2, children:[],
+        configs: [],
+        formulas:[
+          { formula_id:"fo5", name:"Concrete Volume", expression:"S * H", output_unit_symbol:"m³", version: 1, fields:[
+            { field_id:"f7", label:"Total Area", unit_symbol:"m²", required:true, default_value:0, sort_order: 1, is_computed: false },
+            { field_id:"f8", label:"Thickness", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false }
+          ]}
+        ]
+      }
     ]},
-    { id:"gt-col", name:"Columns", name_en:"Columns", name_ar:"الأعمدة", slug:"columns", category_level:"SUB", icon:"🏛️", isActive:true, type:"leaf", children:[],
-      fields:[{id:"f9",label:"Width (b)",type:"NUMBER",unit:"m",required:true},{id:"f10",label:"Depth (d)",type:"NUMBER",unit:"m",required:true},{id:"f11",label:"Height",type:"NUMBER",unit:"m",required:true},{id:"f12",label:"Quantity",type:"NUMBER",unit:"pcs",required:true}],
-      formulas:[{id:"fo6",label:"Total Volume",expression:"B * D * H * N",outputUnit:"m³",formula_type:"MATERIAL"},{id:"fo7",label:"Total Steel",expression:"B * D * H * N * 120",outputUnit:"kg",formula_type:"MATERIAL"}]
-    },
+    { category_id:"gt-col", parent_id: "gt", name_en:"Columns", name_ar:"الأعمدة", category_level:"LEAF", icon:"🏛️", sort_order:3, children:[],
+      configs: [],
+      formulas:[
+        { formula_id:"fo6", name:"Total Volume", expression:"B * D * H * N", output_unit_symbol:"m³", version: 1, fields:[
+          { field_id:"f9", label:"Width (b)", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
+          { field_id:"f10", label:"Depth (d)", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
+          { field_id:"f11", label:"Height", unit_symbol:"m", required:true, default_value:0, sort_order: 3, is_computed: false },
+          { field_id:"f12", label:"Quantity", unit_symbol:"pcs", required:true, default_value:0, sort_order: 4, is_computed: false }
+        ]},
+        { formula_id:"fo7", name:"Total Steel", expression:"B * D * H * N * 120", output_unit_symbol:"kg", version: 1, fields:[
+          { field_id:"f9", label:"Width (b)", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
+          { field_id:"f10", label:"Depth (d)", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
+          { field_id:"f11", label:"Height", unit_symbol:"m", required:true, default_value:0, sort_order: 3, is_computed: false },
+          { field_id:"f12", label:"Quantity", unit_symbol:"pcs", required:true, default_value:0, sort_order: 4, is_computed: false }
+        ]}
+      ]
+    }
   ]},
-  { id:"fin", name:"Finition", name_en:"Finition", name_ar:"التشطيبات", slug:"finition", category_level:"MAIN", icon:"🎨", isActive:true, type:"sub_category", children:[
-    { id:"fin-tile", name:"Tiling", name_en:"Tiling", name_ar:"البلاط", slug:"tiling", category_level:"SUB", icon:"🔲", isActive:true, type:"sub_category", children:[
-      { id:"fin-straight", name:"Straight Tiling", name_en:"Straight Tiling", name_ar:"بلاط مستقيم", slug:"straight-tiling", category_level:"ITEM", icon:"⬛", isActive:true, type:"leaf", children:[],
-        fields:[{id:"f13",label:"Room Length",type:"NUMBER",unit:"m",required:true},{id:"f14",label:"Room Width",type:"NUMBER",unit:"m",required:true},{id:"f15",label:"Tile Length",type:"NUMBER",unit:"m",required:true},{id:"f16",label:"Tile Width",type:"NUMBER",unit:"m",required:true}],
-        formulas:[{id:"fo8",label:"Floor Area",expression:"L * W",outputUnit:"m²",formula_type:"NON_MATERIAL"},{id:"fo9",label:"Tile Count +5%",expression:"ceil((L*W)/(TL*TW)*1.05)",outputUnit:"pcs",formula_type:"MATERIAL"}]
+  { category_id:"fin", parent_id: null, name_en:"Finition", name_ar:"التشطيبات", category_level:"ROOT", icon:"🎨", sort_order:2, children:[
+    { category_id:"fin-tile", parent_id: "fin", name_en:"Tiling", name_ar:"البلاط", category_level:"BRANCH", icon:"🔲", sort_order:1, children:[
+      { category_id:"fin-straight", parent_id: "fin-tile", name_en:"Straight Tiling", name_ar:"بلاط مستقيم", category_level:"LEAF", icon:"⬛", sort_order:1, children:[],
+        configs: [],
+        formulas:[
+          { formula_id:"fo8", name:"Floor Area", expression:"L * W", output_unit_symbol:"m²", version: 1, fields:[
+            { field_id:"f13", label:"Room Length", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
+            { field_id:"f14", label:"Room Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false }
+          ]},
+          { formula_id:"fo9", name:"Tile Count +5%", expression:"ceil((L*W)/(TL*TW)*1.05)", output_unit_symbol:"pcs", version: 1, fields:[
+            { field_id:"f13", label:"Room Length", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
+            { field_id:"f14", label:"Room Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
+            { field_id:"f15", label:"Tile Length", unit_symbol:"m", required:true, default_value:0, sort_order: 3, is_computed: false },
+            { field_id:"f16", label:"Tile Width", unit_symbol:"m", required:true, default_value:0, sort_order: 4, is_computed: false }
+          ]}
+        ]
+      }
+    ]}
+  ]},
+  { category_id:"pf", parent_id: null, name_en:"Doors & Windows", name_ar:"الأبواب والنوافذ", category_level:"ROOT", icon:"🚪", sort_order:3, children:[
+    { category_id:"pf-door", parent_id: "pf", name_en:"Rectangular Door", name_ar:"باب مستطيل", category_level:"LEAF", icon:"▬", sort_order:1, children:[],
+      configs: [],
+      formulas:[
+        { formula_id:"fo10", name:"Total Area", expression:"H * W * N", output_unit_symbol:"m²", version: 1, fields:[
+          { field_id:"f17", label:"Height", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
+          { field_id:"f18", label:"Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
+          { field_id:"f19", label:"Quantity", unit_symbol:"pcs", required:true, default_value:0, sort_order: 3, is_computed: false }
+        ]},
+        { formula_id:"fo11", name:"Manufacturing Time", expression:"2 + H * W * 1.5 * N", output_unit_symbol:"hrs", version: 1, fields:[
+          { field_id:"f17", label:"Height", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
+          { field_id:"f18", label:"Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
+          { field_id:"f19", label:"Quantity", unit_symbol:"pcs", required:true, default_value:0, sort_order: 3, is_computed: false }
+        ]}
+      ]
+    }
+  ]}
+];
+
+export const INIT_PROJECTS = [
+  { 
+    project_id: "1", 
+    name: "Skyline Tower Complex", 
+    description: "High-rise luxury residential complex with sustainable architecture.", 
+    status: "ACTIVE", 
+    budget_type: "FLEXIBLE",
+    created_at: "2024-04-13T18:00:00.000Z", 
+    estimation_id: "est-1", 
+    total_cost: 145000000, 
+    leaf_count: 340,
+    leaf_calculations: [
+      {
+        project_details_id: "det-1",
+        category_id: "go-f-iso",
+        category_name: "Isolated Footing",
+        selected_formula_id: "fo1",
+        formula_name: "Volume Calculation",
+        selected_config_id: "cfg1",
+        config_name: "Standard Mix B25",
+        results: { "volume": 4.5 },
+        created_at: "2024-04-13T22:00:00.000Z",
+        leaf_total: 45000.50
       },
-    ]},
-  ]},
-  { id:"pf", name:"Portes & Fenêtres", name_en:"Doors & Windows", name_ar:"الأبواب والنوافذ", slug:"doors-windows", category_level:"MAIN", icon:"🚪", isActive:true, type:"sub_category", children:[
-    { id:"pf-door", name:"Rectangular Door", name_en:"Rectangular Door", name_ar:"باب مستطيل", slug:"rectangular-door", category_level:"ITEM", icon:"▬", isActive:true, type:"leaf", children:[],
-      fields:[{id:"f17",label:"Height",type:"NUMBER",unit:"m",required:true},{id:"f18",label:"Width",type:"NUMBER",unit:"m",required:true},{id:"f19",label:"Quantity",type:"NUMBER",unit:"pcs",required:true}],
-      formulas:[{id:"fo10",label:"Total Area",expression:"H * W * N",outputUnit:"m²",formula_type:"NON_MATERIAL"},{id:"fo11",label:"Manufacturing Time",expression:"2 + H * W * 1.5 * N",outputUnit:"hrs",formula_type:"NON_MATERIAL"}]
-    },
-  ]},
+      {
+        project_details_id: "det-2",
+        category_id: "go-voiles",
+        category_name: "Concrete Walls",
+        selected_formula_id: "fo3",
+        formula_name: "Wall Surface Area",
+        selected_config_id: "cfg2",
+        config_name: "Premium Concrete",
+        results: { "surface": 120.0 },
+        created_at: "2024-04-14T10:30:00.000Z",
+        leaf_total: 89000.00
+      }
+    ]
+  },
+  { project_id: "2", name: "Riverfront Plaza", description: "Public-private partnership for waterfront development including recreational and office spaces.", status: "COMPLETED", created_at: "2023-01-13T18:00:00.000Z", estimation_id: "est-2", total_cost: 45000000, leaf_count: 120 },
+  { project_id: "3", name: "Oakwood Medical", description: "State-of-the-art medical facility focusing on diagnostic excellence and patient comfort.", status: "ACTIVE", created_at: "2024-02-13T18:00:00.000Z", estimation_id: "est-3", total_cost: 8500000, leaf_count: 55 }
 ];
 
 export const newUsersData = [{d:"Mar 1",v:3},{d:"Mar 3",v:5},{d:"Mar 5",v:2},{d:"Mar 7",v:8},{d:"Mar 9",v:6},{d:"Mar 11",v:11},{d:"Mar 13",v:7},{d:"Mar 15",v:14},{d:"Mar 17",v:9}];

@@ -1,5 +1,5 @@
 import React from "react";
-import { P } from "../lib/design-tokens";
+import { P } from "../../lib/design-tokens";
 
 export default function PlanTable({ data }) {
   return (

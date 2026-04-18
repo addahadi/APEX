@@ -30,6 +30,7 @@ import UserDashboard from "@/pages/User/UserDashboard";
 import UserProfile from "@/pages/User/UserProfile";
 import ProjectOverview from "@/pages/User/ProjectOverview";
 import CategoryDetail from "@/pages/User/CategoryDetail";
+import ProjectHistory from "@/pages/User/ProjectHistory";
 
 // Admin Pages
 import Dashboard from "@/pages/Admin/Dashboard";
@@ -75,6 +76,7 @@ const App = () => (
             <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/projects/:projectId" element={<ProjectOverview />} />
+            <Route path="/projects/:projectId/history" element={<ProjectHistory />} />
           </Route>
 
           <Route path="/projects/:projectId/explorer" element={<ProjectExplorerLayout treeData={CONSTRUCTION_TREE} />}>

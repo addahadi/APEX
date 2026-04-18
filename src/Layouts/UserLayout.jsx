@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
+import { Bot as BotIcon } from "lucide-react";
+import AIChatbot from "@/components/AIChatbot";
 
 const UserLayout = () => {
+  const [isChatOpen, setIsChatOpen] = useState(false);
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col font-sans transition-colors duration-300">
       {/* ─── STICKY USER HEADER ─── */}
@@ -15,8 +18,11 @@ const UserLayout = () => {
 
           {/* Action Area */}
           <div className="flex items-center gap-4">
-            <button className="flex items-center gap-2 px-4 py-2 bg-[#1D4ED8] text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-all shadow-sm">
-              <span className="material-symbols-outlined text-sm">smart_toy</span>
+            <button 
+              onClick={() => setIsChatOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-[#1D4ED8] text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-all shadow-sm"
+            >
+              <BotIcon className="w-4 h-4" />
               <span>AI Assistant</span>
             </button>
             <div className="size-10 rounded-full bg-[#1D4ED8]/10 flex items-center justify-center text-[#1D4ED8] font-bold border border-[#1D4ED8]/20">
@@ -30,6 +36,8 @@ const UserLayout = () => {
       <main className="flex-1 w-full max-w-[1200px] mx-auto overflow-x-hidden">
         <Outlet />
       </main>
+      {/* ─── GLOBAL CHATBOT ─── */}
+      <AIChatbot isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
     </div>
   );
 };
