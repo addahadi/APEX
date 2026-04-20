@@ -1,14 +1,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const PublicArticles = () => {
+  const { t } = useTranslation("public");
   return (
     <>
       <section className="bg-white py-12 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center md:text-left">
-          <h1 className="text-4xl font-extrabold text-slate-900 sm:text-5xl">Insights & Updates</h1>
-          <p className="mt-4 text-xl text-slate-500 max-w-3xl">Stay informed with the latest trends in sustainable construction, quantity surveying, and digital transformation in the industry.</p>
+          <h1 className="text-4xl font-extrabold text-slate-900 sm:text-5xl">{t("articles.title")}</h1>
+          <p className="mt-4 text-xl text-slate-500 max-w-3xl">{t("articles.subtitle")}</p>
         </div>
       </section>
 
@@ -34,7 +36,7 @@ const PublicArticles = () => {
                   <p className="text-slate-600 excerpt-clamp mb-6">Explore how new regulations are shaping the way we approach sustainable materials and energy efficiency in high-density urban projects...</p>
                   <div className="mt-auto">
                     <Link to="/articles/1" className="text-primary font-semibold hover:text-blue-900 inline-flex items-center group">
-                      Read More
+                      {t("articles.readMore")}
                       <ArrowRight className="ml-1 w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
                     </Link>
                   </div>
@@ -138,9 +140,9 @@ const PublicArticles = () => {
           <aside className="lg:w-1/4 space-y-10">
             {/* Search Widget */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200" data-purpose="sidebar-search">
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Search</h3>
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">{t("articles.search")}</h3>
               <div className="relative">
-                <input className="w-full pl-4 pr-10 py-2 border border-slate-300 rounded-lg focus:ring-primary focus:border-primary text-sm" placeholder="Search articles..." type="text" />
+                <input className="w-full pl-4 pr-10 py-2 border border-slate-300 rounded-lg focus:ring-primary focus:border-primary text-sm" placeholder={t("articles.searchPlaceholder")} type="text" />
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
                   <Search className="h-4 w-4" />
                 </div>
@@ -149,29 +151,29 @@ const PublicArticles = () => {
 
             {/* Categories Widget */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200" data-purpose="sidebar-categories">
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Categories</h3>
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">{t("articles.categories")}</h3>
               <ul className="space-y-3">
                 <li>
                   <Link to="#" className="flex justify-between items-center text-sm text-slate-600 hover:text-primary">
-                    <span>Industry News</span>
+                    <span>{t("articles.industryNews")}</span>
                     <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-[10px] font-bold">12</span>
                   </Link>
                 </li>
                 <li>
                   <Link to="#" className="flex justify-between items-center text-sm text-slate-600 hover:text-primary">
-                    <span>Digital Transformation</span>
+                    <span>{t("articles.digitalTransformation")}</span>
                     <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-[10px] font-bold">8</span>
                   </Link>
                 </li>
                 <li>
                   <Link to="#" className="flex justify-between items-center text-sm text-slate-600 hover:text-primary">
-                    <span>Case Studies</span>
+                    <span>{t("articles.caseStudies")}</span>
                     <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-[10px] font-bold">15</span>
                   </Link>
                 </li>
                 <li>
                   <Link to="#" className="flex justify-between items-center text-sm text-slate-600 hover:text-primary">
-                    <span>Estimating Tips</span>
+                    <span>{t("articles.estimatingTips")}</span>
                     <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-[10px] font-bold">6</span>
                   </Link>
                 </li>
@@ -180,7 +182,7 @@ const PublicArticles = () => {
 
             {/* Popular Tags Widget */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200" data-purpose="sidebar-tags">
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Popular Tags</h3>
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">{t("articles.popularTags")}</h3>
               <div className="flex flex-wrap gap-2">
                 <Link to="#" className="px-3 py-1 bg-slate-100 hover:bg-blue-50 hover:text-primary text-slate-600 text-xs font-medium rounded-full transition-colors">Sustainability</Link>
                 <Link to="#" className="px-3 py-1 bg-slate-100 hover:bg-blue-50 hover:text-primary text-slate-600 text-xs font-medium rounded-full transition-colors">BIM</Link>

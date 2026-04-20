@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-import { getPlans, createSubscription, getMySubscription, getMyUsage } from "@/api/subscription.service";
+import { getPlans, createSubscription, getMySubscription, getMyUsage, requestSwitchPlan, confirmSwitchPlan } from "@/api/subscription.service";
 import { handleApiError } from "@/api/handelApiError";
 
 // ── usePlans ─────────────────────────────────────────────────────────────────
@@ -61,6 +61,48 @@ export function useUsage() {
     queryFn: getMyUsage,
     retry: false,
     staleTime: 30 * 1000, // 30 seconds — polled frequently for progress bars
-    refetchInterval: 30 * 1000, // auto-refetch every 30 seconds
+  });
+}
+
+// ── useRequestSwitch ─────────────────────────────────────────────────────────
+
+export function useRequestSwitch() {
+  return useMutation({
+    mutationFn: (newPlanId) => requestSwitchPlan(newPlanId),
+    onSuccess: (data) => {
+      toast.success("Confirmation Required", {
+        description: data?.message || "Please check your email to confirm the plan switch.",
+      });
+    },
+    onError: (err) => {
+      const handled = handleApiError(err);
+      toast.error(handled.message);
+      return handled;
+    },
+  });
+}
+
+// ── useConfirmSwitch ─────────────────────────────────────────────────────────
+
+export function useConfirmSwitch() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (token) => confirmSwitchPlan(token),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["my-subscription"] });
+      queryClient.invalidateQueries({ queryKey: ["my-usage"] });
+      
+      toast.success("Plan Switched Successfully", {
+        description: data?.message || "Your subscription limits have been updated.",
+      });
+      navigate("/dashboard", { replace: true });
+    },
+    onError: (err) => {
+      const handled = handleApiError(err);
+      toast.error(handled.message || "Failed to confirm switch.");
+      return handled;
+    },
   });
 }

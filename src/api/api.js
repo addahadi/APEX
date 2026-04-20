@@ -44,7 +44,10 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (err) {
         clearTokens();
-        window.location.href = "/auth/login";
+        const publicPaths = ["/auth/login", "/auth/register", "/auth/forgot-password"];
+        if (!publicPaths.includes(window.location.pathname)) {
+          window.location.href = "/auth/login";
+        }
         return Promise.reject(normaliseError(err));  // ← normalise before reject
       }
     }

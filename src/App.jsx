@@ -21,6 +21,7 @@ import Login from "@/pages/Auth/Login";
 import Register from "@/pages/Auth/Register";
 import ForgotPassword from "@/pages/Auth/ForgetPassword";
 import Subscription from "@/pages/Auth/Subscription";
+import ConfirmSwitch from "@/pages/Auth/ConfirmSwitch";
 
 // User Pages
 import Home from "@/pages/User/Home";
@@ -74,6 +75,7 @@ const App = () => (
             <Route path="/auth/forgot-password" element={<ForgotPassword />} />
           </Route>
           <Route path="/choose-plan" element={<Subscription />} />
+          <Route path="/confirm-switch" element={<ConfirmSwitch />} />
 
           <Route element={<RequireAuth><UserLayout /></RequireAuth>}>
             <Route path="/dashboard" element={<UserDashboard />} />
@@ -87,7 +89,7 @@ const App = () => (
             <Route path=":categoryId" element={<CategoryDetail />} />
           </Route>
 
-          <Route path="/admin" element={<RequireAuth><AdminLayout /></RequireAuth>}>
+          <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="users" element={<Users />} />
             

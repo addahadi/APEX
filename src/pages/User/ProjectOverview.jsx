@@ -1,45 +1,89 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowRight, Building, Building2, Clock, Droplets, FileText, Filter, Network, PencilRuler, Download, Users, Zap, History } from 'lucide-react';
-import { INIT_PROJECTS, INIT_TREE } from "@/mock/mock-data";
+import { ArrowRight, Building, Building2, Clock, Droplets, FileText, Filter, Network, PencilRuler, Download, Users, Zap, History, Loader2, AlertCircle } from 'lucide-react';
+import { useProject, useProjectEstimation, useExportProject } from "@/hooks/useProjects";
+import { useRootCategories } from "@/hooks/useCategories";
+import DynamicIcon from "@/components/DynamicIcon";
+import { useTranslation } from "react-i18next";
+import { useLocalizedField } from "@/hooks/useLocalizedField";
 
 const ProjectOverview = () => {
+  const { t } = useTranslation("user");
+  const { t: tc } = useTranslation("common");
+  const localize = useLocalizedField();
   const { projectId } = useParams();
-  const project = INIT_PROJECTS.find(p => p.project_id === (projectId || '1')) || INIT_PROJECTS[0];
+  
+  const { data: projectData, isLoading: isProjectLoading, isError: isProjectError } = useProject(projectId);
+  const { data: estimationData, isLoading: isEstimationLoading, isError: isEstimationError } = useProjectEstimation(projectId);
+  const { data: rootCategories, isLoading: isCategoriesLoading, isError: isCategoriesError } = useRootCategories();
+  const exportProjectMutation = useExportProject();
+
+  if (isProjectLoading || isEstimationLoading || isCategoriesLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32 text-slate-400">
+        <Loader2 className="w-12 h-12 animate-spin mb-4 text-primary" />
+        <p>{tc("loading")}</p>
+      </div>
+    );
+  }
+
+  if (isProjectError || isEstimationError || !projectData) {
+    return (
+      <div className="py-12">
+        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 rounded-xl p-8 text-center border border-red-200 dark:border-red-800">
+          <AlertCircle className="w-12 h-12 mx-auto mb-4 opacity-80" />
+          <h2 className="text-xl font-bold mb-2">{t("projectOverview.projectNotFound")}</h2>
+          <p>{t("projectOverview.projectNotFoundDesc")}</p>
+          <Link to="/dashboard" className="inline-block mt-4 text-primary font-bold hover:underline">{t("projectOverview.returnDashboard")}</Link>
+        </div>
+      </div>
+    );
+  }
+
+  const project = { ...projectData, leaf_calculations: estimationData?.leaf_calculations || [] };
 
   let budgetColor = "bg-slate-100 text-slate-600 border-slate-200";
-  if(project.budget_type === "HIGH") budgetColor = "bg-red-100 text-red-700 border-red-200";
-  if(project.budget_type === "MEDIUM") budgetColor = "bg-amber-100 text-amber-700 border-amber-200";
-  if(project.budget_type === "LOW") budgetColor = "bg-emerald-100 text-emerald-700 border-emerald-200";
+  if(estimationData?.budget_type === "LOW") budgetColor = "bg-emerald-100 text-emerald-700 border-emerald-200";
+  if(estimationData?.budget_type === "MEDIUM") budgetColor = "bg-amber-100 text-amber-700 border-amber-200";
+  if(estimationData?.budget_type === "HIGH") budgetColor = "bg-rose-100 text-rose-700 border-rose-200";
 
   return (
     <div className="py-8">
       {/* ─── Project Header ─── */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-8 border-b border-slate-200 dark:border-slate-800 pb-8">
         
-        {project.image && (
-          <div className="md:w-1/3 aspect-video rounded-2xl overflow-hidden shadow-md order-1 mb-4 md:mb-0 shrink-0">
-            <img src={project.image} alt={project.name} className="w-full h-full object-cover" />
-          </div>
-        )}
+        <div className="md:w-1/3 aspect-video rounded-2xl overflow-hidden shadow-md order-1 mb-4 md:mb-0 shrink-0 relative bg-slate-100 dark:bg-slate-800">
+          <img 
+            src={project.image_url || "https://images.unsplash.com/photo-1541888946425-d81bb19480c5?q=80&w=1000&auto=format&fit=crop"} 
+            alt={project.name} 
+            className="w-full h-full object-cover" 
+          />
+          {!project.image_url && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/5">
+              <div className="h-12 w-12 rounded-xl bg-white/90 dark:bg-slate-900/90 shadow-sm flex items-center justify-center text-xl font-black text-primary">
+                {project.name.charAt(0)}
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="flex flex-col gap-3 flex-1 order-2 md:order-1">
           <div className="flex flex-wrap items-center gap-3">
             {project.status === 'COMPLETED' ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-3 py-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                COMPLETED
+                {tc("completed").toUpperCase()}
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/20 dark:bg-primary/30 px-3 py-1 text-xs font-bold text-primary dark:text-primary border border-primary/30 dark:border-primary/50">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>
-                ACTIVE
+                {tc("active").toUpperCase()}
               </span>
             )}
             
-            {project.budget_type && (
+            {estimationData?.budget_type && (
               <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold border ${budgetColor}`}>
-                {project.budget_type} BUDGET
+                {estimationData.budget_type}
               </span>
             )}
 
@@ -55,9 +99,13 @@ const ProjectOverview = () => {
         </div>
         
         <div className="flex gap-3 order-3 md:order-2 self-start md:self-end">
-          <button className="flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-5 py-2 text-sm font-bold text-white hover:bg-emerald-700 transition-all shadow-md shadow-emerald-500/25">
-            <Download className="text-[18px]" />
-            Export
+          <button 
+            onClick={() => exportProjectMutation.mutate(project.project_id)}
+            disabled={exportProjectMutation.isPending || project.leaf_calculations.length === 0}
+            className="flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-5 py-2 text-sm font-bold text-white hover:bg-emerald-700 transition-all shadow-md shadow-emerald-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {exportProjectMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="text-[18px]" />}
+            {tc("export")}
           </button>
         </div>
       </div>
@@ -69,8 +117,8 @@ const ProjectOverview = () => {
               <Zap className="w-6 h-6" />
            </div>
            <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Project Total</p>
-              <p className="text-3xl font-black text-slate-800 dark:text-white leading-none"><span className="text-lg opacity-60 mr-1">$</span>{project.total_cost?.toLocaleString() || 0}</p>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{t("projectOverview.totalAllocation")}</p>
+              <p className="text-3xl font-black text-slate-800 dark:text-white leading-none"><span className="text-lg opacity-60 mr-1 rtl:ml-1 rtl:mr-0">{tc("currency")}</span>{project.total_cost?.toLocaleString() || 0}</p>
            </div>
         </div>
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm flex items-center gap-5">
@@ -78,8 +126,8 @@ const ProjectOverview = () => {
               <Network className="w-6 h-6" />
            </div>
            <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Total Calculs</p>
-              <p className="text-3xl font-black text-slate-800 dark:text-white leading-none">{project.leaf_count || 0} <span className="text-sm text-slate-400 font-medium tracking-normal">Nodes</span></p>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{t("projectOverview.segmentNodes")}</p>
+              <p className="text-3xl font-black text-slate-800 dark:text-white leading-none">{project.leaf_calculations?.length || 0} <span className="text-sm text-slate-400 font-medium tracking-normal">{t("projectOverview.entries")}</span></p>
            </div>
         </div>
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm flex items-center gap-5">
@@ -87,8 +135,8 @@ const ProjectOverview = () => {
               <Clock className="w-6 h-6" />
            </div>
            <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Project Status</p>
-              <p className="text-xl font-bold text-slate-800 dark:text-white leading-tight">Active Phase<br/><span className="text-xs text-slate-400 font-medium tracking-normal">Since {new Date(project.created_at).toLocaleDateString()}</span></p>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{t("projectOverview.phaseIndicator")}</p>
+              <p className="text-xl font-bold text-slate-800 dark:text-white leading-tight">{t("projectOverview.activeOps")}<br/><span className="text-xs text-slate-400 font-medium tracking-normal">{t("projectOverview.since", { date: new Date(project.created_at).toLocaleDateString() })}</span></p>
            </div>
         </div>
       </div>
@@ -96,34 +144,40 @@ const ProjectOverview = () => {
 
       {/* ─── Structural Matrix (Root Categories) ─── */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Project Modules</h2>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{t("projectOverview.projectModules")}</h2>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {INIT_TREE.filter(cat => cat.category_level === 'ROOT').map((cat, i) => {
-          const colors = ['blue', 'amber', 'emerald', 'purple'];
-          const color = colors[i % colors.length];
-          const colorClasses = {
-            blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 group-hover:text-blue-600',
-            amber: 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 group-hover:text-amber-600',
-            emerald: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 group-hover:text-emerald-600',
-            purple: 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 group-hover:text-purple-600'
-          };
-          return (
-            <Link key={cat.category_id} to={`/projects/${project.project_id}/explorer/${cat.category_id}`} className="group flex flex-col bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-md hover:border-primary/50 transition-all cursor-pointer relative overflow-hidden">
-              <div className={`absolute top-0 right-0 w-16 h-16 ${colorClasses[color].split(' ')[0]} ${colorClasses[color].split(' ')[1]} rounded-bl-[40px] -z-0 group-hover:scale-110 transition-transform`}></div>
-              <div className={`h-10 w-10 ${colorClasses[color].split(' ')[0]} ${colorClasses[color].split(' ')[2]} rounded-lg flex items-center justify-center mb-4 z-10 relative text-2xl`}>
-                {cat.icon}
-              </div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-lg mb-1 relative z-10">{cat.name_en}</h3>
-              <p className="text-xs text-slate-500 mb-4 relative z-10">{cat.name_ar}</p>
-              <div className="mt-auto border-t border-slate-100 dark:border-slate-800 pt-3 flex items-center justify-between text-xs font-medium text-slate-400 relative z-10">
-                <span>{cat.children?.length || 0} Sub-categories</span>
-                <ArrowRight className={`text-[16px] ${colorClasses[color].split(' ')[3]} group-hover:translate-x-1 transition-all`} />
-              </div>
-            </Link>
-          );
-        })}
+        {rootCategories && rootCategories.length > 0 ? (
+          rootCategories.map((cat, i) => {
+            const colors = ['blue', 'amber', 'emerald', 'purple'];
+            const color = colors[i % colors.length];
+            const colorClasses = {
+              blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 group-hover:text-blue-600',
+              amber: 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 group-hover:text-amber-600',
+              emerald: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 group-hover:text-emerald-600',
+              purple: 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 group-hover:text-purple-600'
+            };
+            return (
+              <Link key={cat.category_id} to={`/projects/${project.project_id}/explorer/${cat.category_id}`} className="group flex flex-col bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-md hover:border-primary/50 transition-all cursor-pointer relative overflow-hidden">
+                <div className={`absolute top-0 right-0 rtl:right-auto rtl:left-0 w-16 h-16 ${colorClasses[color].split(' ')[0]} ${colorClasses[color].split(' ')[1]} rounded-bl-[40px] rtl:rounded-bl-none rtl:rounded-br-[40px] -z-0 group-hover:scale-110 transition-transform`}></div>
+                <div className={`h-10 w-10 ${colorClasses[color].split(' ')[0]} ${colorClasses[color].split(' ')[2]} rounded-lg flex items-center justify-center mb-4 z-10 relative text-2xl`}>
+                  {cat.icon ? <DynamicIcon name={cat.icon} size={24} className="text-current" /> : '📁'}
+                </div>
+                <h3 className="font-bold text-slate-900 dark:text-white text-lg mb-1 relative z-10">{localize(cat, 'name')}</h3>
+                <p className="text-xs text-slate-500 mb-4 relative z-10">{localize(cat, 'description') || cat.name_ar}</p>
+                <div className="mt-auto border-t border-slate-100 dark:border-slate-800 pt-3 flex items-center justify-between text-xs font-medium text-slate-400 relative z-10">
+                  <span>{t("projectOverview.exploreModules")}</span>
+                  <ArrowRight className={`text-[16px] ${colorClasses[color].split(' ')[3]} group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-all`} />
+                </div>
+              </Link>
+            );
+          })
+        ) : (
+          <div className="col-span-full py-12 text-center text-slate-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
+            {isCategoriesError ? tc("error") : t("projectOverview.noModules")}
+          </div>
+        )}
       </div>
 
       {/* ─── Recent Calculation ─── */}
@@ -131,27 +185,27 @@ const ProjectOverview = () => {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <History className="text-primary" />
-            Recent Calculation
+            {t("projectOverview.recentCalc")}
           </h2>
           <Link to={`/projects/${project.project_id}/history`} className="text-sm font-bold text-primary hover:text-blue-700 transition-colors flex items-center gap-1">
-            View All <ArrowRight className="w-4 h-4 text-primary" />
+            {tc("viewAll")} <ArrowRight className="w-4 h-4 text-primary" />
           </Link>
         </div>
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+            <table className="w-full text-left rtl:text-right text-sm text-slate-600 dark:text-slate-300">
               <thead className="bg-slate-50 dark:bg-slate-800/50 text-xs uppercase font-bold text-slate-500 border-b border-slate-200 dark:border-slate-800">
                 <tr>
-                  <th className="px-6 py-4">Category</th>
-                  <th className="px-6 py-4">Formula Used</th>
-                  <th className="px-6 py-4">Results</th>
-                  <th className="px-6 py-4">Total Cost</th>
-                  <th className="px-6 py-4">Saved On</th>
+                  <th className="px-6 py-4">{t("projectOverview.category")}</th>
+                  <th className="px-6 py-4">{t("projectOverview.formulaUsed")}</th>
+                  <th className="px-6 py-4">{t("projectOverview.results")}</th>
+                  <th className="px-6 py-4">{t("projectOverview.totalCostLabel")}</th>
+                  <th className="px-6 py-4">{t("projectOverview.savedOn")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
                 {project.leaf_calculations && project.leaf_calculations.length > 0 ? (
-                  project.leaf_calculations.map((calc) => (
+                  project.leaf_calculations.slice(0, 5).map((calc) => (
                     <tr key={calc.project_details_id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                       <td className="px-6 py-4">
                         <div className="font-bold text-slate-800 dark:text-slate-100">{calc.category_name}</div>
@@ -161,12 +215,12 @@ const ProjectOverview = () => {
                         <div className="font-medium text-slate-700 dark:text-slate-300">{calc.formula_name}</div>
                         <div className="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
                           <span className="w-2 h-2 rounded-full bg-amber-400"></span>
-                          {calc.config_name || 'No Material Config'}
+                          {calc.config_name || 'N/A'}
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col gap-1">
-                          {Object.entries(calc.results).map(([k, v]) => (
+                          {Object.entries(typeof calc.results === 'string' ? JSON.parse(calc.results) : (calc.results || {})).map(([k, v]) => (
                             <div key={k} className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded inline-flex gap-2 w-fit border border-slate-200 dark:border-slate-700">
                               <span className="text-slate-500">{k}:</span>
                               <span className="font-bold text-slate-700 dark:text-slate-200">{v}</span>
@@ -175,7 +229,7 @@ const ProjectOverview = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 font-black text-emerald-600 dark:text-emerald-400">
-                        ${calc.leaf_total.toLocaleString()}
+                        ${calc.leaf_total?.toLocaleString() || 0}
                       </td>
                       <td className="px-6 py-4 text-xs font-medium text-slate-500">
                         {new Date(calc.created_at).toLocaleDateString()}
@@ -185,7 +239,7 @@ const ProjectOverview = () => {
                 ) : (
                   <tr>
                     <td colSpan="5" className="px-6 py-12 text-center text-slate-400">
-                      No estimation history found. Run a calculation first.
+                      {t("projectOverview.noHistory")}
                     </td>
                   </tr>
                 )}

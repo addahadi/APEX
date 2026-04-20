@@ -1,12 +1,14 @@
 import { RulerDimensionLine } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const AuthLayout = () => {
+  const { t } = useTranslation("auth");
   const location = useLocation();
   const [imgType, setImgType] = useState("");
   useEffect(() => {
-    console.log(location.pathname);
     const imgtype =
       location.pathname === "/auth/login" || location.pathname === "/auth/register"
         ? "/auth/login.png"
@@ -30,10 +32,9 @@ const AuthLayout = () => {
         ></div>
         {imgType === "/auth/login.png" ? (
           <div className="absolute bottom-0 left-0 z-10 p-12 text-white">
-            <h2 className="mb-6 text-5xl font-black tracking-tight">Build Smarter.</h2>
+            <h2 className="mb-6 text-5xl font-black tracking-tight">{t("authLayout.buildSmarter")}</h2>
             <p className="max-w-lg text-xl leading-relaxed text-slate-100">
-              Join thousands of engineers and contractors managing projects efficiently with our
-              smart estimation tools.
+              {t("authLayout.heroText")}
             </p>
           </div>
         ) : (
@@ -41,15 +42,17 @@ const AuthLayout = () => {
             <div className="mb-4">
               <RulerDimensionLine className="h-10 w-10" />
             </div>
-            <h2 className="mb-4 text-4xl font-bold tracking-tight">Build Smarter, Faster.</h2>
+            <h2 className="mb-4 text-4xl font-bold tracking-tight">{t("authLayout.buildSmarterFaster")}</h2>
             <p className="max-w-md text-lg leading-relaxed text-white/90">
-              Streamline your material estimation and project management workflows with our next-gen
-              platform designed for modern engineering.
+              {t("authLayout.heroTextAlt")}
             </p>
           </div>
         )}
       </div>
       <div className="bg-background-light relative flex w-full flex-1 flex-col items-center justify-center px-4 py-12 sm:px-12 lg:w-1/2 lg:px-24">
+        <div className="absolute top-4 right-4 rtl:left-4 rtl:right-auto">
+          <LanguageSwitcher variant="minimal" />
+        </div>
         <Outlet />
       </div>
     </div>

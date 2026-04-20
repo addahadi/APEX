@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Eye, EyeOff, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
-import { loginSchema } from "@/schemas/auth.schema";
+import { getLoginSchema } from "@/schemas/auth.schema";
 import { useLogin } from "@/hooks/useAuth";
 import { handleApiError } from "@/api/handelApiError";
 
 const Login = () => {
+  const { t } = useTranslation("auth");
   const loginMutation = useLogin();
 
   const [email, setEmail] = useState("");
@@ -21,7 +23,7 @@ const Login = () => {
     setServerError("");
     setErrors({});
 
-    // ── Zod validation ──────────────────────────────────────────────
+    const loginSchema = getLoginSchema(t);
     const result = loginSchema.safeParse({ email, password });
     if (!result.success) {
       const fieldErrors = {};
@@ -33,7 +35,6 @@ const Login = () => {
       return;
     }
 
-    // ── API call ────────────────────────────────────────────────────
     loginMutation.mutate(result.data, {
       onError: (err) => {
         const handled = handleApiError(err);
@@ -52,13 +53,9 @@ const Login = () => {
     setServerError("");
   };
 
-  // ----------------------------------------------------------
-  // JSX
-  // ----------------------------------------------------------
   return (
     <div className="w-full max-w-sm">
-
-      {/* شعار الموبايل */}
+      {/* Mobile logo */}
       <div className="mb-10 flex items-center gap-2 lg:hidden">
         <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
           <span className="text-sm font-bold text-white">B</span>
@@ -66,30 +63,29 @@ const Login = () => {
         <span className="text-lg font-bold text-slate-900">BuildEst</span>
       </div>
 
-      {/* العنوان */}
+      {/* Title */}
       <div className="mb-8">
         <h1 className="mb-2 text-3xl font-bold tracking-tight text-slate-900">
-          Welcome back
+          {t("login.title")}
         </h1>
         <p className="text-sm text-slate-500">
-          Log in to manage your construction estimates and projects efficiently.
+          {t("login.subtitle")}
         </p>
       </div>
 
-      {/* خطأ الـ Server العام */}
+      {/* Server error */}
       {serverError && (
         <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
           {serverError}
         </div>
       )}
 
-      {/* النموذج */}
+      {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-5">
-
-        {/* حقل البريد */}
+        {/* Email */}
         <div className="space-y-1.5">
           <label htmlFor="login-email" className="text-sm font-medium text-slate-700">
-            Email Address
+            {t("login.email")}
           </label>
           <div className="relative">
             <input
@@ -97,7 +93,7 @@ const Login = () => {
               type="email"
               value={email}
               onChange={handleChange("email", setEmail)}
-              placeholder="engineer@example.com"
+              placeholder={t("login.emailPlaceholder")}
               className={`w-full rounded-lg border bg-slate-50 py-3 pl-4 pr-11 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 ${
                 errors.email
                   ? "border-red-400 focus:border-red-400 focus:ring-red-200"
@@ -106,20 +102,19 @@ const Login = () => {
             />
             <Mail className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           </div>
-          {/* رسالة الخطأ - تظهر فقط إذا كان errors.email موجوداً */}
           {errors.email && (
             <p className="text-xs text-red-500">{errors.email}</p>
           )}
         </div>
 
-        {/* حقل كلمة المرور */}
+        {/* Password */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <label htmlFor="login-password" className="text-sm font-medium text-slate-700">
-              Password
+              {t("login.password")}
             </label>
             <Link to="/auth/forgot-password" className="text-sm font-medium text-primary hover:underline">
-              Forgot Password?
+              {t("login.forgotPassword")}
             </Link>
           </div>
           <div className="relative">
@@ -148,7 +143,7 @@ const Login = () => {
           )}
         </div>
 
-        {/* تذكرني */}
+        {/* Remember me */}
         <div className="flex items-center gap-2.5">
           <input
             id="login-remember"
@@ -158,48 +153,47 @@ const Login = () => {
             className="h-4 w-4 rounded border-slate-300 accent-primary"
           />
           <label htmlFor="login-remember" className="text-sm text-slate-600">
-            Remember for 30 days
+            {t("login.rememberMe")}
           </label>
         </div>
 
-        {/* زر الإرسال */}
+        {/* Submit */}
         <button
           type="submit"
           disabled={loginMutation.isPending}
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {/* نبدّل النص لـ Loading أثناء الإرسال */}
           {loginMutation.isPending ? (
             <>
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              Logging in...
+              {t("login.loggingIn")}
             </>
           ) : (
-            <>Log In <span>→</span></>
+            <>{t("login.submit")} <span>→</span></>
           )}
         </button>
 
-        {/* فاصل */}
+        {/* Divider */}
         <div className="relative flex items-center py-1">
           <div className="flex-1 border-t border-slate-200" />
-          <span className="mx-4 text-xs text-slate-400">or</span>
+          <span className="mx-4 text-xs text-slate-400">{t("login.or")}</span>
           <div className="flex-1 border-t border-slate-200" />
         </div>
 
-        {/* رابط إنشاء حساب */}
+        {/* Register link */}
         <p className="text-center text-sm text-slate-500">
-          Don&apos;t have an account?{" "}
+          {t("login.noAccount")}{" "}
           <Link to="/auth/register" className="font-semibold text-primary hover:underline">
-            Create an account
+            {t("login.createAccount")}
           </Link>
         </p>
       </form>
 
-      {/* روابط السياسة */}
+      {/* Policy links */}
       <div className="mt-10 flex items-center justify-center gap-4">
-        <Link to="#" className="text-xs text-slate-400 hover:text-slate-600">Privacy Policy</Link>
+        <Link to="#" className="text-xs text-slate-400 hover:text-slate-600">{t("login.privacyPolicy")}</Link>
         <span className="text-slate-300">•</span>
-        <Link to="#" className="text-xs text-slate-400 hover:text-slate-600">Terms of Service</Link>
+        <Link to="#" className="text-xs text-slate-400 hover:text-slate-600">{t("login.termsOfService")}</Link>
       </div>
     </div>
   );

@@ -1,0 +1,30 @@
+{
+  "appName": "APEX",
+  "workspace": "Workspace v2.0",
+  "aiAssistant": "AI Assistant",
+  "collapseAll": "Collapse All",
+  "dashboard": "Dashboard",
+  "loading": "Loading...",
+  "error": "Error",
+  "save": "Save",
+  "cancel": "Cancel",
+  "search": "Search",
+  "filter": "Filters",
+  "previous": "Previous",
+  "next": "Next",
+  "backTo": "Back to",
+  "viewAll": "View All",
+  "createdAt": "Created",
+  "status": "Status",
+  "active": "Active",
+  "completed": "Completed",
+  "explore": "Explore",
+  "calculate": "Calculate",
+  "export": "Export",
+  "retry": "Retry",
+  "noResults": "No results found",
+  "currency": "DZD",
+  "chatbot": {
+    "welcome": "Hello! I am your APEX Assistant. How can I help you navigate the system today?"
+  }
+}

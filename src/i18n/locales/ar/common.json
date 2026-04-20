@@ -1,0 +1,30 @@
+{
+  "appName": "APEX",
+  "workspace": "مساحة العمل v2.0",
+  "aiAssistant": "المساعد الذكي",
+  "collapseAll": "طي الكل",
+  "dashboard": "لوحة التحكم",
+  "loading": "جاري التحميل...",
+  "error": "خطأ",
+  "save": "حفظ",
+  "cancel": "إلغاء",
+  "search": "بحث",
+  "filter": "تصفية",
+  "previous": "السابق",
+  "next": "التالي",
+  "backTo": "العودة إلى",
+  "viewAll": "عرض الكل",
+  "createdAt": "تاريخ الإنشاء",
+  "status": "الحالة",
+  "active": "نشط",
+  "completed": "مكتمل",
+  "explore": "استكشاف",
+  "calculate": "حساب",
+  "export": "تصدير",
+  "retry": "إعادة المحاولة",
+  "noResults": "لا توجد نتائج",
+  "currency": "د.ج",
+  "chatbot": {
+    "welcome": "مرحباً! أنا مساعد APEX الخاص بك. كيف يمكنني مساعدتك في التنقل في النظام اليوم؟"
+  }
+}

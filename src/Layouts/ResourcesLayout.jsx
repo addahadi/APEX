@@ -1,8 +1,19 @@
+import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { P } from "../lib/design-tokens.js";
 import { SectionTitle } from "../components/admin/ui-atoms.jsx";
+import { INIT_RESOURCES, INIT_SERVICES } from "../mock/mock-data.js";
+import { useModulesTree, useUnits } from "@/hooks/modules.queries";
 
 export default function ResourcesLayout() {
+  const { data: units = [], isLoading: unitsLoading } = useUnits();
+  const { data: tree = [],  isLoading: treeLoading }  = useModulesTree();
+
+  const [resources, setResources] = useState(INIT_RESOURCES);
+  const [services, setServices]   = useState(INIT_SERVICES);
+  const [search, setSearch]       = useState("");
+  const [showNew, setShowNew]     = useState(false);
+
   const tabStyle = ({ isActive }) => ({
     padding: "10px 20px",
     background: "none",
@@ -38,7 +49,16 @@ export default function ResourcesLayout() {
         </NavLink>
       </div>
 
-      <Outlet />
+      <Outlet context={{ 
+        units, unitsLoading,
+        resources, setResources, 
+        services, setServices,
+        tree, treeLoading,
+        search, setSearch,
+        showNew, setShowNew
+      }} />
     </div>
   );
 }
+
+

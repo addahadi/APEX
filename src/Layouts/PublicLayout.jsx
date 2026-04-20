@@ -1,6 +1,10 @@
 import { Link, Outlet, NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const PublicLayout = () => {
+  const { t } = useTranslation("public");
+
   return (
     <div className="min-h-screen flex flex-col font-sans text-slate-900 bg-white">
       {/* ─── STICKY NAVBAR ─── */}
@@ -14,35 +18,37 @@ const PublicLayout = () => {
             </Link>
 
             {/* Desktop Menu */}
-            <div className="hidden md:flex items-center space-x-10">
+            <div className="hidden md:flex items-center space-x-10 rtl:space-x-reverse">
               <NavLink 
                 to="/" 
                 className={({ isActive }) => `text-sm font-semibold transition-colors ${isActive ? "text-[#1D4ED8]" : "text-slate-600 hover:text-[#1D4ED8]"}`}
               >
-                Home
+                {t("nav.home")}
               </NavLink>
               <NavLink 
                 to="/about" 
                 className={({ isActive }) => `text-sm font-semibold transition-colors ${isActive ? "text-[#1D4ED8]" : "text-slate-600 hover:text-[#1D4ED8]"}`}
               >
-                About Us
+                {t("nav.aboutUs")}
               </NavLink>
               <NavLink 
                 to="/articles" 
                 className={({ isActive }) => `text-sm font-semibold transition-colors ${isActive ? "text-[#1D4ED8]" : "text-slate-600 hover:text-[#1D4ED8]"}`}
               >
-                Articles
+                {t("nav.articles")}
               </NavLink>
+              <LanguageSwitcher variant="minimal" />
               <Link 
                 to="/auth/register" 
                 className="bg-[#1D4ED8] text-white px-7 py-2.5 rounded-md text-sm font-bold hover:bg-blue-700 transition-all shadow-md shadow-blue-200"
               >
-                Get Started
+                {t("nav.getStarted")}
               </Link>
             </div>
 
-            {/* Mobile Menu Toggle (Simplified) */}
-            <div className="md:hidden">
+            {/* Mobile Menu Toggle */}
+            <div className="md:hidden flex items-center gap-2">
+              <LanguageSwitcher variant="minimal" />
               <button className="text-slate-500" type="button">
                 <span className="material-symbols-outlined">menu</span>
               </button>
@@ -66,32 +72,32 @@ const PublicLayout = () => {
                 <span className="font-bold text-2xl tracking-tight uppercase">APEX</span>
               </div>
               <p className="text-slate-400 max-w-sm leading-relaxed text-lg">
-                The intelligence platform for modern infrastructure. Leading the digital transformation of construction management since 2018.
+                {t("footer.description")}
               </p>
             </div>
             
             <div className="md:col-span-2 md:col-start-7">
-              <h4 className="font-bold text-white mb-8 uppercase text-xs tracking-widest text-white/50">Platform</h4>
+              <h4 className="font-bold text-white mb-8 uppercase text-xs tracking-widest text-white/50">{t("footer.platform")}</h4>
               <ul className="space-y-4 text-slate-400 font-medium list-none p-0">
-                <li><Link className="hover:text-white transition-colors no-underline" to="/">Home</Link></li>
-                <li><Link className="hover:text-white transition-colors no-underline" to="/choose-plan">Pricing & Plans</Link></li>
-                <li><Link className="hover:text-white transition-colors no-underline" to="/articles">Articles & News</Link></li>
-                <li><Link className="hover:text-white transition-colors no-underline" to="/ai">AI Solutions</Link></li>
+                <li><Link className="hover:text-white transition-colors no-underline" to="/">{t("footer.home")}</Link></li>
+                <li><Link className="hover:text-white transition-colors no-underline" to="/choose-plan">{t("footer.pricingPlans")}</Link></li>
+                <li><Link className="hover:text-white transition-colors no-underline" to="/articles">{t("footer.articlesNews")}</Link></li>
+                <li><Link className="hover:text-white transition-colors no-underline" to="/ai">{t("footer.aiSolutions")}</Link></li>
               </ul>
             </div>
             
             <div className="md:col-span-2">
-              <h4 className="font-bold text-white mb-8 uppercase text-xs tracking-widest text-white/50">Company</h4>
+              <h4 className="font-bold text-white mb-8 uppercase text-xs tracking-widest text-white/50">{t("footer.company")}</h4>
               <ul className="space-y-4 text-slate-400 font-medium list-none p-0">
-                <li><Link className="hover:text-white transition-colors no-underline" to="/about">About Us</Link></li>
-                <li><Link className="hover:text-white transition-colors no-underline" to="/support">Contact Support</Link></li>
-                <li><Link className="hover:text-white transition-colors no-underline" to="/privacy">Privacy Policy</Link></li>
-                <li><Link className="hover:text-white transition-colors no-underline" to="/terms">Terms of Service</Link></li>
+                <li><Link className="hover:text-white transition-colors no-underline" to="/about">{t("footer.aboutUs")}</Link></li>
+                <li><Link className="hover:text-white transition-colors no-underline" to="/support">{t("footer.contactSupport")}</Link></li>
+                <li><Link className="hover:text-white transition-colors no-underline" to="/privacy">{t("footer.privacyPolicy")}</Link></li>
+                <li><Link className="hover:text-white transition-colors no-underline" to="/terms">{t("footer.termsOfService")}</Link></li>
               </ul>
             </div>
             
             <div className="md:col-span-2">
-              <h4 className="font-bold text-white mb-8 uppercase text-xs tracking-widest text-white/50">Connect</h4>
+              <h4 className="font-bold text-white mb-8 uppercase text-xs tracking-widest text-white/50">{t("footer.connect")}</h4>
               <div className="flex gap-6">
                 <a className="text-slate-400 hover:text-white transition-colors" href="#">
                   <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24">
@@ -108,11 +114,11 @@ const PublicLayout = () => {
           </div>
           
           <div className="border-t border-white/10 pt-12 flex flex-col md:flex-row justify-between items-center gap-6">
-            <p className="text-sm text-slate-500 font-medium">© 2026 APEX Inc. All rights reserved.</p>
+            <p className="text-sm text-slate-500 font-medium">{t("footer.copyright")}</p>
             <div className="flex gap-8 text-sm text-slate-500 font-medium">
-              <Link className="hover:text-white no-underline" to="/privacy">Privacy</Link>
-              <Link className="hover:text-white no-underline" to="/cookies">Cookies</Link>
-              <Link className="hover:text-white no-underline" to="/sitemap">Sitemap</Link>
+              <Link className="hover:text-white no-underline" to="/privacy">{t("footer.privacy")}</Link>
+              <Link className="hover:text-white no-underline" to="/cookies">{t("footer.cookies")}</Link>
+              <Link className="hover:text-white no-underline" to="/sitemap">{t("footer.sitemap")}</Link>
             </div>
           </div>
         </div>

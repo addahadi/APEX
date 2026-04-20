@@ -25,7 +25,13 @@ export const TYPE_CONF    = { NORMAL:{ color:P.cyan, bg:P.cyanL }, COMPANY:{ col
 export const ART_TYPE_CONF   = { BLOG:{ color:P.main, bg:P.mainL }, ACTUALITE:{ color:P.warn, bg:P.warnL } };
 export const ART_STATUS_CONF = { PUBLISHED:{ color:P.success, bg:P.successL }, DRAFT:{ color:P.txt3, bg:P.borderL } };
 export const FORMULA_TYPE_CONF = { MATERIAL:{ color:P.orange, bg:P.orangeL }, NON_MATERIAL:{ color:P.purple, bg:P.purpleL } };
-export const CAT_LEVEL_CONF  = { MAIN:{ color:P.main, bg:P.mainL }, SUB:{ color:P.warn, bg:P.warnL }, ITEM:{ color:P.success, bg:P.successL } };
+export const CAT_LEVEL_CONF  = { 
+  ROOT: { color:P.main, bg:P.mainL, label:"ROOT" }, 
+  DOMAIN: { color:P.purple, bg:P.purpleL, label:"DOMAIN" }, 
+  SUB_TYPE: { color:P.success, bg:P.successL, label:"SUB_TYPE" },
+  BRANCH: { color:P.warn, bg:P.warnL, label:"BRANCH" },
+  ITEM: { color:P.cyan, bg:P.cyanL, label:"ITEM" }
+};
 export const AI_TYPE_CONF    = { QUERY:{ color:P.main, bg:P.mainL }, RECOMMENDATION:{ color:P.purple, bg:P.purpleL }, ANALYSIS:{ color:P.cyan, bg:P.cyanL } };
 
 export const uid = () => Math.random().toString(36).slice(2,8);

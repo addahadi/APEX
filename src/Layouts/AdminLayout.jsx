@@ -26,18 +26,18 @@ export default function AdminLayout() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: P.bg, display: "flex", flexDirection: "column", fontFamily: "'Inter',sans-serif", color: P.txt, fontSize: P.body.size }}>
+    <div style={{ height: "100vh", background: P.bg, display: "flex", flexDirection: "column", fontFamily: "'Inter',sans-serif", color: P.txt, fontSize: P.body.size, overflow: "hidden" }}>
       
       {/* --- TOPBAR (NAVBAR) --- */}
       <div style={{ height: 60, borderBottom: `1px solid ${P.border}`, display: "flex", alignItems: "center", padding: "0 24px", gap: 14, background: P.surface, position: "sticky", top: 0, zIndex: 200, flexShrink: 0 }}>
         {/* Brand */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <Link to="/admin" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", color: "inherit" }}>
           <img src="/logo.png" alt="APEX Logo" style={{ width: 34, height: 34, borderRadius: 9, objectFit: "cover", boxShadow: `0 2px 8px rgba(16,78,216,.3)` }} />
           <div>
             <div style={{ fontSize: P.body.size, fontWeight: 700, color: P.txt, lineHeight: 1.2 }}>APEX</div>
             <div style={{ fontSize: 11, color: P.txt3, fontWeight: 400 }}>v1.2.0 · Admin Panel</div>
           </div>
-        </div>
+        </Link>
 
         <div style={{ flex: 1 }} />
 

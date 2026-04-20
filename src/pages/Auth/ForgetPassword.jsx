@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { ArrowLeft, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
-import { forgotPasswordSchema } from "@/schemas/auth.schema";
+import { getForgotPasswordSchema } from "@/schemas/auth.schema";
 import { useForgotPassword } from "@/hooks/useAuth";
 import { handleApiError } from "@/api/handelApiError";
 
 const ForgetPassword = () => {
+  const { t } = useTranslation("auth");
   const forgotMutation = useForgotPassword();
 
   const [email, setEmail] = useState("");
@@ -20,7 +22,7 @@ const ForgetPassword = () => {
     setServerMessage("");
     setErrors({});
 
-    // ── Zod validation ──────────────────────────────────────────────
+    const forgotPasswordSchema = getForgotPasswordSchema(t);
     const result = forgotPasswordSchema.safeParse({ email });
     if (!result.success) {
       const fieldErrors = {};
@@ -32,7 +34,6 @@ const ForgetPassword = () => {
       return;
     }
 
-    // ── API call ────────────────────────────────────────────────────
     forgotMutation.mutate(result.data, {
       onSuccess: (data) => {
         setServerMessage(
@@ -64,15 +65,14 @@ const ForgetPassword = () => {
           className="inline-flex items-center gap-2 text-sm font-medium hover:text-primary"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Login
+          {t("forgotPassword.backToLogin")}
         </Link>
       </div>
 
       <div className="mb-8">
-        <h1 className="mb-3 text-4xl font-bold tracking-tight text-slate-900">Forgot Password?</h1>
+        <h1 className="mb-3 text-4xl font-bold tracking-tight text-slate-900">{t("forgotPassword.title")}</h1>
         <p className="max-w-md text-sm leading-6 text-slate-500">
-          Don&apos;t worry, it happens. Enter the email address associated with your account and
-          we&apos;ll send you a link to reset your password.
+          {t("forgotPassword.subtitle")}
         </p>
       </div>
 
@@ -91,7 +91,7 @@ const ForgetPassword = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-3">
           <label htmlFor="forgot-email" className="text-sm font-medium text-slate-700">
-            Email Address
+            {t("forgotPassword.email")}
           </label>
           <div className="relative">
             <input
@@ -99,7 +99,7 @@ const ForgetPassword = () => {
               type="email"
               value={email}
               onChange={handleChange("email", setEmail)}
-              placeholder="name@company.com"
+              placeholder={t("forgotPassword.emailPlaceholder")}
               className={`w-full rounded-2xl border bg-slate-50 py-3 pl-4 pr-12 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 ${
                 errors.email
                   ? "border-red-400 focus:border-red-400 focus:ring-red-200"
@@ -119,18 +119,18 @@ const ForgetPassword = () => {
           {forgotMutation.isPending ? (
             <>
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              Sending...
+              {t("forgotPassword.sending")}
             </>
           ) : (
-            "Send Reset Link"
+            t("forgotPassword.submit")
           )}
         </button>
       </form>
 
       <p className="mt-8 text-center text-sm text-slate-500">
-        Remember your password?{" "}
+        {t("forgotPassword.rememberPassword")}{" "}
         <Link to="/auth/login" className="font-semibold text-primary hover:underline">
-          Log in
+          {t("forgotPassword.login")}
         </Link>
       </p>
     </div>

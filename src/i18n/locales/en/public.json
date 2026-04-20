@@ -1,0 +1,95 @@
+{
+  "nav": {
+    "home": "Home",
+    "aboutUs": "About Us",
+    "articles": "Articles",
+    "getStarted": "Get Started"
+  },
+  "hero": {
+    "tagline": "The Future of Construction Management",
+    "titleLine1": "Build Smarter,",
+    "titleLine2": "Faster.",
+    "description": "From structural blueprints to the final finishing touches. Automate your workflow with AI-driven estimation and precision project management.",
+    "startTrial": "Start Free Trial",
+    "watchDemo": "Watch Demo",
+    "socialProof": "Joined by 2,000+ construction firms",
+    "liveAI": "Live AI Estimation",
+    "projectName": "Project: High-Rise Alpha",
+    "accuracyRate": "Accuracy Rate"
+  },
+  "features": {
+    "title": "What you can do",
+    "subtitle": "Explore the powerful capabilities built for construction professionals.",
+    "calc": {
+      "title": "Project creation with formula-based calculations",
+      "desc": "Accurate estimations using Projects, Formulas, Categories, and Units for ultimate precision."
+    },
+    "bookmark": {
+      "title": "Save and like articles",
+      "desc": "Build your personal knowledge base from our expert insights and industry best practices."
+    },
+    "blog": {
+      "title": "Access to Blog and News content",
+      "desc": "Stay informed with technical updates, case studies, and construction industry news."
+    }
+  },
+  "pricing": {
+    "title": "Pricing & Plans",
+    "subtitle": "Choose the perfect plan for your construction management needs.",
+    "normalUser": "Normal User",
+    "normalDesc": "Perfect for independent surveyors and small projects.",
+    "company": "Company",
+    "companyDesc": "Comprehensive solution for professional construction firms.",
+    "recommended": "Recommended",
+    "perMonth": "/mo",
+    "projects": "Up to {{count}} projects",
+    "aiRequests": "{{count}} AI requests",
+    "unlimitedAI": "Unlimited AI requests",
+    "pdfExport": "PDF export",
+    "externalServices": "External services integration",
+    "getStarted": "Get Started",
+    "chooseEnterprise": "Choose Enterprise"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Answers to common questions about our platform and estimation tools.",
+    "q1": "How accurate is the AI estimation?",
+    "a1": "Our AI model is trained on thousands of real-world construction datasets. While accuracy varies by project complexity, our users typically report within 95-98% accuracy compared to final bill of quantities.",
+    "q2": "Can I import my existing Excel formulas?",
+    "a2": "Yes! Our formula builder is designed to be familiar to Excel users. You can create custom variables, link categories, and apply complex arithmetic for your structural and finishing calculations.",
+    "q3": "Do you offer trial periods for the Company plan?",
+    "a3": "Absolutely. We offer a 14-day full-access trial for firms to test out our team management features and unlimited AI estimation capabilities before committing."
+  },
+  "footer": {
+    "description": "The intelligence platform for modern infrastructure. Leading the digital transformation of construction management since 2018.",
+    "platform": "Platform",
+    "home": "Home",
+    "pricingPlans": "Pricing & Plans",
+    "articlesNews": "Articles & News",
+    "aiSolutions": "AI Solutions",
+    "company": "Company",
+    "aboutUs": "About Us",
+    "contactSupport": "Contact Support",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "connect": "Connect",
+    "copyright": "© 2026 APEX Inc. All rights reserved.",
+    "privacy": "Privacy",
+    "cookies": "Cookies",
+    "sitemap": "Sitemap"
+  },
+  "articles": {
+    "title": "Insights & Updates",
+    "subtitle": "Stay informed with the latest trends in sustainable construction, quantity surveying, and digital transformation in the industry.",
+    "readMore": "Read More",
+    "search": "Search",
+    "searchPlaceholder": "Search articles...",
+    "categories": "Categories",
+    "popularTags": "Popular Tags",
+    "minRead": "{{count}} min read",
+    "industryNews": "Industry News",
+    "digitalTransformation": "Digital Transformation",
+    "caseStudies": "Case Studies",
+    "estimatingTips": "Estimating Tips"
+  }
+}

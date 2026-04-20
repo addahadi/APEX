@@ -16,9 +16,9 @@ export const PLAN_TYPES = [
   { id:"pt2", name_en:"Company", name_ar:"شركة" },
 ];
 export const PLANS = [
-  { id:"p1", name:"Free",       type:"NORMAL",  typeId:"pt1", desc:"Basic access for individuals",     price:0,    duration:365, features:[{key:"max_projects",val:"3"},{key:"max_calculations",val:"20"},{key:"can_export_pdf",val:"false"},{key:"support_level",val:"none"}] },
-  { id:"p2", name:"Pro",        type:"NORMAL",  typeId:"pt1", desc:"Full access for professionals",    price:1900, duration:365, features:[{key:"max_projects",val:"20"},{key:"max_calculations",val:"500"},{key:"can_export_pdf",val:"true"},{key:"can_use_api",val:"false"},{key:"support_level",val:"email"}] },
-  { id:"p3", name:"Enterprise", type:"COMPANY", typeId:"pt2", desc:"Unlimited for construction firms", price:5900, duration:365, features:[{key:"max_projects",val:"unlimited"},{key:"max_calculations",val:"unlimited"},{key:"can_export_pdf",val:"true"},{key:"can_use_api",val:"true"},{key:"support_level",val:"priority"},{key:"team_members",val:"25"}] },
+  { id:"p1", name:"Free",       type:"NORMAL",  typeId:"pt1", desc:"Basic access for individuals",     price:0,    duration:365, features:[{key:"projects_limit",val:"3"},{key:"max_calculations",val:"20"},{key:"can_export_pdf",val:"false"},{key:"support_level",val:"none"}] },
+  { id:"p2", name:"Pro",        type:"NORMAL",  typeId:"pt1", desc:"Full access for professionals",    price:1900, duration:365, features:[{key:"projects_limit",val:"20"},{key:"max_calculations",val:"500"},{key:"can_export_pdf",val:"true"},{key:"can_use_api",val:"false"},{key:"support_level",val:"email"}] },
+  { id:"p3", name:"Enterprise", type:"COMPANY", typeId:"pt2", desc:"Unlimited for construction firms", price:5900, duration:365, features:[{key:"projects_limit",val:"unlimited"},{key:"max_calculations",val:"unlimited"},{key:"can_export_pdf",val:"true"},{key:"can_use_api",val:"true"},{key:"support_level",val:"priority"},{key:"team_members",val:"25"}] },
 ];
 export const SUBS = [
   { id:"s1", user:"Karim Benali",   email:"karim@mail.com",    plan:"Pro",        type:"NORMAL",  status:"ACTIVE",   start:"2025-11-03", end:"2026-11-03" },
@@ -92,97 +92,97 @@ export const AI_USAGE = [
 ];
 
 export const INIT_TREE = [
-  { category_id:"gt", parent_id: null, name_en:"Grand Travaux", name_ar:"أعمال كبرى", category_level:"ROOT", icon:"🏚️", sort_order:1, children:[
-    { category_id:"gt-exc", parent_id: "gt", name_en:"Excavation", name_ar:"الحفر", category_level:"LEAF", icon:"⛏️", sort_order:1, children:[],
-      configs: [ { config_id: "cfg1", name: "Standard Dig", description: "Default excavation settings" } ],
+  { id:"gt", category_id:"gt", parent_id: null, name_en:"Grand Travaux", name_ar:"أعمال كبرى", category_level:"ROOT", icon:"🏚️", sort_order:1, children:[
+    { id:"gt-exc", category_id:"gt-exc", parent_id: "gt", name_en:"Excavation", name_ar:"الحفر", category_level:"SUB_TYPE", icon:"⛏️", sort_order:1, children:[],
+      configs: [ { id: "cfg1", config_id: "cfg1", name: "Standard Dig", description: "Default excavation settings" } ],
       formulas:[
-        { formula_id:"fo1", name:"Excavation Volume", expression:"L * W * D", output_unit_symbol:"m³", version: 1, fields:[
-          { field_id:"f1", label:"Length", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
-          { field_id:"f2", label:"Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
-          { field_id:"f3", label:"Depth", unit_symbol:"m", required:true, default_value:0, sort_order: 3, is_computed: false }
+        { id:"fo1", formula_id:"fo1", name:"Excavation Volume", expression:"L * W * D", output_unit_symbol:"m³", version: 1, fields:[
+          { id:"f1", field_id:"f1", label:"Length", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
+          { id:"f2", field_id:"f2", label:"Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
+          { id:"f3", field_id:"f3", label:"Depth", unit_symbol:"m", required:true, default_value:0, sort_order: 3, is_computed: false }
         ]},
-        { formula_id:"fo2", name:"Backfill Water", expression:"L * W * D * 0.1", output_unit_symbol:"m³", version: 1, fields:[
-          { field_id:"f1", label:"Length", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
-          { field_id:"f2", label:"Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
-          { field_id:"f3", label:"Depth", unit_symbol:"m", required:true, default_value:0, sort_order: 3, is_computed: false }
+        { id:"fo2", formula_id:"fo2", name:"Backfill Water", expression:"L * W * D * 0.1", output_unit_symbol:"m³", version: 1, fields:[
+          { id:"f1", field_id:"f1", label:"Length", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
+          { id:"f2", field_id:"f2", label:"Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
+          { id:"f3", field_id:"f3", label:"Depth", unit_symbol:"m", required:true, default_value:0, sort_order: 3, is_computed: false }
         ]}
       ]
     },
-    { category_id:"gt-found", parent_id: "gt", name_en:"Foundations", name_ar:"الأساسات", category_level:"BRANCH", icon:"🏗️", sort_order:2, children:[
-      { category_id:"gt-iso", parent_id: "gt-found", name_en:"Isolated Footing", name_ar:"قاعدة معزولة", category_level:"LEAF", icon:"🟦", sort_order:1, children:[],
+    { id:"gt-found", category_id:"gt-found", parent_id: "gt", name_en:"Foundations", name_ar:"الأساسات", category_level:"BRANCH", icon:"🏗️", sort_order:2, children:[
+      { id:"gt-iso", category_id:"gt-iso", parent_id: "gt-found", name_en:"Isolated Footing", name_ar:"قاعدة معزولة", category_level:"SUB_TYPE", icon:"🟦", sort_order:1, children:[],
         configs: [],
         formulas:[
-          { formula_id:"fo3", name:"Concrete Volume", expression:"L * W * H", output_unit_symbol:"m³", version: 1, fields:[
-            { field_id:"f4", label:"Length", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
-            { field_id:"f5", label:"Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
-            { field_id:"f6", label:"Thickness", unit_symbol:"m", required:true, default_value:0, sort_order: 3, is_computed: false }
+          { id:"fo3", formula_id:"fo3", name:"Concrete Volume", expression:"L * W * H", output_unit_symbol:"m³", version: 1, fields:[
+            { id:"f4", field_id:"f4", label:"Length", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
+            { id:"f5", field_id:"f5", label:"Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
+            { id:"f6", field_id:"f6", label:"Thickness", unit_symbol:"m", required:true, default_value:0, sort_order: 3, is_computed: false }
           ]},
-          { formula_id:"fo4", name:"Surface Area", expression:"L * W", output_unit_symbol:"m²", version: 1, fields:[
-            { field_id:"f4", label:"Length", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
-            { field_id:"f5", label:"Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false }
+          { id:"fo4", formula_id:"fo4", name:"Surface Area", expression:"L * W", output_unit_symbol:"m²", version: 1, fields:[
+            { id:"f4", field_id:"f4", label:"Length", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
+            { id:"f5", field_id:"f5", label:"Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false }
           ]}
         ]
       },
-      { category_id:"gt-raft", parent_id: "gt-found", name_en:"Raft Slab", name_ar:"بلاطة حصيرة", category_level:"LEAF", icon:"⬛", sort_order:2, children:[],
+      { id:"gt-raft", category_id:"gt-raft", parent_id: "gt-found", name_en:"Raft Slab", name_ar:"بلاطة حصيرة", category_level:"SUB_TYPE", icon:"⬛", sort_order:2, children:[],
         configs: [],
         formulas:[
-          { formula_id:"fo5", name:"Concrete Volume", expression:"S * H", output_unit_symbol:"m³", version: 1, fields:[
-            { field_id:"f7", label:"Total Area", unit_symbol:"m²", required:true, default_value:0, sort_order: 1, is_computed: false },
-            { field_id:"f8", label:"Thickness", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false }
+          { id:"fo5", formula_id:"fo5", name:"Concrete Volume", expression:"S * H", output_unit_symbol:"m³", version: 1, fields:[
+            { id:"f7", field_id:"f7", label:"Total Area", unit_symbol:"m²", required:true, default_value:0, sort_order: 1, is_computed: false },
+            { id:"f8", field_id:"f8", label:"Thickness", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false }
           ]}
         ]
       }
     ]},
-    { category_id:"gt-col", parent_id: "gt", name_en:"Columns", name_ar:"الأعمدة", category_level:"LEAF", icon:"🏛️", sort_order:3, children:[],
+    { id:"gt-col", category_id:"gt-col", parent_id: "gt", name_en:"Columns", name_ar:"الأعمدة", category_level:"SUB_TYPE", icon:"🏛️", sort_order:3, children:[],
       configs: [],
       formulas:[
-        { formula_id:"fo6", name:"Total Volume", expression:"B * D * H * N", output_unit_symbol:"m³", version: 1, fields:[
-          { field_id:"f9", label:"Width (b)", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
-          { field_id:"f10", label:"Depth (d)", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
-          { field_id:"f11", label:"Height", unit_symbol:"m", required:true, default_value:0, sort_order: 3, is_computed: false },
-          { field_id:"f12", label:"Quantity", unit_symbol:"pcs", required:true, default_value:0, sort_order: 4, is_computed: false }
+        { id:"fo6", formula_id:"fo6", name:"Total Volume", expression:"B * D * H * N", output_unit_symbol:"m³", version: 1, fields:[
+          { id:"f9", field_id:"f9", label:"Width (b)", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
+          { id:"f10", field_id:"f10", label:"Depth (d)", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
+          { id:"f11", field_id:"f11", label:"Height", unit_symbol:"m", required:true, default_value:0, sort_order: 3, is_computed: false },
+          { id:"f12", field_id:"f12", label:"Quantity", unit_symbol:"pcs", required:true, default_value:0, sort_order: 4, is_computed: false }
         ]},
-        { formula_id:"fo7", name:"Total Steel", expression:"B * D * H * N * 120", output_unit_symbol:"kg", version: 1, fields:[
-          { field_id:"f9", label:"Width (b)", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
-          { field_id:"f10", label:"Depth (d)", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
-          { field_id:"f11", label:"Height", unit_symbol:"m", required:true, default_value:0, sort_order: 3, is_computed: false },
-          { field_id:"f12", label:"Quantity", unit_symbol:"pcs", required:true, default_value:0, sort_order: 4, is_computed: false }
+        { id:"fo7", formula_id:"fo7", name:"Total Steel", expression:"B * D * H * N * 120", output_unit_symbol:"kg", version: 1, fields:[
+          { id:"f9", field_id:"f9", label:"Width (b)", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
+          { id:"f10", field_id:"f10", label:"Depth (d)", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
+          { id:"f11", field_id:"f11", label:"Height", unit_symbol:"m", required:true, default_value:0, sort_order: 3, is_computed: false },
+          { id:"f12", field_id:"f12", label:"Quantity", unit_symbol:"pcs", required:true, default_value:0, sort_order: 4, is_computed: false }
         ]}
       ]
     }
   ]},
-  { category_id:"fin", parent_id: null, name_en:"Finition", name_ar:"التشطيبات", category_level:"ROOT", icon:"🎨", sort_order:2, children:[
-    { category_id:"fin-tile", parent_id: "fin", name_en:"Tiling", name_ar:"البلاط", category_level:"BRANCH", icon:"🔲", sort_order:1, children:[
-      { category_id:"fin-straight", parent_id: "fin-tile", name_en:"Straight Tiling", name_ar:"بلاط مستقيم", category_level:"LEAF", icon:"⬛", sort_order:1, children:[],
+  { id:"fin", category_id:"fin", parent_id: null, name_en:"Finition", name_ar:"التشطيبات", category_level:"ROOT", icon:"🎨", sort_order:2, children:[
+    { id:"fin-tile", category_id:"fin-tile", parent_id: "fin", name_en:"Tiling", name_ar:"البلاط", category_level:"BRANCH", icon:"🔲", sort_order:1, children:[
+      { id:"fin-straight", category_id:"fin-straight", parent_id: "fin-tile", name_en:"Straight Tiling", name_ar:"بلاط مستقيم", category_level:"SUB_TYPE", icon:"⬛", sort_order:1, children:[],
         configs: [],
         formulas:[
-          { formula_id:"fo8", name:"Floor Area", expression:"L * W", output_unit_symbol:"m²", version: 1, fields:[
-            { field_id:"f13", label:"Room Length", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
-            { field_id:"f14", label:"Room Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false }
+          { id:"fo8", formula_id:"fo8", name:"Floor Area", expression:"L * W", output_unit_symbol:"m²", version: 1, fields:[
+            { id:"f13", field_id:"f13", label:"Room Length", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
+            { id:"f14", field_id:"f14", label:"Room Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false }
           ]},
-          { formula_id:"fo9", name:"Tile Count +5%", expression:"ceil((L*W)/(TL*TW)*1.05)", output_unit_symbol:"pcs", version: 1, fields:[
-            { field_id:"f13", label:"Room Length", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
-            { field_id:"f14", label:"Room Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
-            { field_id:"f15", label:"Tile Length", unit_symbol:"m", required:true, default_value:0, sort_order: 3, is_computed: false },
-            { field_id:"f16", label:"Tile Width", unit_symbol:"m", required:true, default_value:0, sort_order: 4, is_computed: false }
+          { id:"fo9", formula_id:"fo9", name:"Tile Count +5%", expression:"ceil((L*W)/(TL*TW)*1.05)", output_unit_symbol:"pcs", version: 1, fields:[
+            { id:"f13", field_id:"f13", label:"Room Length", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
+            { id:"f14", field_id:"f14", label:"Room Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
+            { id:"f15", field_id:"f15", label:"Tile Length", unit_symbol:"m", required:true, default_value:0, sort_order: 3, is_computed: false },
+            { id:"f16", field_id:"f16", label:"Tile Width", unit_symbol:"m", required:true, default_value:0, sort_order: 4, is_computed: false }
           ]}
         ]
       }
     ]}
   ]},
-  { category_id:"pf", parent_id: null, name_en:"Doors & Windows", name_ar:"الأبواب والنوافذ", category_level:"ROOT", icon:"🚪", sort_order:3, children:[
-    { category_id:"pf-door", parent_id: "pf", name_en:"Rectangular Door", name_ar:"باب مستطيل", category_level:"LEAF", icon:"▬", sort_order:1, children:[],
+  { id:"pf", category_id:"pf", parent_id: null, name_en:"Doors & Windows", name_ar:"الأبواب والنوافذ", category_level:"ROOT", icon:"🚪", sort_order:3, children:[
+    { id:"pf-door", category_id:"pf-door", parent_id: "pf", name_en:"Rectangular Door", name_ar:"باب مستطيل", category_level:"SUB_TYPE", icon:"▬", sort_order:1, children:[],
       configs: [],
       formulas:[
-        { formula_id:"fo10", name:"Total Area", expression:"H * W * N", output_unit_symbol:"m²", version: 1, fields:[
-          { field_id:"f17", label:"Height", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
-          { field_id:"f18", label:"Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
-          { field_id:"f19", label:"Quantity", unit_symbol:"pcs", required:true, default_value:0, sort_order: 3, is_computed: false }
+        { id:"fo10", formula_id:"fo10", name:"Total Area", expression:"H * W * N", output_unit_symbol:"m²", version: 1, fields:[
+          { id:"f17", field_id:"f17", label:"Height", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
+          { id:"f18", field_id:"f18", label:"Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
+          { id:"f19", field_id:"f19", label:"Quantity", unit_symbol:"pcs", required:true, default_value:0, sort_order: 3, is_computed: false }
         ]},
-        { formula_id:"fo11", name:"Manufacturing Time", expression:"2 + H * W * 1.5 * N", output_unit_symbol:"hrs", version: 1, fields:[
-          { field_id:"f17", label:"Height", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
-          { field_id:"f18", label:"Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
-          { field_id:"f19", label:"Quantity", unit_symbol:"pcs", required:true, default_value:0, sort_order: 3, is_computed: false }
+        { id:"fo11", formula_id:"fo11", name:"Manufacturing Time", expression:"2 + H * W * 1.5 * N", output_unit_symbol:"hrs", version: 1, fields:[
+          { id:"f17", field_id:"f17", label:"Height", unit_symbol:"m", required:true, default_value:0, sort_order: 1, is_computed: false },
+          { id:"f18", field_id:"f18", label:"Width", unit_symbol:"m", required:true, default_value:0, sort_order: 2, is_computed: false },
+          { id:"f19", field_id:"f19", label:"Quantity", unit_symbol:"pcs", required:true, default_value:0, sort_order: 3, is_computed: false }
         ]}
       ]
     }

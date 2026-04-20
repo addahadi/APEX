@@ -15,11 +15,7 @@ export default function Dashboard() {
         <KpiCard label="Monthly Rev."   value="189K" sub="↑ 9.6% vs Feb"   icon={<TrendingUp size={16}/>}    color={P.warn}    delay={.1}  />
         <KpiCard label="Total Projects" value="437"  sub="↑ 23 this week"  icon={<FolderOpen size={16}/>}    color={P.purple}  delay={.15} />
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:14, marginBottom:14 }}>
-        <KpiCard label="AI Queries (Today)" value={AI_USAGE.filter(a=>a.usage_date==="2026-04-09").length} sub="↑ 3 vs yesterday" icon={<Bot size={16}/>}      color={P.cyan}   delay={.2} />
-        <KpiCard label="Resources Listed"   value={INIT_RESOURCES.length+INIT_SERVICES.length} sub="Materials & services"    icon={<Boxes size={16}/>}    color={P.orange} delay={.25} />
-        <KpiCard label="Exchange Rate"      value="155.82" sub={`Market factor ×${INIT_FINANCIAL.market_factor}`}            icon={<DollarSign size={16}/>} color={P.success} delay={.3} />
-      </div>
+
       <div style={{ display:"grid", gridTemplateColumns:"1.5fr 1fr", gap:14, marginBottom:14 }}>
         <Card style={{ padding:"18px 20px" }}>
           <div style={{ fontSize:12, color:P.txt3, fontWeight:600, marginBottom:14 }}>NEW USERS · MARCH 2026</div>

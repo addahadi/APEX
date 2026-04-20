@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Eye, EyeOff, Mail, User } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
-import { registerSchema } from "@/schemas/auth.schema";
+import { getRegisterSchema } from "@/schemas/auth.schema";
 import { useRegister } from "@/hooks/useAuth";
 import { handleApiError } from "@/api/handelApiError";
 
 const Register = () => {
+  const { t } = useTranslation("auth");
   const registerMutation = useRegister();
 
   const [fullName, setFullName] = useState("");
@@ -23,7 +25,7 @@ const Register = () => {
     setServerError("");
     setErrors({});
 
-    // ── Zod validation ──────────────────────────────────────────────
+    const registerSchema = getRegisterSchema(t);
     const result = registerSchema.safeParse({
       fullName,
       email,
@@ -41,8 +43,6 @@ const Register = () => {
       return;
     }
 
-    // ── API call ────────────────────────────────────────────────────
-    // Backend expects `name`, frontend uses `fullName`
     registerMutation.mutate(
       {
         name: result.data.fullName,
@@ -68,7 +68,6 @@ const Register = () => {
     setServerError("");
   };
 
-  // كلاس الـ input المشترك - يتغير لون الـ border حسب وجود خطأ
   const inputClass = (field) =>
     `w-full rounded-lg border bg-slate-50 py-3 pl-4 pr-11 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 ${
       errors[field]
@@ -78,18 +77,15 @@ const Register = () => {
 
   return (
     <div className="w-full max-w-md">
-
-      {/* العنوان */}
       <div className="mb-8">
         <h1 className="mb-2 text-3xl font-bold tracking-tight text-slate-900">
-          Create your account
+          {t("register.title")}
         </h1>
         <p className="text-sm text-slate-500">
-          Start managing your construction projects today.
+          {t("register.subtitle")}
         </p>
       </div>
 
-      {/* خطأ الـ Server */}
       {serverError && (
         <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
           {serverError}
@@ -97,11 +93,10 @@ const Register = () => {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
-
-        {/* الاسم الكامل */}
+        {/* Full Name */}
         <div className="space-y-1.5">
           <label htmlFor="register-fullName" className="text-sm font-medium text-slate-700">
-            Full Name
+            {t("register.fullName")}
           </label>
           <div className="relative">
             <input
@@ -109,7 +104,7 @@ const Register = () => {
               type="text"
               value={fullName}
               onChange={handleChange("fullName", setFullName)}
-              placeholder="John Doe"
+              placeholder={t("register.fullNamePlaceholder")}
               className={inputClass("fullName")}
             />
             <User className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -117,10 +112,10 @@ const Register = () => {
           {errors.fullName && <p className="text-xs text-red-500">{errors.fullName}</p>}
         </div>
 
-        {/* البريد الإلكتروني */}
+        {/* Email */}
         <div className="space-y-1.5">
           <label htmlFor="register-email" className="text-sm font-medium text-slate-700">
-            Email Address
+            {t("register.email")}
           </label>
           <div className="relative">
             <input
@@ -128,7 +123,7 @@ const Register = () => {
               type="email"
               value={email}
               onChange={handleChange("email", setEmail)}
-              placeholder="john@example.com"
+              placeholder={t("register.emailPlaceholder")}
               className={inputClass("email")}
             />
             <Mail className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -136,13 +131,11 @@ const Register = () => {
           {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
         </div>
 
-        {/* كلمتا المرور - جنباً إلى جنب */}
+        {/* Password pair */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-
-          {/* كلمة المرور */}
           <div className="space-y-1.5">
             <label htmlFor="register-password" className="text-sm font-medium text-slate-700">
-              Password
+              {t("register.password")}
             </label>
             <div className="relative">
               <input
@@ -164,10 +157,9 @@ const Register = () => {
             {errors.password && <p className="text-xs text-red-500">{errors.password}</p>}
           </div>
 
-          {/* تأكيد كلمة المرور */}
           <div className="space-y-1.5">
             <label htmlFor="register-confirmPassword" className="text-sm font-medium text-slate-700">
-              Confirm Password
+              {t("register.confirmPassword")}
             </label>
             <div className="relative">
               <input
@@ -189,7 +181,7 @@ const Register = () => {
           </div>
         </div>
 
-        {/* الموافقة على الشروط */}
+        {/* Terms */}
         <div className="flex items-start gap-2.5">
           <input
             id="register-terms"
@@ -200,14 +192,14 @@ const Register = () => {
             className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-primary"
           />
           <label htmlFor="register-terms" className="text-sm leading-relaxed text-slate-600">
-            I agree to the{" "}
-            <Link to="#" className="font-medium text-primary hover:underline">Terms and Conditions</Link>
-            {" "}and{" "}
-            <Link to="#" className="font-medium text-primary hover:underline">Privacy Policy</Link>.
+            {t("register.agreeTerms")}{" "}
+            <Link to="#" className="font-medium text-primary hover:underline">{t("register.termsAndConditions")}</Link>
+            {" "}{t("register.and")}{" "}
+            <Link to="#" className="font-medium text-primary hover:underline">{t("register.privacyPolicy")}</Link>.
           </label>
         </div>
 
-        {/* زر إنشاء الحساب */}
+        {/* Submit */}
         <button
           type="submit"
           disabled={registerMutation.isPending}
@@ -216,18 +208,18 @@ const Register = () => {
           {registerMutation.isPending ? (
             <>
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              Creating account...
+              {t("register.creating")}
             </>
           ) : (
-            <>Create Account <span>→</span></>
+            <>{t("register.submit")} <span>→</span></>
           )}
         </button>
 
-        {/* رابط تسجيل الدخول */}
+        {/* Login link */}
         <p className="text-center text-sm text-slate-500">
-          Already have an account?{" "}
+          {t("register.hasAccount")}{" "}
           <Link to="/auth/login" className="font-semibold text-primary hover:underline">
-            Login
+            {t("register.login")}
           </Link>
         </p>
       </form>
