@@ -2,94 +2,129 @@
   "nav": {
     "home": "Home",
     "aboutUs": "About Us",
-    "articles": "Articles",
-    "getStarted": "Get Started"
+    "articles": "Insights",
+    "getStarted": "Launch Platform"
   },
   "hero": {
-    "tagline": "The Future of Construction Management",
-    "titleLine1": "Build Smarter,",
-    "titleLine2": "Faster.",
-    "description": "From structural blueprints to the final finishing touches. Automate your workflow with AI-driven estimation and precision project management.",
-    "startTrial": "Start Free Trial",
-    "watchDemo": "Watch Demo",
-    "socialProof": "Joined by 2,000+ construction firms",
-    "liveAI": "Live AI Estimation",
-    "projectName": "Project: High-Rise Alpha",
-    "accuracyRate": "Accuracy Rate"
+    "tagline": "Next-Gen AEC Estimation Engine",
+    "titleLine1": "Precision in Every",
+    "titleLine2": "Calculation.",
+    "description": "The definitive platform for AEC professionals. Build complex, multi-layered estimations with our dynamic formula engine and structural analysis tools.",
+    "startTrial": "Explore Engine",
+    "watchDemo": "View Case Studies",
+    "socialProof": "Trusted by leading engineering firms worldwide",
+    "liveAI": "Live Engine Logic",
+    "projectName": "Structural Analysis: Tower B",
+    "accuracyRate": "Precision Rate"
   },
-  "features": {
-    "title": "What you can do",
-    "subtitle": "Explore the powerful capabilities built for construction professionals.",
-    "calc": {
-      "title": "Project creation with formula-based calculations",
-      "desc": "Accurate estimations using Projects, Formulas, Categories, and Units for ultimate precision."
+  "modules": {
+    "title": "Specialized AEC Modules",
+    "subtitle": "Native support for complex engineering categories with pre-defined logic sets.",
+    "explore": "Explore Logic",
+    "majorWorks": {
+      "title": "Major Works",
+      "desc": "Foundations, structural frames, and heavy masonry logic for large-scale infrastructure."
     },
-    "bookmark": {
-      "title": "Save and like articles",
-      "desc": "Build your personal knowledge base from our expert insights and industry best practices."
+    "interior": {
+      "title": "Interior Fit-out",
+      "desc": "Smart estimation for partitions, flooring, and comprehensive interior architectural works."
     },
-    "blog": {
-      "title": "Access to Blog and News content",
-      "desc": "Stay informed with technical updates, case studies, and construction industry news."
+    "doorsWindows": {
+      "title": "Doors & Windows",
+      "desc": "Precision tracking for openings, glazing, and intricate joinery specifications."
+    },
+    "finishing": {
+      "title": "Finishing Works",
+      "desc": "Mathematical modeling for painting, plastering, and high-end aesthetic touches."
     }
   },
-  "pricing": {
-    "title": "Pricing & Plans",
-    "subtitle": "Choose the perfect plan for your construction management needs.",
-    "normalUser": "Normal User",
-    "normalDesc": "Perfect for independent surveyors and small projects.",
-    "company": "Company",
-    "companyDesc": "Comprehensive solution for professional construction firms.",
-    "recommended": "Recommended",
-    "perMonth": "/mo",
-    "projects": "Up to {{count}} projects",
-    "aiRequests": "{{count}} AI requests",
-    "unlimitedAI": "Unlimited AI requests",
-    "pdfExport": "PDF export",
-    "externalServices": "External services integration",
-    "getStarted": "Get Started",
-    "chooseEnterprise": "Choose Enterprise"
+  "features": {
+    "title": "Unrivaled Estimation Control",
+    "subtitle": "Harness the power of our hierarchical calculation engine built for complex infrastructure projects.",
+    "calc": {
+      "title": "Dynamic Formula Orchestration",
+      "desc": "Define complex variables and mathematical expressions once, then apply them across thousands of categories with surgical precision."
+    },
+    "bookmark": {
+      "title": "Hierarchical Data Mapping",
+      "desc": "Organize your projects into nested categories, sub-categories, and leaf nodes for perfect structural integrity."
+    },
+    "blog": {
+      "title": "Unified Unit Conversions",
+      "desc": "Seamlessly handle meters, cubic volume, weight, and custom engineering units within a single calculation flow."
+    }
+  },
+  "cta": {
+    "title": "Ready to Engineering the Future?",
+    "subtitle": "Join the elite engineering firms using APEX to automate their estimation ecosystem."
+  },
+  "aboutUs": {
+    "title": "Architecting the Future of Estimation",
+    "subtitle": "APEX was born from a simple observation: AEC calculation tools haven't kept pace with modern complexity.",
+    "mission": "Our Mission",
+    "missionDesc": "To provide engineers and architects with the absolute precision they need to bring world-class infrastructure to life.",
+    "story": "The APEX Story",
+    "storyDesc": "Founded in 2018, we set out to build more than just a spreadsheet. We built an engine—a powerful, multi-dimensional logic processor that understands the nuance of structural engineering.",
+    "stats": {
+      "accuracy": "Engine Accuracy",
+      "tracked": "Projects Tracked",
+      "users": "Engineering Users",
+      "logic": "Lines of Logic"
+    },
+    "coreLogic": "Our Core Logic",
+    "coreLogicDesc": "The principles that drive every line of code in the APEX Engine.",
+    "builtBy": "Built by Engineers, for Engineers.",
+    "joinUs": "We're always looking for brilliant minds in AEC and Computer Science.",
+    "viewRoles": "View Open Roles",
+    "values": {
+      "precision": "Mathematical Precision",
+      "precisionDesc": "Every calculation is verified against structural logic patterns to ensure absolute data integrity.",
+      "flexibility": "Infinite Flexibility",
+      "flexibilityDesc": "A recursive engine architecture that adapts to any project scale, from residential to urban infrastructure.",
+      "innovation": "Modern AEC Stack",
+      "innovationDesc": "Deploying the latest in reactive computation and AI-augmented logic to automate tedious surveyed data."
+    }
   },
   "faq": {
-    "title": "Frequently Asked Questions",
-    "subtitle": "Answers to common questions about our platform and estimation tools.",
-    "q1": "How accurate is the AI estimation?",
-    "a1": "Our AI model is trained on thousands of real-world construction datasets. While accuracy varies by project complexity, our users typically report within 95-98% accuracy compared to final bill of quantities.",
-    "q2": "Can I import my existing Excel formulas?",
-    "a2": "Yes! Our formula builder is designed to be familiar to Excel users. You can create custom variables, link categories, and apply complex arithmetic for your structural and finishing calculations.",
-    "q3": "Do you offer trial periods for the Company plan?",
-    "a3": "Absolutely. We offer a 14-day full-access trial for firms to test out our team management features and unlimited AI estimation capabilities before committing."
+    "title": "Technical Insights",
+    "subtitle": "Everything you need to know about the APEX calculation engine.",
+    "q1": "How does the formula evaluation work?",
+    "a1": "Our engine parses mathematical expressions in real-time, mapping field variables (like length, depth, height) to their specific category definitions for instant results.",
+    "q2": "Can I define custom units for finishing works?",
+    "a2": "Absolutely. The platform supports arbitrary unit definitions, allowing you to track everything from linear meters of cabling to metric tons of reinforced concrete.",
+    "q3": "Is the system compatible with existing Revit or CAD exports?",
+    "a3": "Yes. APEX is designed to be the logic layer that sits after your design phase, accepting structural data for comprehensive cost and quantity analysis."
   },
   "footer": {
-    "description": "The intelligence platform for modern infrastructure. Leading the digital transformation of construction management since 2018.",
+    "description": "The logic layer for modern infrastructure. Engineering the digital transformation of AEC estimation workflows.",
     "platform": "Platform",
     "home": "Home",
-    "pricingPlans": "Pricing & Plans",
-    "articlesNews": "Articles & News",
-    "aiSolutions": "AI Solutions",
+    "pricingPlans": "System Architecture",
+    "articlesNews": "Engineering Insights",
+    "aiSolutions": "Logic Engine",
     "company": "Company",
     "aboutUs": "About Us",
-    "contactSupport": "Contact Support",
+    "contactSupport": "Technical Support",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "connect": "Connect",
-    "copyright": "© 2026 APEX Inc. All rights reserved.",
+    "copyright": "© 2026 APEX Engine Inc. All rights reserved.",
     "privacy": "Privacy",
     "cookies": "Cookies",
     "sitemap": "Sitemap"
   },
   "articles": {
-    "title": "Insights & Updates",
-    "subtitle": "Stay informed with the latest trends in sustainable construction, quantity surveying, and digital transformation in the industry.",
-    "readMore": "Read More",
+    "title": "Engineering Insights",
+    "subtitle": "Deep dives into structural estimation, quantity surveying, and digital AEC workflows.",
+    "readMore": "View Report",
     "search": "Search",
-    "searchPlaceholder": "Search articles...",
-    "categories": "Categories",
-    "popularTags": "Popular Tags",
+    "searchPlaceholder": "Search technical papers...",
+    "categories": "Domains",
+    "popularTags": "Technologies",
     "minRead": "{{count}} min read",
-    "industryNews": "Industry News",
-    "digitalTransformation": "Digital Transformation",
-    "caseStudies": "Case Studies",
-    "estimatingTips": "Estimating Tips"
+    "industryNews": "Sector Updates",
+    "digitalTransformation": "Digital Shift",
+    "caseStudies": "Performance Audits",
+    "estimatingTips": "Logic Optimization"
   }
 }

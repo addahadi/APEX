@@ -25,8 +25,9 @@ import ConfirmSwitch from "@/pages/Auth/ConfirmSwitch";
 
 // User Pages
 import Home from "@/pages/User/Home";
-import PublicArticles from "@/pages/User/PublicArticles";
-import ArticleView from "@/pages/User/ArticleView";
+import AboutUs from "@/pages/User/AboutUs";
+import PublicArticles from "@/pages/blog/PublicArticles";
+import ArticleView from "@/pages/blog/ArticleView";
 import UserDashboard from "@/pages/User/UserDashboard";
 import UserProfile from "@/pages/User/UserProfile";
 import ProjectOverview from "@/pages/User/ProjectOverview";
@@ -37,9 +38,10 @@ import ProjectHistory from "@/pages/User/ProjectHistory";
 import Dashboard from "@/pages/Admin/Dashboard";
 import Users from "@/pages/Admin/UsersPage";
 import Modules from "@/pages/Admin/Modules";
-import AdminArticles from "@/pages/Admin/AdminArticles";
-import ArticleEditor from "@/pages/Admin/ArticleEditor";
-import Tags from "@/pages/Admin/Tags";
+import AdminArticles from "@/pages/blog/AdminArticles";
+import ArticleEditor from "@/pages/blog/ArticleEditor";
+import Tags from "@/pages/blog/Tags";
+import ArticleLayout from "@/pages/blog/ArticleLayout";
 import PlanFeatures from "@/pages/Admin/PlanFeatures";
 import PlanTypes from "@/pages/Admin/PlanTypes";
 import Subscribers from "@/pages/Admin/Subscribers";
@@ -65,6 +67,7 @@ const App = () => (
           <Routes>
             <Route element={<PublicLayout />}>
             <Route path="/" element={<Home />} />
+            <Route path="/about" element={<AboutUs />} />
             <Route path="/articles" element={<PublicArticles />} />
             <Route path="/articles/:id" element={<ArticleView />} />
           </Route>
@@ -105,10 +108,12 @@ const App = () => (
               <Route path="units" element={<Units />} />
             </Route>
             
-            <Route path="articles" element={<AdminArticles />} />
-            <Route path="articles/new" element={<ArticleEditor />} />
-            <Route path="articles/:id/edit" element={<ArticleEditor />} />
-            <Route path="articles/tags" element={<Tags />} />
+            <Route path="articles" element={<ArticleLayout />}>
+              <Route index element={<AdminArticles />} />
+              <Route path="tags" element={<Tags />} />
+              <Route path="new" element={<ArticleEditor />} />
+              <Route path=":id/edit" element={<ArticleEditor />} />
+            </Route> 
             
             <Route path="modules" element={<CategoryTree tree={ADMIN_CATEGORY_TREE} />}>
               <Route index element={<Modules />} />

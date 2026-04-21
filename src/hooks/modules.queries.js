@@ -4,9 +4,9 @@ import * as api from "@/api/modules.api";
 // ── Query keys ────────────────────────────────────────────────────────────────
 
 export const MODULES_KEYS = {
-  tree:   ["modules", "tree"],
-  leaf:   (id)  => ["modules", "leaf", id],
-  units:  ["modules", "units"],
+  tree:  ["modules", "tree"],
+  leaf:  (id) => ["modules", "leaf", id],
+  units: ["modules", "units"],
 };
 
 // ── Queries ───────────────────────────────────────────────────────────────────
@@ -33,7 +33,7 @@ export function useUnits() {
   return useQuery({
     queryKey: MODULES_KEYS.units,
     queryFn:  api.getUnits,
-    staleTime: Infinity, // units rarely change
+    staleTime: Infinity,
   });
 }
 
@@ -85,6 +85,35 @@ export function useDeleteFormula(categoryId) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: api.deleteFormula,
+    onSuccess:  () => qc.invalidateQueries({ queryKey: MODULES_KEYS.leaf(categoryId) }),
+  });
+}
+
+// ── Formula Output mutations ──────────────────────────────────────────────────
+// FIX: createFormulaOutput now passes formulaId as the first positional arg to
+// api.createFormulaOutput(formulaId, data) instead of merging formula_id into
+// the body and posting to a non-existent /admin/formula-outputs route.
+
+export function useCreateFormulaOutput(categoryId) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ formulaId, data }) => api.createFormulaOutput(formulaId, data),
+    onSuccess:  () => qc.invalidateQueries({ queryKey: MODULES_KEYS.leaf(categoryId) }),
+  });
+}
+
+export function useUpdateFormulaOutput(categoryId) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ outputId, data }) => api.updateFormulaOutput(outputId, data),
+    onSuccess:  () => qc.invalidateQueries({ queryKey: MODULES_KEYS.leaf(categoryId) }),
+  });
+}
+
+export function useDeleteFormulaOutput(categoryId) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: api.deleteFormulaOutput,
     onSuccess:  () => qc.invalidateQueries({ queryKey: MODULES_KEYS.leaf(categoryId) }),
   });
 }
@@ -163,32 +192,6 @@ export function useDeleteCoefficient(categoryId) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: api.deleteCoefficient,
-    onSuccess:  () => qc.invalidateQueries({ queryKey: MODULES_KEYS.leaf(categoryId) }),
-  });
-}
-
-// ── Formula Output mutations ──────────────────────────────────────────────────
-
-export function useCreateFormulaOutput(categoryId) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ formulaId, data }) => api.createFormulaOutput({ formula_id: formulaId, ...data }),
-    onSuccess:  () => qc.invalidateQueries({ queryKey: MODULES_KEYS.leaf(categoryId) }),
-  });
-}
-
-export function useUpdateFormulaOutput(categoryId) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ outputId, data }) => api.updateFormulaOutput(outputId, data),
-    onSuccess:  () => qc.invalidateQueries({ queryKey: MODULES_KEYS.leaf(categoryId) }),
-  });
-}
-
-export function useDeleteFormulaOutput(categoryId) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: api.deleteFormulaOutput,
     onSuccess:  () => qc.invalidateQueries({ queryKey: MODULES_KEYS.leaf(categoryId) }),
   });
 }

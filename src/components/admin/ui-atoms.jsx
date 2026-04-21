@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, X } from "lucide-react";
 import { P } from "@/lib/design-tokens";
 
 export function Badge({ label, color, bg }) {
@@ -126,6 +126,36 @@ export function TabBar({ tabs, active, onSelect }) {
           {t.l}
         </button>
       ))}
+    </div>
+  );
+}
+export function Modal({ isOpen, onClose, title, children, maxWidth=500 }) {
+  useEffect(() => {
+    if (isOpen) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "auto";
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div style={{ position:"fixed", inset:0, zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:20, animation:"fadeIn .2s ease" }}>
+      <div onClick={onClose} style={{ position:"absolute", inset:0, background:"rgba(15,23,42,0.4)", backdropFilter:"blur(4px)" }} />
+      <Card style={{ position:"relative", zIndex:10, width:"100%", maxWidth, maxHeight:"90vh", overflowY:"auto", animation:"modalIn .3s cubic-bezier(0.16, 1, 0.3, 1)" }}>
+        <div style={{ padding:"16px 20px", borderBottom:`1px solid ${P.borderL}`, display:"flex", justifyContent:"space-between", alignItems:"center", background:P.surface, position:"sticky", top:0, zIndex:2 }}>
+          <div style={{ fontSize:16, fontWeight:700, color:P.txt }}>{title}</div>
+          <button onClick={onClose} style={{ background:"none", border:"none", cursor:"pointer", color:P.txt3, padding:4, borderRadius:6, display:"flex", transition:"all .15s" }}
+            onMouseEnter={e=>e.currentTarget.style.background=P.bg} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+            <X size={18} />
+          </button>
+        </div>
+        <div style={{ padding:20 }}>
+          {children}
+        </div>
+      </Card>
+      <style>{`
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes modalIn { from { transform: scale(0.95) translateY(10px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+      `}</style>
     </div>
   );
 }

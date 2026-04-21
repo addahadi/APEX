@@ -82,6 +82,19 @@ function getCrumb(nodes = [], targetId) {
 const toVarName = (label) =>
   label.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "").replace(/^[^a-z]+/, "") || "";
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function normalizeUuidOrNull(value) {
+  if (value === null || value === undefined) return null;
+  const str = String(value).trim();
+  if (!str || str.toLowerCase() === "null" || str.toLowerCase() === "undefined") return null;
+  return UUID_RE.test(str) ? str : null;
+}
+
+function unitIdOf(unit) {
+  return normalizeUuidOrNull(unit?.unit_id ?? unit?.unitId ?? unit?.id ?? null);
+}
+
 function Spin() {
   return <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} />;
 }
@@ -157,7 +170,11 @@ function FormulaOutputRow({ output, formulaId, units, categoryId, onDelete }) {
 
   const save = () => {
     if (!isDirty) return;
-    update.mutate({ outputId: output.output_id, data: cur }, {
+    const payload = {
+      ...cur,
+      output_unit_id: normalizeUuidOrNull(cur.output_unit_id),
+    };
+    update.mutate({ outputId: output.output_id, data: payload }, {
       onSuccess: () => setDraft(null),
     });
   };
@@ -200,10 +217,14 @@ function FormulaOutputRow({ output, formulaId, units, categoryId, onDelete }) {
       {/* unit */}
       <select
         value={cur.output_unit_id || ""}
-        onChange={e => setDraft(d => ({ ...(d ?? output), output_unit_id: e.target.value }))}
+        onChange={e => setDraft(d => ({ ...(d ?? output), output_unit_id: normalizeUuidOrNull(e.target.value) }))}
         style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 5, padding: "5px 6px", color: P.txt2, fontSize: 11, outline: "none" }}>
         <option value="">— unit —</option>
-        {units.map(u => <option key={u.unit_id} value={u.unit_id}>{u.symbol}</option>)}
+        {units.map(u => {
+          const unitId = unitIdOf(u);
+          if (!unitId) return null;
+          return <option key={unitId} value={unitId}>{u.symbol || ""}</option>;
+        })}
       </select>
       {/* save */}
       {isDirty && (
@@ -282,10 +303,14 @@ function FieldRow({ field, formulaId, allFormulas, units, categoryId }) {
             placeholder="auto from label"
             style={{ width: "100%", background: "transparent", border: "none", borderBottom: `1.5px solid ${P.main + "55"}`, color: P.main, fontSize: 12, fontFamily: "monospace", outline: "none", paddingBottom: 2 }} />
         </div>
-        <select value={cur.unit_id || ""} onChange={e => patch({ unit_id: e.target.value || null })}
+        <select value={cur.unit_id || ""} onChange={e => patch({ unit_id: normalizeUuidOrNull(e.target.value) })}
           style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 5, padding: "5px 7px", color: P.txt2, fontSize: 11, outline: "none" }}>
           <option value="">— unit —</option>
-          {units.map(u => <option key={u.unit_id} value={u.unit_id}>{u.symbol} · {u.name_en}</option>)}
+          {units.map(u => {
+            const unitId = unitIdOf(u);
+            if (!unitId) return null;
+            return <option key={unitId} value={unitId}>{u.symbol || ""} · {u.name_en || u.name || ""}</option>;
+          })}
         </select>
         {!isComputed
           ? <label style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}>
@@ -354,8 +379,14 @@ function FormulaCard({ formula, allFormulas, units, categoryId, onDelete }) {
 
   const save = () => {
     if (!isDirty) return;
+    const normalizedOutputUnitId = normalizeUuidOrNull(cur.output_unit_id);
+    const payload = {
+      name: cur.name,
+      expression: cur.expression,
+      ...(normalizedOutputUnitId ? { output_unit_id: normalizedOutputUnitId } : {}),
+    };
     updateFormula.mutate(
-      { formulaId: formula.formula_id, data: { name: cur.name, expression: cur.expression, output_unit_id: cur.output_unit_id } },
+      { formulaId: formula.formula_id, data: payload },
       { onSuccess: () => setDraft(null) },
     );
   };
@@ -379,7 +410,7 @@ function FormulaCard({ formula, allFormulas, units, categoryId, onDelete }) {
       data: {
         output_key:    `output_${Date.now().toString(36)}`,
         output_label:  "New Output",
-        output_unit_id: formula.output_unit_id || "",
+        output_unit_id: normalizeUuidOrNull(formula.output_unit_id),
       },
     });
   };
@@ -401,10 +432,14 @@ function FormulaCard({ formula, allFormulas, units, categoryId, onDelete }) {
         </div>
         <div>
           <div style={{ fontSize: 10, color: P.txt3, marginBottom: 2 }}>Output unit</div>
-          <select value={cur.output_unit_id || ""} onChange={e => patch({ output_unit_id: e.target.value })}
+          <select value={cur.output_unit_id || ""} onChange={e => patch({ output_unit_id: normalizeUuidOrNull(e.target.value) })}
             style={{ width: "100%", background: P.surface, border: `1px solid ${P.border}`, borderRadius: 5, padding: "4px 6px", color: P.txt2, fontSize: 11, outline: "none" }}>
             <option value="">— unit —</option>
-            {units.map(u => <option key={u.unit_id} value={u.unit_id}>{u.symbol}</option>)}
+            {units.map(u => {
+              const unitId = unitIdOf(u);
+              if (!unitId) return null;
+              return <option key={unitId} value={unitId}>{u.symbol || ""}</option>;
+            })}
           </select>
         </div>
         <div style={{ display: "flex", justifyContent: "center" }}>
@@ -592,7 +627,15 @@ function CoeffRow({ coeff, configs, isDuplicate, updateCoefficient, deleteCoeffi
 
 function AddFormulaModal({ units, onClose, onSave, isPending }) {
   const [form, setForm] = useState({ name: "", expression: "", output_unit_id: "" });
-  const valid = form.name.trim() && form.expression.trim() && form.output_unit_id;
+  const normalizedOutputUnitId = normalizeUuidOrNull(form.output_unit_id);
+  const valid = form.name.trim() && form.expression.trim() && !!normalizedOutputUnitId;
+  const unitOptions = units
+    .map((u) => {
+      const id = unitIdOf(u);
+      if (!id) return null;
+      return { v: id, l: `${u.symbol || ""} · ${u.name_en || u.name || ""}` };
+    })
+    .filter(Boolean);
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(15,23,42,0.4)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 500 }}
@@ -611,11 +654,11 @@ function AddFormulaModal({ units, onClose, onSave, isPending }) {
               style={{ width: "100%", background: P.bg, border: `1.5px solid ${P.main}55`, borderRadius: 7, padding: "8px 10px", color: P.main, fontSize: 13, fontFamily: "monospace", outline: "none", boxSizing: "border-box" }}/>
           </div>
           <Sel label="Output unit" value={form.output_unit_id} onChange={v => setForm(f => ({ ...f, output_unit_id: v }))}
-            options={[{ v: "", l: "— select unit —" }, ...units.map(u => ({ v: u.unit_id, l: `${u.symbol} · ${u.name_en}` }))]}/>
+            options={[{ v: "", l: "— select unit —" }, ...unitOptions]}/>
         </div>
         <div style={{ display: "flex", gap: 8, marginTop: 22, justifyContent: "flex-end" }}>
           <Btn variant="ghost" onClick={onClose}>Cancel</Btn>
-          <Btn onClick={() => onSave(form)} disabled={!valid || isPending} icon={isPending ? <Spin/> : <Plus size={13}/>}>
+          <Btn onClick={() => onSave({ ...form, output_unit_id: normalizedOutputUnitId })} disabled={!valid || isPending} icon={isPending ? <Spin/> : <Plus size={13}/>}>
             Create Formula
           </Btn>
         </div>
@@ -627,13 +670,22 @@ function AddFormulaModal({ units, onClose, onSave, isPending }) {
 // ── New Category Modal ────────────────────────────────────────────────────────
 
 function NewCategoryModal({ newCat, setNewCat, allNodes, onClose, onCreate, isPending }) {
+  const selectedParentId = normalizeUuidOrNull(newCat.parent_id);
+  const parentOptions = allNodes
+    .map((n) => {
+      const id = normalizeUuidOrNull(n.category_id);
+      if (!id) return null;
+      return { v: id, l: n.name_en };
+    })
+    .filter(Boolean);
+
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(15,23,42,0.4)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 500 }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div style={{ width: 420, background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14, padding: 28, boxShadow: "0 20px 60px rgba(0,0,0,0.12)" }}>
         <div style={{ fontSize: 16, fontWeight: 700, color: P.txt, marginBottom: 4 }}>New Category</div>
         <div style={{ fontSize: 12, color: P.txt3, marginBottom: 20 }}>
-          {newCat.parent_id ? `Under: ${allNodes.find(n => n.category_id === newCat.parent_id)?.name_en ?? "…"}` : "Root level"}
+          {selectedParentId ? `Under: ${allNodes.find(n => n.category_id === selectedParentId)?.name_en ?? "…"}` : "Root level"}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
@@ -644,7 +696,7 @@ function NewCategoryModal({ newCat, setNewCat, allNodes, onClose, onCreate, isPe
             <Sel label="Level" value={newCat.category_level} onChange={v => setNewCat(c => ({ ...c, category_level: v }))}
               options={CAT_LEVELS.map(l => ({ v: l, l }))}/>
             <Sel label="Parent" value={newCat.parent_id} onChange={v => setNewCat(c => ({ ...c, parent_id: v }))}
-              options={[{ v: "", l: "— Root —" }, ...allNodes.map(n => ({ v: n.category_id, l: n.name_en }))]}/>
+              options={[{ v: "", l: "— Root —" }, ...parentOptions]}/>
           </div>
           <div>
             <div style={{ fontSize: 12, color: P.txt2, marginBottom: 6, fontWeight: 500 }}>Icon</div>
@@ -686,7 +738,11 @@ export default function Modules() {
 
   const allNodes = useMemo(() => flattenTree(tree), [tree]);
   const node     = useMemo(() => allNodes.find(n => n.category_id === selected), [allNodes, selected]);
-  const isLeaf   = node && !node.children?.length;
+  const isLeaf   = !!node && (node.category_level ? node.category_level === "SUB_TYPE" : !node.children?.length);
+  const leafNodesCount = useMemo(
+    () => allNodes.filter(n => (n.category_level ? n.category_level === "SUB_TYPE" : !n.children?.length)).length,
+    [allNodes],
+  );
   const crumb    = useMemo(() => getCrumb(tree, selected), [tree, selected]);
 
   const { data: leafData, isLoading: leafLoading } = useLeafDetails(selected, { enabled: !!selected && !!isLeaf });
@@ -716,8 +772,13 @@ export default function Modules() {
 
   const handleCreateCategory = () => {
     if (!newCat.name_en.trim()) return;
+    const parentId = normalizeUuidOrNull(newCat.parent_id);
+    if (newCat.parent_id && !parentId) {
+      showToast("Invalid parent category");
+      return;
+    }
     createCategory.mutate(
-      { ...newCat, parent_id: newCat.parent_id || null },
+      { ...newCat, parent_id: parentId },
       {
         onSuccess: () => {
           setShowNew(false);
@@ -773,7 +834,7 @@ export default function Modules() {
           <div style={{ fontSize: 11, color: P.txt3, fontWeight: 600, marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 }}>Category Tree</div>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             <span style={{ fontSize: 10.5, color: P.main, background: `${P.main}14`, padding: "2px 7px", borderRadius: 4, fontWeight: 500 }}>{allNodes.length} nodes</span>
-            <span style={{ fontSize: 10.5, color: P.warn, background: `${P.warn}14`, padding: "2px 7px", borderRadius: 4, fontWeight: 500 }}>{allNodes.filter(n => !n.children?.length).length} leaves</span>
+            <span style={{ fontSize: 10.5, color: P.warn, background: `${P.warn}14`, padding: "2px 7px", borderRadius: 4, fontWeight: 500 }}>{leafNodesCount} leaves</span>
           </div>
         </div>
         <div style={{ flex: 1, overflowY: "auto", padding: "8px" }}>
@@ -913,7 +974,11 @@ export default function Modules() {
                   <div style={{ fontSize: 13, color: P.txt3, marginBottom: 12 }}>No sub-categories yet.</div>
                 )}
                 <Btn variant="outline" icon={<Plus size={13}/>}
-                  onClick={() => { setNewCat(c => ({ ...c, parent_id: node.category_id })); setShowNew(true); }}>
+                  onClick={() => {
+                    const parentId = normalizeUuidOrNull(node.category_id);
+                    setNewCat(c => ({ ...c, parent_id: parentId || "" }));
+                    setShowNew(true);
+                  }}>
                   Add Sub-category under "{node.name_en}"
                 </Btn>
               </ModSection>
@@ -991,7 +1056,17 @@ export default function Modules() {
       {/* Add formula modal */}
       {showNew === "formula" && (
         <AddFormulaModal units={units} onClose={() => setShowNew(false)}
-          onSave={(dto) => { createFormula.mutate(dto, { onSuccess: () => { setShowNew(false); showToast("Formula created"); } }); }}
+          onSave={(dto) => {
+            const outputUnitId = normalizeUuidOrNull(dto.output_unit_id);
+            if (!outputUnitId) {
+              showToast("Invalid output unit");
+              return;
+            }
+            createFormula.mutate(
+              { ...dto, output_unit_id: outputUnitId },
+              { onSuccess: () => { setShowNew(false); showToast("Formula created"); } },
+            );
+          }}
           isPending={createFormula.isPending}/>
       )}
 
