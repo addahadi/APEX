@@ -14,6 +14,7 @@ const Subscription = () => {
   const { data: activeSub, isLoading: activeSubLoading } = useMySubscription();
   const subscribeMutation = useSubscribe();
   const requestSwitchMutation = useRequestSwitch();
+  
 
   const plans = React.useMemo(() => {
     if (!rawPlans || !Array.isArray(rawPlans)) return [];
@@ -21,7 +22,7 @@ const Subscription = () => {
     return rawPlans.map((p) => {
       const featureList = p.features
         ? Object.entries(p.features).map(([key, val]) => ({
-            text: `${key} — ${val}`,
+            text: `${key} : ${val}`,
             icon: "check",
           }))
         : [];
@@ -56,14 +57,12 @@ const Subscription = () => {
   }, [rawPlans]);
 
   const handleSelectPlan = (planId) => {
+    console.log(planId)
     if (activeSub) {
-      // Prevent requesting switch to the exact same plan
-      if (activeSub.plan.id === planId || activeSub.plan_id === planId) {
-        requestSwitchMutation.mutate(planId); // Let backend catch it, or just use mutate. The backend will throw "You are already on this plan"
-      } else {
-        requestSwitchMutation.mutate(planId);
-      }
+      // Already has a subscription — request a switch
+      requestSwitchMutation.mutate(planId);
     } else {
+      // No subscription yet — subscribe fresh
       subscribeMutation.mutate(planId);
     }
   };
@@ -167,14 +166,16 @@ const Subscription = () => {
             </div>
 
             <div className="mx-auto grid w-full max-w-4xl grid-cols-1 gap-8 px-4 py-4 md:grid-cols-2">
-              {plans.map((plan) => (
-                <PlanCard
+              {plans.map((plan) => {
+                console.log(plan)
+                return <PlanCard
                   key={plan.id}
                   {...plan}
                   onClick={() => handleSelectPlan(plan.id)}
                   disabled={isPending}
                 />
-              ))}
+
+              })}
             </div>
 
             {isPending && (

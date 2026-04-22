@@ -24,7 +24,23 @@ api.interceptors.request.use((config) => {
 
 // ── Response interceptor ──────────────────────────────────────────────────────
 api.interceptors.response.use(
-  (response) => response.data.data,  // ← unwrap success payload
+  (response) => {
+    const payload = response.data;
+
+    // Unwrap only standard JSON envelope.
+    // Keep blobs/raw payloads untouched.
+    if (
+      payload &&
+      typeof payload === "object" &&
+      !Array.isArray(payload) &&
+      "success" in payload &&
+      "data" in payload
+    ) {
+      return payload.data;
+    }
+
+    return payload;
+  },
 
   async (error) => {
     const originalRequest = error.config;

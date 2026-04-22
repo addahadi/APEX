@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import { useLocalizedField } from "@/hooks/useLocalizedField";
 
 const ProjectOverview = () => {
-  const { t } = useTranslation("user");
+  const { t, i18n } = useTranslation("user");
   const { t: tc } = useTranslation("common");
   const localize = useLocalizedField();
   const { projectId } = useParams();
@@ -41,6 +41,13 @@ const ProjectOverview = () => {
   }
 
   const project = { ...projectData, leaf_calculations: estimationData?.leaf_calculations || [] };
+  const isAr = String(i18n.language || "").toLowerCase().startsWith("ar");
+  const pickLocalizedName = (item, enKey, arKey) => {
+    if (!item) return "";
+    const en = item[enKey];
+    const ar = item[arKey];
+    return isAr ? (ar || en || "") : (en || ar || "");
+  };
 
   let budgetColor = "bg-slate-100 text-slate-600 border-slate-200";
   if(estimationData?.budget_type === "LOW") budgetColor = "bg-emerald-100 text-emerald-700 border-emerald-200";
@@ -208,11 +215,15 @@ const ProjectOverview = () => {
                   project.leaf_calculations.slice(0, 5).map((calc) => (
                     <tr key={calc.project_details_id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                       <td className="px-6 py-4">
-                        <div className="font-bold text-slate-800 dark:text-slate-100">{calc.category_name}</div>
+                        <div className="font-bold text-slate-800 dark:text-slate-100">
+                          {pickLocalizedName(calc, "category_name_en", "category_name_ar")}
+                        </div>
                         <div className="text-[10px] uppercase font-mono text-slate-400 mt-1">ID: {calc.category_id}</div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="font-medium text-slate-700 dark:text-slate-300">{calc.formula_name}</div>
+                        <div className="font-medium text-slate-700 dark:text-slate-300">
+                          {pickLocalizedName(calc, "formula_name_en", "formula_name_ar")}
+                        </div>
                         <div className="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
                           <span className="w-2 h-2 rounded-full bg-amber-400"></span>
                           {calc.config_name || 'N/A'}

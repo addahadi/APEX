@@ -13,10 +13,29 @@ export function useLogin() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: loginUser,
-    onSuccess: (data) => {
+    mutationFn: (variables) => loginUser(variables),
+    onSuccess: (data, variables) => {
       setTokens(data.accessToken, data.refreshToken);
       queryClient.setQueryData(["me"], data.user);
+      const role = String(data?.user?.role || "").toUpperCase();
+
+      // If a specific redirect path was requested (e.g. from RequireAuth state)
+      if (variables.redirectTo) {
+        toast.success("Welcome back!", {
+          description: "You have been logged in successfully.",
+        });
+        navigate(variables.redirectTo, { replace: true });
+        return;
+      }
+
+      // Admins should always land on admin dashboard.
+      if (role === "ADMIN") {
+        toast.success("Welcome back!", {
+          description: "You have been logged in successfully.",
+        });
+        navigate("/admin", { replace: true });
+        return;
+      }
 
       // Backend now returns subscription snapshot with login.
       // If null → user hasn't subscribed yet → send to choose-plan.

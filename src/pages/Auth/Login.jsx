@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Eye, EyeOff, Mail } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import { getLoginSchema } from "@/schemas/auth.schema";
@@ -9,7 +9,12 @@ import { handleApiError } from "@/api/handelApiError";
 
 const Login = () => {
   const { t } = useTranslation("auth");
+  const location = useLocation();
   const loginMutation = useLogin();
+
+  // Where to go after login?
+  const from = location.state?.from;
+  const redirectTo = from ? `${from.pathname}${from.search}${from.hash}` : null;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,7 +40,7 @@ const Login = () => {
       return;
     }
 
-    loginMutation.mutate(result.data, {
+    loginMutation.mutate({ email, password, redirectTo }, {
       onError: (err) => {
         const handled = handleApiError(err);
         if (handled.type === "field") {

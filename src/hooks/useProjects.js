@@ -66,22 +66,22 @@ export function useCreateProject() {
 export function useExportProject() {
   return useMutation({
     mutationFn: (projectId) => exportProjectReport(projectId),
-    onSuccess: (data, variables) => {
-      // Create an object URL from the Blob and trigger download
-      const url = window.URL.createObjectURL(new Blob([data]));
-      const link = document.createElement("a");
+    onSuccess: (data) => {
+      // data may already be a Blob (transformResponse) or wrapped in axios response
+      const blob = data instanceof Blob ? data : new Blob([data], { type: 'application/pdf' });
+      const url  = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
       link.href = url;
-      link.setAttribute("download", `Estimation_Report.pdf`);
+      link.setAttribute('download', 'Estimation_Report.pdf');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
-      toast.success("Report downloaded successfully!");
+      toast.success('Report downloaded successfully!');
     },
     onError: (err) => {
       const handled = handleApiError(err);
-      toast.error(handled.message || "Failed to download the report.");
+      toast.error(handled.message || 'Failed to download the report.');
     },
   });
 } 

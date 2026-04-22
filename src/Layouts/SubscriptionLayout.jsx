@@ -37,7 +37,7 @@ export default function SubscriptionLayout() {
     borderBottom: `2px solid ${isActive ? P.main : "transparent"}`,
     color: isActive ? P.main : P.txt3,
     fontSize: 14,
-    fontFamily: "Inter,sans-serif",
+    fontFamily: P.font,
     cursor: "pointer",
     fontWeight: isActive ? 600 : 400,
     transition: "all .15s",

@@ -37,10 +37,6 @@ export const useAuthContext = () => useContext(AuthContext);
 
 // Component to protect routes — redirects unauthenticated users to login
 export const RequireAuth = ({ children }) => {
-  // Temporary bypass for development
-  return children;
-
-  /* Original code disabled:
   const { isAuthenticated, isLoading } = useAuthContext();
   const location = useLocation();
 
@@ -57,5 +53,27 @@ export const RequireAuth = ({ children }) => {
   }
 
   return children;
-  */
+};
+
+export const RequireRole = ({ children, allowedRoles }) => {
+  const { user, isAuthenticated, isLoading } = useAuthContext();
+  const location = useLocation();
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white dark:bg-slate-950">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/auth/login" state={{ from: location }} replace />;
+  }
+
+  if (!allowedRoles.includes(user?.role)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
 };

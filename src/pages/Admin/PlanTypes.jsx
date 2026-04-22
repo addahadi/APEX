@@ -1,130 +1,113 @@
 import { useState } from "react";
-import { Plus, Pencil, Trash2, Save, Loader2, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Save, X, Loader2 } from "lucide-react";
 import { P } from "@/lib/design-tokens";
-import { Btn, Card, TH, TD, SectionTitle, Field } from "@/components/admin/ui-atoms";
-import { usePlanTypes, useCreatePlanType, useUpdatePlanType, useDeletePlanType } from "@/hooks/plan.queries";
-import { useToast } from "@/hooks/use-toast";
+import { Btn, Card, Field, TH, TD } from "@/components/admin/ui-atoms";
+import { usePlanTypes, useCreatePlanType, useUpdatePlanType, useDeletePlanType } from "@/hooks/plans.queries";
 
-export default function PlanTypes() {
-  const { toast } = useToast();
-  const { data: planTypes = [], isLoading } = usePlanTypes();
-  const createMutation = useCreatePlanType();
-  const updateMutation = useUpdatePlanType();
-  const deleteMutation = useDeletePlanType();
+function Spin() { return <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} />; }
 
-  const [editId, setEditId] = useState(null);
-  const [formData, setFormData] = useState({ name_en: "", name_ar: "" });
-  const [showAdd, setShowAdd] = useState(false);
+function PlanTypeRow({ pt }) {
+  const [editing, setEditing] = useState(false);
+  const [draft,   setDraft]   = useState(null);
+  const update = useUpdatePlanType();
+  const remove = useDeletePlanType();
 
-  const handleEdit = (pt) => {
-    setEditId(pt.id);
-    setFormData({ name_en: pt.name_en, name_ar: pt.name_ar });
-    setShowAdd(false);
+  const save = () => {
+    update.mutate({ id: pt.plan_type_id, data: draft }, {
+      onSuccess: () => { setEditing(false); setDraft(null); },
+    });
   };
 
-  const handleCancel = () => {
-    setEditId(null);
-    setShowAdd(false);
-    setFormData({ name_en: "", name_ar: "" });
-  };
-
-  const handleSave = async () => {
-    try {
-      if (editId) {
-        await updateMutation.mutateAsync({ id: editId, ...formData });
-        toast({ title: "Updated", description: "Plan type updated successfully" });
-      } else {
-        await createMutation.mutateAsync(formData);
-        toast({ title: "Created", description: "Plan type created successfully" });
-      }
-      handleCancel();
-    } catch (err) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to save plan type" });
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure? This might affect existing plans.")) return;
-    try {
-      await deleteMutation.mutateAsync(id);
-      toast({ title: "Deleted", description: "Plan type removed" });
-    } catch (err) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to delete" });
-    }
-  };
-
-  const isPending = createMutation.isPending || updateMutation.isPending;
+  if (!editing) return (
+    <tr style={{ borderTop: `1px solid ${P.borderL}`, transition: "background .12s" }}
+      onMouseEnter={e => e.currentTarget.style.background = P.bg}
+      onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+      <TD style={{ fontWeight: 600 }}>{pt.name_en}</TD>
+      <TD style={{ color: P.txt2, direction: "rtl" }}>{pt.name_ar || "—"}</TD>
+      <TD>
+        <div style={{ display: "flex", gap: 6 }}>
+          <Btn small variant="outline" icon={<Pencil size={11} />}
+            onClick={() => { setDraft({ name_en: pt.name_en, name_ar: pt.name_ar ?? "" }); setEditing(true); }}>
+            Edit
+          </Btn>
+          <Btn small variant="danger" icon={remove.isPending ? <Spin /> : <Trash2 size={11} />}
+            onClick={() => remove.mutate(pt.plan_type_id)} />
+        </div>
+      </TD>
+    </tr>
+  );
 
   return (
-    <div style={{ animation: "fadeUp .3s ease", paddingBottom: 40 }}>
-      
-      <div style={{ maxWidth: 700 }}>
+    <tr style={{ borderTop: `1px solid ${P.borderL}`, background: P.mainL }}>
+      <TD>
+        <input value={draft.name_en} onChange={e => setDraft(d => ({ ...d, name_en: e.target.value }))}
+          style={{ width: "100%", background: P.surface, border: `1.5px solid ${P.main}55`, borderRadius: 6, padding: "5px 8px", fontSize: 13, outline: "none" }} />
+      </TD>
+      <TD>
+        <input value={draft.name_ar} onChange={e => setDraft(d => ({ ...d, name_ar: e.target.value }))}
+          placeholder="الاسم بالعربية"
+          style={{ width: "100%", background: P.surface, border: `1.5px solid ${P.border}`, borderRadius: 6, padding: "5px 8px", fontSize: 13, outline: "none", direction: "rtl" }} />
+      </TD>
+      <TD>
+        <div style={{ display: "flex", gap: 6 }}>
+          <Btn small icon={update.isPending ? <Spin /> : <Save size={11} />} onClick={save}>Save</Btn>
+          <Btn small variant="ghost" icon={<X size={11} />} onClick={() => { setEditing(false); setDraft(null); }} />
+        </div>
+      </TD>
+    </tr>
+  );
+}
 
-        {(showAdd || editId) && (
-          <Card style={{ padding: 20, marginBottom: 20, border: `1.5px solid ${P.main}33` }}>
-            <div style={{ display: "flex", gap: 12, alignItems: "flex-end" }}>
-              <div style={{ flex: 1 }}>
-                <Field label="Name (EN)" value={formData.name_en} onChange={v => setFormData(p => ({ ...p, name_en: v }))} placeholder="e.g. Enterprise" />
-              </div>
-              <div style={{ flex: 1 }}>
-                <Field label="Name (AR)" value={formData.name_ar} onChange={v => setFormData(p => ({ ...p, name_ar: v }))} placeholder="مثلاً: شركات" />
-              </div>
-              <div style={{ display: "flex", gap: 6, paddingBottom: 4 }}>
-                <Btn onClick={handleSave} disabled={isPending} icon={isPending ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}>
-                  {isPending ? "..." : "Save"}
-                </Btn>
-                <Btn variant="ghost" icon={<X size={14} />} onClick={handleCancel} />
-              </div>
-            </div>
-          </Card>
-        )}
+export default function PlanTypes() {
+  const [showNew, setShowNew] = useState(false);
+  const [newPT,   setNewPT]   = useState({ name_en: "", name_ar: "" });
+  const { data: planTypes = [], isLoading } = usePlanTypes();
+  const create = useCreatePlanType();
 
-        <Card style={{ marginBottom: 20, overflow: "hidden" }}>
+  const handleCreate = () => {
+    if (!newPT.name_en.trim()) return;
+    create.mutate(newPT, { onSuccess: () => { setShowNew(false); setNewPT({ name_en: "", name_ar: "" }); } });
+  };
+
+  return (
+    <div style={{ animation: "fadeUp .3s ease", maxWidth: 560 }}>
+      {showNew && (
+        <Card style={{ padding: 22, marginBottom: 20, animation: "fadeUp .2s ease" }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: P.txt, marginBottom: 16 }}>New Plan Type</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+            <Field label="Name (EN)" value={newPT.name_en} onChange={v => setNewPT(p => ({ ...p, name_en: v }))} placeholder="e.g. Company" />
+            <Field label="Name (AR)" value={newPT.name_ar} onChange={v => setNewPT(p => ({ ...p, name_ar: v }))} placeholder="شركة" />
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Btn icon={create.isPending ? <Spin /> : <Save size={13} />} disabled={!newPT.name_en.trim() || create.isPending} onClick={handleCreate}>
+              Save
+            </Btn>
+            <Btn variant="ghost" onClick={() => setShowNew(false)}>Cancel</Btn>
+          </div>
+        </Card>
+      )}
+
+      <Card style={{ marginBottom: 16 }}>
+        {isLoading ? (
+          <div style={{ padding: 32, textAlign: "center", color: P.txt3, display: "flex", gap: 8, justifyContent: "center", alignItems: "center" }}><Spin /> Loading…</div>
+        ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr>
-                {["Name (EN)", "Name (AR)", "Actions"].map((h) => (
-                  <TH key={h}>{h}</TH>
-                ))}
-              </tr>
+              <tr>{["Name (EN)", "Name (AR)", "Actions"].map(h => <TH key={h}>{h}</TH>)}</tr>
             </thead>
             <tbody>
-              {isLoading ? (
-                <tr>
-                  <TD colSpan={3} style={{ textAlign: "center", padding: 30 }}>
-                    <Loader2 size={20} className="animate-spin" style={{ color: P.txt3 }} />
-                  </TD>
-                </tr>
-              ) : planTypes.length === 0 ? (
-                <tr>
-                  <TD colSpan={3} style={{ textAlign: "center", padding: 30, color: P.txt3 }}>
-                    No plan types found.
-                  </TD>
-                </tr>
-              ) : (
-                planTypes.map((pt) => (
-                  <tr key={pt.id} style={{ borderTop: `1px solid ${P.borderL}`, background: editId === pt.id ? P.mainL : "transparent" }}>
-                    <TD style={{ fontWeight: 600 }}>{pt.name_en}</TD>
-                    <TD style={{ color: P.txt2, direction: "rtl" }}>{pt.name_ar}</TD>
-                    <TD>
-                      <div style={{ display: "flex", gap: 6 }}>
-                        <Btn small variant="outline" icon={<Pencil size={11} />} onClick={() => handleEdit(pt)}>
-                          Edit
-                        </Btn>
-                        <Btn small variant="ghost" color={P.error} icon={<Trash2 size={11} />} onClick={() => handleDelete(pt.id)} />
-                      </div>
-                    </TD>
-                  </tr>
-                ))
+              {planTypes.map(pt => <PlanTypeRow key={pt.plan_type_id} pt={pt} />)}
+              {planTypes.length === 0 && (
+                <tr><td colSpan={3} style={{ padding: "24px 0", textAlign: "center", color: P.txt3, fontSize: 13 }}>No plan types yet.</td></tr>
               )}
             </tbody>
           </table>
-        </Card>
-        
-        {!showAdd && !editId && (
-          <Btn icon={<Plus size={13} />} onClick={() => setShowAdd(true)}>Add Plan Type</Btn>
         )}
-      </div>
+      </Card>
+
+      {!showNew && (
+        <Btn icon={<Plus size={13} />} onClick={() => setShowNew(true)}>Add Plan Type</Btn>
+      )}
     </div>
   );
 }

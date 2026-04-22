@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useConfirmSwitch } from "@/hooks/useSubscription";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const ConfirmSwitch = () => {
@@ -13,7 +13,6 @@ const ConfirmSwitch = () => {
   
   // Prevent double-mounting executing twice
   const executed = useRef(false);
-
   useEffect(() => {
     if (!token) {
       navigate("/dashboard");
@@ -24,8 +23,41 @@ const ConfirmSwitch = () => {
       executed.current = true;
       confirmSwitchMutation.mutate(token);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, navigate]);
+
+  // Navigate to dashboard automatically after 3 seconds on success
+  useEffect(() => {
+    if (confirmSwitchMutation.isSuccess) {
+      const timer = setTimeout(() => {
+        navigate("/dashboard", { replace: true });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [confirmSwitchMutation.isSuccess, navigate]);
+
+  if (confirmSwitchMutation.isSuccess) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 max-w-md w-full text-center shadow-xl shadow-slate-200/50 dark:shadow-none">
+          <div className="w-16 h-16 bg-green-50 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="w-8 h-8 text-green-500" />
+          </div>
+          <h2 className="text-2xl font-black text-slate-800 dark:text-white mb-2">
+            Switch Successful!
+          </h2>
+          <p className="text-slate-500 mb-6">
+            {confirmSwitchMutation.data?.message || "Your subscription has been updated. You're being redirected to your dashboard..."}
+          </p>
+          <button 
+            onClick={() => navigate("/dashboard", { replace: true })}
+            className="w-full py-3 bg-primary text-white font-bold rounded-xl hover:opacity-90 transition-opacity"
+          >
+            Go to Dashboard Now
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (confirmSwitchMutation.isError) {
     return (
@@ -38,7 +70,7 @@ const ConfirmSwitch = () => {
             Switch Failed
           </h2>
           <p className="text-slate-500 mb-6">
-            {confirmSwitchMutation.error?.response?.data?.message || "We couldn't confirm your subscription switch. The link may have expired."}
+            {confirmSwitchMutation.error?.message || "We couldn't confirm your subscription switch. The link may have expired."}
           </p>
           <button 
             onClick={() => navigate("/dashboard")}

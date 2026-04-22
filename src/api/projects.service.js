@@ -51,4 +51,9 @@ export const getProjectEstimation = (id) => api.get(`/projects/${id}/estimation`
  * @param {string} id
  * @returns {Blob} PDF blob
  */
-export const exportProjectReport = (id) => api.get(`/projects/${id}/export`, { responseType: 'blob' });
+export const exportProjectReport = (id) =>
+  api.get(`/projects/${id}/export`, {
+    responseType: 'blob',
+    // Prevent the response interceptor from calling .data.data on a Blob
+    transformResponse: (data) => data,
+  });

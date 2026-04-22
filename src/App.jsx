@@ -53,7 +53,7 @@ import Units from "@/pages/Admin/Units";
 import { Outlet } from "react-router-dom";
 const CategoryTree = () => <Outlet />;
 
-import { AuthProvider, RequireAuth } from "@/contexts/AuthContext";
+import { AuthProvider, RequireAuth, RequireRole } from "@/contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -78,7 +78,7 @@ const App = () => (
             <Route path="/auth/forgot-password" element={<ForgotPassword />} />
           </Route>
           <Route path="/choose-plan" element={<Subscription />} />
-          <Route path="/confirm-switch" element={<ConfirmSwitch />} />
+          <Route path="/confirm-switch" element={<RequireAuth><ConfirmSwitch /></RequireAuth>} />
 
           <Route element={<RequireAuth><UserLayout /></RequireAuth>}>
             <Route path="/dashboard" element={<UserDashboard />} />
@@ -87,12 +87,26 @@ const App = () => (
             <Route path="/projects/:projectId/history" element={<ProjectHistory />} />
           </Route>
 
-          <Route path="/projects/:projectId/explorer" element={<ProjectExplorerLayout treeData={CONSTRUCTION_TREE} />}>
+          <Route
+            path="/projects/:projectId/explorer"
+            element={
+              <RequireAuth>
+                <ProjectExplorerLayout treeData={CONSTRUCTION_TREE} />
+              </RequireAuth>
+            }
+          >
             <Route index element={<CategoryDetail />} />
             <Route path=":categoryId" element={<CategoryDetail />} />
           </Route>
 
-          <Route path="/admin" element={<AdminLayout />}>
+          <Route
+            path="/admin"
+            element={
+              <RequireRole allowedRoles={["ADMIN"]}>
+                <AdminLayout />
+              </RequireRole>
+            }
+          >
             <Route index element={<Dashboard />} />
             <Route path="users" element={<Users />} />
             

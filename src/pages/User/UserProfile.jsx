@@ -1,8 +1,9 @@
 import React from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useUsage } from "@/hooks/useSubscription";
+import { useUsage, useMySubscription } from "@/hooks/useSubscription";
 import { useLogout } from "@/hooks/useAuth";
-import { User, Mail, Shield, Calendar, LogOut, CreditCard, Activity, Package, Bot, ArrowRight, Loader2 } from "lucide-react";
+// Added Calculator icon here
+import { User, Mail, Shield, Calendar, LogOut, CreditCard, Activity, Package, Bot, Calculator, ArrowRight, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useLocalizedField } from "@/hooks/useLocalizedField";
@@ -13,6 +14,7 @@ const UserProfile = () => {
   const localize = useLocalizedField();
   const { user } = useAuthContext();
   const { data: usageData, isLoading: usageLoading } = useUsage();
+  const { data: subData } = useMySubscription();
   const logoutMutation = useLogout();
   const navigate = useNavigate();
 
@@ -44,6 +46,13 @@ const UserProfile = () => {
       </div>
     );
   };
+
+  // Define the configuration for our dynamic usage cards
+  const usageCardsConfig = [
+    { key: "projects", icon: Package, title: t("profile.projectsCreated") },
+    { key: "ai", icon: Bot, title: t("profile.aiQueries") },
+    { key: "estimations", icon: Calculator, title: t("profile.estimations", "Leaf Calculations") }
+  ];
 
   return (
     <div className="py-8 px-4 md:px-8 max-w-5xl mx-auto min-h-[calc(100vh-80px)]">
@@ -131,7 +140,7 @@ const UserProfile = () => {
                    <div>
                      <p className="text-sm text-blue-200 mb-1">{t("profile.activePlan")}</p>
                      <h2 className="text-3xl font-black flex items-center gap-3 w-full">
-                        {usageData?.plan ? localize(usageData.plan, 'name') : t("profile.freeTier", "Free Tier")}
+                        {subData?.plan ? localize(subData.plan, 'name') : t("profile.freeTier", "Free Tier")}
                         <span className="text-xs px-2 py-1 bg-white/20 rounded-md font-bold uppercase tracking-wider backdrop-blur-md">
                           {t("profile.billingCycle")}
                         </span>
@@ -155,61 +164,68 @@ const UserProfile = () => {
            </div>
 
            {/* Usage Metrics */}
-           <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm">
-             <div className="flex items-center gap-2 mb-6">
-               <Activity className="w-5 h-5 text-primary" />
-               <h3 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-sm">{t("profile.usageLimits")}</h3>
-             </div>
+                      {/* Usage Metrics */}
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm">
+              <div className="flex items-center gap-2 mb-6">
+                <Activity className="w-5 h-5 text-primary" />
+                <h3 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-sm">{t("profile.usageLimits")}</h3>
+              </div>
 
-             {usageLoading ? (
-               <div className="py-12 flex justify-center text-slate-400">
-                 <Loader2 className="w-8 h-8 animate-spin" />
-               </div>
-             ) : (
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                 
-                 {/* Projects Usage */}
-                 <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-800 relative group overflow-hidden">
-                   <div className="absolute top-0 right-0 rtl:left-0 rtl:right-auto p-3 opacity-20 group-hover:scale-110 transition-transform">
-                     <Package className="w-16 h-16 text-slate-500" />
-                   </div>
-                   <div className="relative z-10 flex flex-col h-full">
-                     <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t("profile.projectsCreated")}</span>
-                     <div className="mt-2 flex items-baseline gap-2 mb-4">
-                       <span className="text-3xl font-black text-slate-800 dark:text-white">{usageData?.usage?.projects?.used || 0}</span>
-                       <span className="text-sm font-bold text-slate-400">
-                         / {usageData?.usage?.projects?.unlimited ? t("profile.unlimited") : (usageData?.usage?.projects?.limit || "0")}
-                       </span>
-                     </div>
-                     <div className="mt-auto">
-                       {renderProgressBar(usageData?.usage?.projects?.used || 0, usageData?.usage?.projects?.limit || 0, usageData?.usage?.projects?.unlimited)}
-                     </div>
-                   </div>
-                 </div>
+              {usageLoading ? (
+                <div className="py-12 flex justify-center text-slate-400">
+                  <Loader2 className="w-8 h-8 animate-spin" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Dynamically mapped and filtered Usage Cards */}
+                  {usageData?.usage && usageCardsConfig
+                    .filter((card) => {
+                      const metricData = usageData.usage[card.key];
+                      
+                      // UPDATED: Check if limit is the string "unlimited" (or falls back to the boolean just in case)
+                      const isUnlimited = metricData?.limit === "unlimited" || metricData?.unlimited === true;
+                      
+                      // Only return true (render) if the metric exists AND it is NOT unlimited
+                      return metricData && !isUnlimited;
+                    })
+                    .map((card) => {
+                      const metricData = usageData.usage[card.key];
+                      const Icon = card.icon;
 
-                 {/* AI Usage */}
-                 <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-800 relative group overflow-hidden">
-                   <div className="absolute top-0 right-0 rtl:left-0 rtl:right-auto p-3 opacity-20 group-hover:scale-110 transition-transform">
-                     <Bot className="w-16 h-16 text-slate-500" />
-                   </div>
-                   <div className="relative z-10 flex flex-col h-full">
-                     <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t("profile.aiQueries")}</span>
-                     <div className="mt-2 flex items-baseline gap-2 mb-4">
-                       <span className="text-3xl font-black text-slate-800 dark:text-white">{usageData?.usage?.ai?.used || 0}</span>
-                       <span className="text-sm font-bold text-slate-400">
-                         / {usageData?.usage?.ai?.unlimited ? t("profile.unlimited") : (usageData?.usage?.ai?.limit || "0")}
-                       </span>
-                     </div>
-                     <div className="mt-auto">
-                       {renderProgressBar(usageData?.usage?.ai?.used || 0, usageData?.usage?.ai?.limit || 0, usageData?.usage?.ai?.unlimited)}
-                     </div>
-                   </div>
-                 </div>
-
-               </div>
-             )}
-           </div>
-
+                      return (
+                        <div key={card.key} className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-800 relative group overflow-hidden">
+                          <div className="absolute top-0 right-0 rtl:left-0 rtl:right-auto p-3 opacity-20 group-hover:scale-110 transition-transform">
+                            <Icon className="w-16 h-16 text-slate-500" />
+                          </div>
+                          <div className="relative z-10 flex flex-col h-full">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{card.title}</span>
+                            <div className="mt-2 flex items-baseline gap-2 mb-4">
+                              <span className="text-3xl font-black text-slate-800 dark:text-white">{metricData.used || 0}</span>
+                              <span className="text-sm font-bold text-slate-400">
+                                / {metricData.limit || "0"}
+                              </span>
+                            </div>
+                            <div className="mt-auto">
+                              {/* Passed 'false' for unlimited because we already filtered unlimited metrics out */}
+                              {renderProgressBar(metricData.used || 0, metricData.limit || 0, false)}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                  })}
+                  
+                  {/* UPDATED: Fallback message check for "unlimited" string */}
+                  {usageData?.usage && usageCardsConfig.every((card) => {
+                    const metric = usageData.usage[card.key];
+                    return !metric || metric.limit === "unlimited" || metric.unlimited === true;
+                  }) && (
+                    <div className="col-span-full py-6 text-center text-slate-500 dark:text-slate-400">
+                      {t("profile.allUnlimited", "All your usage limits are unlimited! 🎉")}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
         </div>
       </div>
     </div>

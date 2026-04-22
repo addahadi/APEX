@@ -6,7 +6,7 @@ import DynamicIcon from "@/components/DynamicIcon";
 import { useTranslation } from "react-i18next";
 
 const ProjectHistory = () => {
-  const { t } = useTranslation("user");
+  const { t, i18n } = useTranslation("user");
   const { t: tc } = useTranslation("common");
   const { projectId } = useParams();
   
@@ -47,6 +47,13 @@ const ProjectHistory = () => {
 
   const project = projectData;
   const calculations = estimationData?.leaf_calculations || [];
+  const isAr = String(i18n.language || "").toLowerCase().startsWith("ar");
+  const pickLocalizedName = (item, enKey, arKey) => {
+    if (!item) return "";
+    const en = item[enKey];
+    const ar = item[arKey];
+    return isAr ? (ar || en || "") : (en || ar || "");
+  };
 
   return (
     <div className="py-8 px-4 md:px-8 max-w-7xl mx-auto">
@@ -125,7 +132,9 @@ const ProjectHistory = () => {
                                <DynamicIcon name="calculator" size={20} className="opacity-80" />
                              </div>
                              <div>
-                               <h3 className="font-black text-slate-900 dark:text-white text-xl leading-tight group-hover:text-primary transition-colors">{calc.category_name}</h3>
+                               <h3 className="font-black text-slate-900 dark:text-white text-xl leading-tight group-hover:text-primary transition-colors">
+                                 {pickLocalizedName(calc, "category_name_en", "category_name_ar")}
+                               </h3>
                                <div className="flex items-center gap-2 mt-1">
                                  <span className="text-[11px] font-bold text-slate-400 font-mono tracking-widest flex items-center gap-1 uppercase">
                                    <Clock className="w-3 h-3" />
@@ -140,7 +149,7 @@ const ProjectHistory = () => {
                         <div className="flex flex-wrap gap-2 mb-6">
                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide bg-primary/10 text-primary border border-primary/20">
                              <Calculator className="w-3.5 h-3.5" />
-                             {calc.formula_name}
+                             {pickLocalizedName(calc, "formula_name_en", "formula_name_ar")}
                            </span>
                            {calc.config_name && (
                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-500 border border-amber-200 dark:border-amber-800/50">

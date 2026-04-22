@@ -97,7 +97,6 @@ export function useConfirmSwitch() {
       toast.success("Plan Switched Successfully", {
         description: data?.message || "Your subscription limits have been updated.",
       });
-      navigate("/dashboard", { replace: true });
     },
     onError: (err) => {
       const handled = handleApiError(err);

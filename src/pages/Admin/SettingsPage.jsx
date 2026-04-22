@@ -106,13 +106,13 @@ export default function SettingsPage() {
                 <div>
                   <div style={{ fontSize:12, color:P.txt2, marginBottom:5, fontWeight:500 }}>Answer (EN)</div>
                   <textarea value={newQ.answer_text_en} onChange={e=>setNewQ(q=>({...q,answer_text_en:e.target.value}))} rows={3}
-                    style={{ width:"100%", background:P.surface, border:`1.5px solid ${P.border}`, borderRadius:7, padding:"9px 11px", color:P.txt, fontSize:13, fontFamily:"Inter,sans-serif", outline:"none", resize:"vertical" }}
+                    style={{ width:"100%", background:P.surface, border:`1.5px solid ${P.border}`, borderRadius:7, padding:"9px 11px", color:P.txt, fontSize:13, fontFamily:P.font, outline:"none", resize:"vertical" }}
                     onFocus={e=>e.target.style.borderColor=P.main} onBlur={e=>e.target.style.borderColor=P.border} />
                 </div>
                 <div>
                   <div style={{ fontSize:12, color:P.txt2, marginBottom:5, fontWeight:500 }}>Answer (AR)</div>
                   <textarea value={newQ.answer_text_ar} onChange={e=>setNewQ(q=>({...q,answer_text_ar:e.target.value}))} rows={3}
-                    style={{ width:"100%", background:P.surface, border:`1.5px solid ${P.border}`, borderRadius:7, padding:"9px 11px", color:P.txt, fontSize:13, fontFamily:"Inter,sans-serif", outline:"none", resize:"vertical", direction:"rtl" }}
+                    style={{ width:"100%", background:P.surface, border:`1.5px solid ${P.border}`, borderRadius:7, padding:"9px 11px", color:P.txt, fontSize:13, fontFamily:P.font, outline:"none", resize:"vertical", direction:"rtl" }}
                     onFocus={e=>e.target.style.borderColor=P.main} onBlur={e=>e.target.style.borderColor=P.border} />
                 </div>
                 <Field label="Display Location" value={newQ.display_location} onChange={v=>setNewQ(q=>({...q,display_location:v}))} placeholder="calculator, materials, estimation…" />

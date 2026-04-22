@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useLocation, Link, Outlet } from "react-router-dom";
 import { LayoutDashboard, Users, CreditCard, FileText, FolderOpen, Settings, Package, Zap, Bot } from "lucide-react";
 import { Avatar } from "../components/admin/ui-atoms.jsx";
 import { P } from "../lib/design-tokens.js";
+import AIChatbot from "../components/AIChatbot.jsx";
 
 
 const NAV = [
@@ -18,6 +20,7 @@ const NAV = [
 /* --- ADMIN LAYOUT COMPONENT --- */
 export default function AdminLayout() {
   const location = useLocation();
+  const [chatOpen, setChatOpen] = useState(false);
 
   // Helper to check if a nav item is active
   const isActive = (navPath, isExact) => {
@@ -26,7 +29,7 @@ export default function AdminLayout() {
   };
 
   return (
-    <div style={{ height: "100vh", background: P.bg, display: "flex", flexDirection: "column", fontFamily: "'Inter',sans-serif", color: P.txt, fontSize: P.body.size, overflow: "hidden" }}>
+    <div style={{ height: "100vh", background: P.bg, display: "flex", flexDirection: "column", fontFamily: P.font, color: P.txt, fontSize: P.body.size, overflow: "hidden" }}>
       
       {/* --- TOPBAR (NAVBAR) --- */}
       <div style={{ height: 60, borderBottom: `1px solid ${P.border}`, display: "flex", alignItems: "center", padding: "0 24px", gap: 14, background: P.surface, position: "sticky", top: 0, zIndex: 200, flexShrink: 0 }}>
@@ -42,7 +45,8 @@ export default function AdminLayout() {
         <div style={{ flex: 1 }} />
 
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <button style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 16px", borderRadius: 8, background: P.main, color: "#fff", fontSize: 14, fontFamily: "Inter,sans-serif", fontWeight: 600, cursor: "pointer", border: "none", boxShadow: `0 1px 3px rgba(16,78,216,.3)`, transition: "background .15s" }}
+          <button style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 16px", borderRadius: 8, background: P.main, color: "#fff", fontSize: 14, fontFamily: P.font, fontWeight: 600, cursor: "pointer", border: "none", boxShadow: `0 1px 3px rgba(16,78,216,.3)`, transition: "background .15s" }}
+            onClick={() => setChatOpen(true)}
             onMouseEnter={e => e.currentTarget.style.background = P.mainD}
             onMouseLeave={e => e.currentTarget.style.background = P.main}>
             <Bot size={16} strokeWidth={2}/> AI Assistant
@@ -72,7 +76,7 @@ export default function AdminLayout() {
               const active = isActive(n.path, n.exact);
               return (
                 <Link key={n.path} to={n.path}
-                  style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", margin: "1px 0", borderRadius: 8, border: "none", cursor: "pointer", width: "100%", textAlign: "left", background: active ? P.mainL : "transparent", color: active ? P.main : P.txt2, transition: "all .15s", fontFamily: "Inter,sans-serif", fontSize: 14, fontWeight: active ? 600 : 500 }}
+                  style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", margin: "1px 0", borderRadius: 8, border: "none", cursor: "pointer", width: "100%", textAlign: "left", background: active ? P.mainL : "transparent", color: active ? P.main : P.txt2, transition: "all .15s", fontFamily: P.font, fontSize: 14, fontWeight: active ? 600 : 500 }}
                   onMouseEnter={e => { if (!active) e.currentTarget.style.background = P.bg; }}
                   onMouseLeave={e => { if (!active) e.currentTarget.style.background = "transparent"; }}>
                   <span style={{ display: "flex", color: active ? P.main : P.txt3 }}>{n.icon}</span>
@@ -94,6 +98,9 @@ export default function AdminLayout() {
         </div>
 
       </div>
+
+      <AIChatbot isOpen={chatOpen} onClose={() => setChatOpen(false)} location="GENERAL" />
+
     </div>
   );
 }

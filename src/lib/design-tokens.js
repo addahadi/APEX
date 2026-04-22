@@ -1,4 +1,5 @@
 export const P = {
+  font:"'Plus Jakarta Sans', sans-serif",
   main:"#104ED8", mainL:"#EFF4FF", mainM:"#DBEAFE", mainD:"#0D3FAE",
   success:"#059669", successL:"#ECFDF5", successM:"#A7F3D0",
   warn:"#F59E0B", warnL:"#FFFBEB", warnM:"#FDE68A",

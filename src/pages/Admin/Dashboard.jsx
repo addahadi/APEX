@@ -101,7 +101,7 @@ export default function Dashboard() {
             ? <Spin/>
             : <ResponsiveContainer width="100%" height={160}>
                 <LineChart data={newUsers30d}>
-                  <XAxis dataKey="d" tick={{ fontSize: 11, fill: P.txt3, fontFamily: "Inter" }} axisLine={false} tickLine={false} interval={4} />
+                  <XAxis dataKey="d" tick={{ fontSize: 11, fill: P.txt3, fontFamily: P.font }} axisLine={false} tickLine={false} interval={4} />
                   <YAxis hide />
                   <Tooltip content={<ChartTip unit=" users" />} />
                   <Line type="monotone" dataKey="v" stroke={P.main} strokeWidth={2.5} dot={{ r: 3, fill: P.main }} />
@@ -118,7 +118,7 @@ export default function Dashboard() {
             ? <Spin/>
             : <ResponsiveContainer width="100%" height={160}>
                 <BarChart data={monthlyRev}>
-                  <XAxis dataKey="m" tick={{ fontSize: 11, fill: P.txt3, fontFamily: "Inter" }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="m" tick={{ fontSize: 11, fill: P.txt3, fontFamily: P.font }} axisLine={false} tickLine={false} />
                   <YAxis hide />
                   <Tooltip content={<ChartTip unit=" DA" />} />
                   <Bar dataKey="v" fill={P.main} radius={[4, 4, 0, 0]} />

@@ -35,6 +35,7 @@ const LeafCategory = ({ node }) => {
   }, [formulas, configs, selectedFormulaId, selectedConfigId]);
 
   const activeFormula = formulas.find(f => f.formula_id === selectedFormulaId) || formulas[0];
+  const activeFormulaName = activeFormula ? (localize(activeFormula, "name") || activeFormula.name) : "";
   const fields = activeFormula?.fields || [];
 
   useEffect(() => {
@@ -164,7 +165,7 @@ const LeafCategory = ({ node }) => {
                            />
                            <div className="flex-1">
                              <div className="font-bold text-slate-800 dark:text-slate-200 flex justify-between">
-                                {f.name}
+                                {localize(f, 'name') || f.name}
                                 <span className="text-[10px] uppercase font-mono text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">v{f.version}</span>
                              </div>
                              <div className="text-xs font-mono text-slate-500 mt-1 p-1 bg-slate-50 dark:bg-slate-900 rounded">
@@ -220,7 +221,7 @@ const LeafCategory = ({ node }) => {
                     {fields.map((field) => (
                       <div key={field.field_id}>
                         <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex justify-between">
-                           <span>{field.label} {field.required && <span className="text-red-500">*</span>}</span>
+                           <span>{localize(field, 'label') || field.label} {field.required && <span className="text-red-500">*</span>}</span>
                            {!field.is_computed && <span className="text-[10px] font-mono text-primary bg-primary/10 px-1 rounded">{t("leaf.input")}</span>}
                            {field.is_computed && <span className="text-[10px] font-mono text-amber-500 bg-amber-500/10 px-1 rounded">{t("leaf.computed")}</span>}
                         </label>
@@ -287,7 +288,7 @@ const LeafCategory = ({ node }) => {
                          <div className="space-y-4 mt-2">
                             {calculationResult.intermediate_results?.map((res, idx) => (
                               <div key={idx} className="flex justify-between items-end border-b border-blue-500/30 pb-2">
-                                <span className="text-sm font-bold text-blue-100">{res.label || res.output_key}</span>
+                                <span className="text-sm font-bold text-blue-100">{res.output_label || res.label || res.output_key}</span>
                                 <div className="flex items-baseline gap-1">
                                   <span className="text-xl font-black">{res.value % 1 !== 0 ? res.value.toFixed(2) : res.value}</span>
                                   <span className="text-xs text-blue-300 font-bold">{res.unit_symbol}</span>
@@ -295,7 +296,7 @@ const LeafCategory = ({ node }) => {
                               </div>
                             ))}
                          </div>
-                         <div className="mt-4 text-[10px] text-blue-300 font-mono">{t("leaf.basedOn")} {activeFormula?.name}</div>
+                         <div className="mt-4 text-[10px] text-blue-300 font-mono">{t("leaf.basedOn")} {activeFormulaName}</div>
                       </div>
 
                       {/* Material Resources */}
