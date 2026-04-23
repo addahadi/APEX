@@ -12,6 +12,11 @@ Responsibilities:
 */
 export default async function checkSubscription(req, res, next) {
   try {
+    // ── 0. Admin bypass
+    if (req.user?.role === 'ADMIN') {
+      return next();
+    }
+
     // ── 1. Fetch raw subscription row (we need subscription_id for usage counting)
     const rows = await sql`
       SELECT *

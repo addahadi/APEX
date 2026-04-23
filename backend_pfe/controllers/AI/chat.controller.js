@@ -68,11 +68,13 @@ export const getAnswerByQuestionId = async (req, res, next) => {
     const data = rows[0];
     const lang = language === 'ar' ? 'ar' : 'en';
 
-    // 2. Log usage in ai_usage_history
-    await sql`
-      INSERT INTO ai_usage_history (user_id, usage_date, usage_type, created_at, subscription_id)
-      VALUES (${userId}, CURRENT_DATE, ${'QUERY'}, CURRENT_TIMESTAMP, ${subscriptionId})
-    `;
+    // 2. Log usage in ai_usage_history (Users only)
+    if (req.user?.role !== 'ADMIN') {
+      await sql`
+        INSERT INTO ai_usage_history (user_id, usage_date, usage_type, created_at, subscription_id)
+        VALUES (${userId}, CURRENT_DATE, ${'QUERY'}, CURRENT_TIMESTAMP, ${subscriptionId})
+      `;
+    }
 
     // 3. Return bilingual content + the resolved reply for the chosen language
     ok(res, {
@@ -108,11 +110,13 @@ export const handleExpertStage = async (req, res, next) => {
     // 1. Get response from Groq
     const aiReply = await aiService.getExpertResponse(user_message);
 
-    // 2. Log usage history
-    await sql`
-      INSERT INTO ai_usage_history (user_id, usage_date, usage_type, created_at, subscription_id)
-      VALUES (${userId}, CURRENT_DATE, ${'ANALYSIS'}, CURRENT_TIMESTAMP, ${subscriptionId})
-    `;
+    // 2. Log usage history (Users only)
+    if (req.user?.role !== 'ADMIN') {
+      await sql`
+        INSERT INTO ai_usage_history (user_id, usage_date, usage_type, created_at, subscription_id)
+        VALUES (${userId}, CURRENT_DATE, ${'ANALYSIS'}, CURRENT_TIMESTAMP, ${subscriptionId})
+      `;
+    }
 
     // 3. Return AI response
     ok(res, { message: aiReply, user_id: userId });

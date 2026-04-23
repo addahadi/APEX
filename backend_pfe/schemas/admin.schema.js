@@ -1,19 +1,26 @@
 import { z } from 'zod';
 
 const adminUserStatusSchema = z.preprocess(
-  (value) => (typeof value === 'string' ? value.trim().toLowerCase() : value),
-  z.enum(['active', 'banned', 'suspended', 'inactive'])
+  (value) => {
+    if (typeof value !== 'string') return value;
+    const v = value.trim().toUpperCase();
+    if (v === 'BANNED' || v === 'SUSPENDED') return 'INACTIVE';
+    return v;
+  },
+  z.enum(['ACTIVE', 'INACTIVE'])
 );
 
 const adminUserStatusFilterSchema = z.preprocess(
   (value) => {
-    if (typeof value !== 'string') return 'all';
-    const normalised = value.trim().toLowerCase();
-    return normalised || 'all';
+    if (typeof value !== 'string') return 'ALL';
+    const v = value.trim().toUpperCase();
+    if (v === 'ALL') return 'ALL';
+    if (v === 'BANNED' || v === 'SUSPENDED') return 'INACTIVE';
+    return v || 'ALL';
   },
   z
-    .enum(['all', 'active', 'banned', 'suspended', 'inactive'])
-    .transform((value) => (value === 'all' ? 'ALL' : value))
+    .enum(['ALL', 'ACTIVE', 'INACTIVE'])
+    .transform((value) => value || 'ALL')
 );
 
 export const adminUsersQuerySchema = z.object({
@@ -32,7 +39,7 @@ export const adminUsersQuerySchema = z.object({
     .optional()
     .default(''),
   page: z.coerce.number().int().min(1).optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(8),
 });
 
 export const adminUserIdParamSchema = z.object({

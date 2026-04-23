@@ -43,7 +43,7 @@ import {
 
 import { useAdminUserDetails, useAdminUsers, useUpdateAdminUserStatus } from "@/hooks/admin.queries";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 8;
 
 const DEFAULT_PAGINATION = {
   total: 0,
@@ -59,19 +59,15 @@ const DEFAULT_SUMMARY = {
 
 const DEFAULT_STATUS_OPTIONS = [
   { v: "ALL", l: "All statuses" },
-  { v: "active", l: "Active" },
-  { v: "banned", l: "Banned" },
-  { v: "suspended", l: "Suspended" },
-  { v: "inactive", l: "Inactive" },
+  { v: "ACTIVE", l: "Active" },
+  { v: "INACTIVE", l: "Inactive" },
 ];
 
 const DEFAULT_PLAN_OPTIONS = [{ v: "ALL", l: "All plans" }];
 
 const USER_STATUS_CONF = {
-  active: { label: "Active", color: P.success, bg: P.successL },
-  banned: { label: "Banned", color: P.error, bg: P.errorL },
-  suspended: { label: "Suspended", color: P.warn, bg: P.warnL },
-  inactive: { label: "Inactive", color: P.txt3, bg: P.borderL },
+  ACTIVE: { label: "Active", color: P.success, bg: P.successL },
+  INACTIVE: { label: "Inactive", color: P.error, bg: P.errorL },
 };
 
 const SUBSCRIPTION_CONF = {
@@ -113,18 +109,18 @@ function planTypeColor(type = "") {
 }
 
 function getStatusAction(status) {
-  if (status === "active") {
+  if (status === "ACTIVE") {
     return {
-      label: "Ban User",
-      nextStatus: "banned",
+      label: "Deactivate",
+      nextStatus: "INACTIVE",
       variant: "danger",
       icon: <Ban size={13} />,
     };
   }
 
   return {
-    label: status === "banned" ? "Unban" : "Activate",
-    nextStatus: "active",
+    label: "Activate",
+    nextStatus: "ACTIVE",
     variant: "outline",
     color: P.success,
     icon: <CheckCircle size={13} />,
@@ -294,7 +290,7 @@ export default function UsersPage() {
                     </TableCell>
                   </TableRow>
                 ) : rows.map((user) => {
-                  const statusConf = USER_STATUS_CONF[user.status] ?? USER_STATUS_CONF.active;
+                  const statusConf = USER_STATUS_CONF[user.status] ?? USER_STATUS_CONF.ACTIVE;
                   const planConf = planColor(user.plan?.name ?? "");
                   const typeConf = planTypeColor(user.plan?.type ?? "");
                   const subscriptionConf = SUBSCRIPTION_CONF[user.plan?.subscription_status] ?? SUBSCRIPTION_CONF.INACTIVE;
@@ -470,11 +466,11 @@ export default function UsersPage() {
                 variant="outline"
                 className="font-semibold text-[10px] uppercase tracking-wider"
                 style={{
-                  color: (USER_STATUS_CONF[selectedUser?.status] ?? USER_STATUS_CONF.active).color,
-                  backgroundColor: (USER_STATUS_CONF[selectedUser?.status] ?? USER_STATUS_CONF.active).bg,
+                  color: (USER_STATUS_CONF[selectedUser?.status] ?? USER_STATUS_CONF.ACTIVE).color,
+                  backgroundColor: (USER_STATUS_CONF[selectedUser?.status] ?? USER_STATUS_CONF.ACTIVE).bg,
                 }}
               >
-                {(USER_STATUS_CONF[selectedUser?.status] ?? USER_STATUS_CONF.active).label}
+                {(USER_STATUS_CONF[selectedUser?.status] ?? USER_STATUS_CONF.ACTIVE).label}
               </Badge>
               <Badge
                 variant="outline"

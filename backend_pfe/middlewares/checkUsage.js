@@ -60,6 +60,11 @@ Factory middleware. Usage:
 export default function checkUsage(featureKey) {
   return async (req, res, next) => {
     try {
+      // ── 0. Admin bypass
+      if (req.user?.role === 'ADMIN') {
+        return next();
+      }
+
       const { userId }   = req.user;
       const subscription = req.subscription; // set by checkSubscription
 

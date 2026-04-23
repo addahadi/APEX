@@ -45,6 +45,8 @@ import {
 import { useMaterials, useMaterialFormulas, useCreateMaterial, useUpdateMaterial, useDeleteMaterial } from "@/hooks/materials.queries";
 import { useUnits } from "@/hooks/units.queries";
 
+const PAGE_SIZE = 8;
+
 const MATERIAL_TYPES = [
   { v: "PRIMARY",   l: "Primary"   },
   { v: "ACCESSORY", l: "Accessory" },
@@ -72,7 +74,7 @@ function MaterialModal({ initial, units, materialFormulas, onClose, onSave, isPe
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto z-[100]">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold tracking-tight">{title}</DialogTitle>
           <DialogDescription>
@@ -184,7 +186,7 @@ export default function Materials() {
   const [modal,    setModal]    = useState(null); // null | "new" | {material}
   const [confirm,  setConfirm]  = useState(null);
 
-  const { data: mats,       isLoading: matsLoading   } = useMaterials({ search, page });
+  const { data: mats,       isLoading: matsLoading   } = useMaterials({ search, page, limit: PAGE_SIZE });
   const { data: units = []                            } = useUnits();
   const { data: mFormulas = []                        } = useMaterialFormulas();
   const createMat = useCreateMaterial();
@@ -349,8 +351,8 @@ export default function Materials() {
       {pagination.total_pages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-xs text-muted-foreground">
-            Showing <span className="font-medium">{((page - 1) * 20) + 1}</span> to{" "}
-            <span className="font-medium">{Math.min(page * 20, pagination.total)}</span> of{" "}
+            Showing <span className="font-medium">{((page - 1) * PAGE_SIZE) + 1}</span> to{" "}
+            <span className="font-medium">{Math.min(page * PAGE_SIZE, pagination.total)}</span> of{" "}
             <span className="font-medium">{pagination.total}</span> materials
           </p>
           <Pagination className="justify-end w-auto mx-0">
@@ -411,7 +413,7 @@ export default function Materials() {
       )}
 
       <Dialog open={!!confirm} onOpenChange={() => setConfirm(null)}>
-        <DialogContent className="sm:max-w-[400px]">
+        <DialogContent className="sm:max-w-[400px] z-[100]">
           <DialogHeader>
             <DialogTitle>Delete material?</DialogTitle>
             <DialogDescription className="py-2">

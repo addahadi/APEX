@@ -36,6 +36,8 @@ import {
 
 import { useSubscribers } from "@/hooks/admin.queries";
 
+const PAGE_SIZE = 8;
+
 // ── Config ────────────────────────────────────────────────────────────────────
 
 const STATUS_OPTIONS = ["ALL", "ACTIVE", "INACTIVE"];
@@ -77,7 +79,7 @@ export default function Subscribers() {
     status: statusF,
     search,
     page,
-    limit: 20,
+    limit: PAGE_SIZE,
   });
 
   const rows       = data?.data        ?? [];
@@ -201,8 +203,8 @@ export default function Subscribers() {
       {pagination.total_pages > 1 && (
         <div className="flex items-center justify-between mt-6 px-2">
           <p className="text-xs text-muted-foreground">
-            Showing <span className="font-medium">{((page - 1) * 20) + 1}</span> to{" "}
-            <span className="font-medium">{Math.min(page * 20, pagination.total)}</span> of{" "}
+            Showing <span className="font-medium">{((page - 1) * PAGE_SIZE) + 1}</span> to{" "}
+            <span className="font-medium">{Math.min(page * PAGE_SIZE, pagination.total)}</span> of{" "}
             <span className="font-medium">{pagination.total}</span> subscribers
           </p>
           <Pagination className="justify-end w-auto mx-0">
