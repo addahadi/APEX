@@ -38,22 +38,35 @@ export class PostgresEngineRepository {
   }
 
   async getFieldDefinitions(formula_id) {
+    // LEFT JOIN field_types so field_type_name is available to the engine
+    // for type-aware coercion (NUMBER / BOOLEAN / SELECT).
     return sql`
       SELECT
-        field_id,
-        formula_id,
-        field_type_id,
-        unit_id,
-        source_formula_id,
-        label_en       AS label,
-        label_ar,
-        variable_name,
-        required,
-        default_value,
-        sort_order
-      FROM field_definitions
-      WHERE formula_id = ${formula_id}
-      ORDER BY sort_order
+        fd.field_id,
+        fd.formula_id,
+        fd.field_type_id,
+        LOWER(COALESCE(ft.name_en, 'number')) AS field_type_name,
+        fd.unit_id,
+        fd.source_formula_id,
+        fd.label_en       AS label,
+        fd.label_ar,
+        fd.variable_name,
+        fd.required,
+        fd.default_value,
+        fd.sort_order
+      FROM field_definitions fd
+      LEFT JOIN field_types ft ON ft.field_type_id = fd.field_type_id
+      WHERE fd.formula_id = ${formula_id}
+      ORDER BY fd.sort_order
+    `;
+  }
+
+  // Used by the admin UI to populate the field-type selector.
+  async getFieldTypes() {
+    return sql`
+      SELECT field_type_id, name_en, name_ar
+      FROM field_types
+      ORDER BY name_en
     `;
   }
 

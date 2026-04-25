@@ -22,6 +22,7 @@ export class CalculationEngine {
     const fieldDefs = await this.repo.getFieldDefinitions(selectedFormula.formula_id);
 
     // ── 3. Build vars — resolves field UUIDs → variable_name symbols ──────
+    //       Now type-aware: NUMBER / BOOLEAN / SELECT (see buildInitialVars)
     const vars = this.buildInitialVars(input.field_values, fieldDefs);
 
     // ── 4. Evaluate selected NON_MATERIAL formula ─────────────────────────
@@ -61,19 +62,32 @@ export class CalculationEngine {
     const skippedMaterials = [];
 
     for (const mat of materials) {
-      const mf = await this.repo.getFormula(mat.formula_id);
-      this.assertFormulaType(mf, 'MATERIAL');
+      // Gracefully skip if the material's formula doesn't exist in the DB
+      let mf;
+      try {
+        mf = await this.repo.getFormula(mat.formula_id);
+        this.assertFormulaType(mf, 'MATERIAL');
+      } catch (e) {
+        skippedMaterials.push({
+          material_id:      mat.material_id,
+          material_name:    mat.material_name,
+          material_name_en: mat.material_name_en,
+          material_name_ar: mat.material_name_ar,
+          reason:           e.message,
+        });
+        continue;
+      }
 
       let rawQty;
       try {
         rawQty = this.evalExpr(mf.expression, vars, mf);
       } catch (e) {
         skippedMaterials.push({
-          material_id:     mat.material_id,
-          material_name:   mat.material_name,
+          material_id:      mat.material_id,
+          material_name:    mat.material_name,
           material_name_en: mat.material_name_en,
           material_name_ar: mat.material_name_ar,
-          reason:          e.message,
+          reason:           e.message,
         });
         continue;
       }
@@ -145,8 +159,9 @@ export class CalculationEngine {
         formula_id:      formula.formula_id,
         formula_version: formula.version,
         output_key:      key,
-        namespaced_key:  `${namespace}.${key}`, // Inject namespace
-        output_label:    formula.name,
+        namespaced_key:  `${namespace}.${key}`,
+        output_label_en: formula.name_en,
+        output_label_ar: formula.name_ar,
         value:           this.r4(value),
         unit_symbol:     unit.symbol,
       }];
@@ -162,8 +177,9 @@ export class CalculationEngine {
         formula_id:      formula.formula_id,
         formula_version: formula.version,
         output_key:      out.output_key,
-        namespaced_key:  `${namespace}.${out.output_key}`, // Inject namespace
-        output_label:    out.output_label,
+        namespaced_key:  `${namespace}.${out.output_key}`,
+        output_label_en: out.output_label_en,
+        output_label_ar: out.output_label_ar,
         value:           this.r4(value),
         unit_symbol:     unit.symbol,
       });
@@ -180,24 +196,67 @@ export class CalculationEngine {
   }
 
   /**
-   * Builds the variable context from field_values.
-   * field_values keys are field UUIDs from the frontend.
-   * We look up each field's variable_name (e.g. "L", "l", "h")
-   * so formula expressions like "L * l * h" resolve correctly.
-   * The original UUID key is also kept for chaining lookups.
+   * Builds the variable context from field_values, with type-aware coercion.
+   *
+   * Each field's field_type_name (resolved via LEFT JOIN in the repository)
+   * determines how the raw incoming value is coerced:
+   *
+   *   NUMBER  (default) — must already be a finite number, identical to the
+   *                        original behaviour.
+   *
+   *   BOOLEAN           — accepts true/false (JS boolean) or 1/0 (number) or
+   *                        the strings "true"/"false". Coerced to 1 or 0 so
+   *                        formula expressions can do arithmetic on it,
+   *                        e.g.  if(has_basement == 1, depth * 0.3, 0).
+   *
+   *   SELECT            — the frontend sends the numeric value of the chosen
+   *                        option (stored per-option in default_value JSON).
+   *                        Validated as a finite number so downstream
+   *                        expressions receive a clean numeric variable.
+   *
+   * field_type_name is matched with a contains-check so minor naming
+   * differences in the DB ("Boolean Toggle", "BOOLEAN", etc.) all work.
+   *
+   * The original UUID key is always kept alongside the symbol key so
+   * source_formula_id chaining lookups continue to function unchanged.
    */
   buildInitialVars(fv, fieldDefs) {
     const vars = {};
+
     for (const [k, v] of Object.entries(fv)) {
-      if (typeof v !== 'number' || isNaN(v))
-        throw new EngineError(`Invalid value for field "${k}"`);
+      const field      = fieldDefs.find(f => f.field_id === k);
+      const symbol     = field?.variable_name || k;
+      const typeName   = (field?.field_type_name || 'number'); // already lowercased by repo
 
-      const field  = fieldDefs.find(f => f.field_id === k);
-      const symbol = field?.variable_name || k;
+      let numVal;
 
-      vars[symbol] = v;  // "L" = 5   — used in expressions
-      vars[k]      = v;  // uuid  = 5 — kept for chaining
+      if (typeName.includes('bool')) {
+        // ── BOOLEAN ───────────────────────────────────────────────────────
+        if (v === true  || v === 1 || v === 'true')  numVal = 1;
+        else if (v === false || v === 0 || v === 'false') numVal = 0;
+        else throw new EngineError(
+          `Field "${k}" is BOOLEAN — expected true/false/1/0, got "${v}"`
+        );
+
+      } else if (typeName.includes('select')) {
+        // ── SELECT ────────────────────────────────────────────────────────
+        // The frontend sends the numeric value of the chosen option.
+        numVal = Number(v);
+        if (!isFinite(numVal)) throw new EngineError(
+          `Field "${k}" is SELECT — option value must be a number, got "${v}"`
+        );
+
+      } else {
+        // ── NUMBER (default) ──────────────────────────────────────────────
+        if (typeof v !== 'number' || !isFinite(v))
+          throw new EngineError(`Invalid value for field "${k}": expected a finite number, got "${v}"`);
+        numVal = v;
+      }
+
+      vars[symbol] = numVal; // "L" = 5   — used in expressions
+      vars[k]      = numVal; // uuid  = 5 — kept for chaining
     }
+
     return vars;
   }
 

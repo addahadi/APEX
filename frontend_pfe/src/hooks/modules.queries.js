@@ -7,6 +7,7 @@ export const MODULES_KEYS = {
   tree:  ["modules", "tree"],
   leaf:  (id) => ["modules", "leaf", id],
   units: ["modules", "units"],
+  fieldTypes: ["modules", "fieldTypes"],
 };
 
 // ── Queries ───────────────────────────────────────────────────────────────────
@@ -33,6 +34,14 @@ export function useUnits() {
   return useQuery({
     queryKey: MODULES_KEYS.units,
     queryFn:  api.getUnits,
+    staleTime: Infinity,
+  });
+}
+
+export function useFieldTypes() {
+  return useQuery({
+    queryKey: MODULES_KEYS.fieldTypes,
+    queryFn:  api.getFieldTypes,
     staleTime: Infinity,
   });
 }

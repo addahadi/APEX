@@ -21,7 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 import { CAT_LEVEL_CONF } from "@/lib/design-tokens";
 import {
-  useModulesTree, useLeafDetails, useUnits,
+  useModulesTree, useLeafDetails, useUnits, useFieldTypes,
   useCreateCategory,  useUpdateCategory,  useDeleteCategory,
   useCreateFormula,   useUpdateFormula,   useDeleteFormula,
   useCreateFormulaOutput, useUpdateFormulaOutput, useDeleteFormulaOutput,
@@ -211,7 +211,7 @@ function TreeRow({ node, depth, selected, onSelect, expanded, onToggle }) {
 }
 
 // ── Field row ─────────────────────────────────────────────────────────────────
-function FieldRow({ field, formulaId, allNonMaterialFormulas, units, categoryId }) {
+function FieldRow({ field, formulaId, allNonMaterialFormulas, units, fieldTypes, categoryId }) {
   const [draft, setDraft] = useState(null);
   const cur     = draft ?? field;
   const isDirty = draft !== null;
@@ -227,23 +227,48 @@ function FieldRow({ field, formulaId, allNonMaterialFormulas, units, categoryId 
     return next;
   });
 
-  const chainable  = allNonMaterialFormulas.filter(f => f.formula_id !== formulaId);
-  const linked     = chainable.find(f => f.formula_id === cur.source_formula_id);
-  const isInvalid  = cur.variable_name && !varNameRegex.test(cur.variable_name);
+  // ── Derive field type ──────────────────────────────────────────────────
+  const selectedType = fieldTypes.find(t => t.field_type_id === cur.field_type_id);
+  const typeName     = (selectedType?.name_en || 'number').toLowerCase();
+  const isBoolean    = typeName.includes('bool');
+  const isSelect     = typeName.includes('select');
+
+  // ── SELECT options — stored as JSON in default_value ──────────────────
+  // Format: [{ label: "High", value: 1.5 }, { label: "Low", value: 1.0 }]
+  const parseOptions = (v) => { try { return JSON.parse(v || '[]'); } catch { return []; } };
+  const options      = isSelect ? parseOptions(cur.default_value) : [];
+  const setOptions   = (newOpts) => patch({ default_value: JSON.stringify(newOpts) });
+  const addOption    = () => setOptions([...options, { label: 'Option', value: 0 }]);
+  const removeOption = (i) => setOptions(options.filter((_, idx) => idx !== i));
+  const updateOption = (i, key, val) => {
+    const next = [...options];
+    next[i] = { ...next[i], [key]: val };
+    setOptions(next);
+  };
+
+  // ── Accent colour varies by type ───────────────────────────────────────
+  const typeAccent = isBoolean
+    ? 'border-violet-300/60 bg-violet-50/60'
+    : isSelect
+      ? 'border-amber-300/60 bg-amber-50/60'
+      : isComp
+        ? 'border-primary/30 bg-primary/5'
+        : 'bg-background border-border hover:border-border/80';
+
+  const isInvalid = cur.variable_name && !varNameRegex.test(cur.variable_name);
+  const chainable = allNonMaterialFormulas.filter(f => f.formula_id !== formulaId);
+  const linked    = chainable.find(f => f.formula_id === cur.source_formula_id);
 
   return (
-    <div className={cn(
-      "rounded-xl border transition-all shadow-sm overflow-hidden",
-      isComp
-        ? "border-primary/30 bg-primary/5"
-        : "bg-background border-border hover:border-border/80",
-    )}>
-      {/* Top accent line for computed fields */}
-      {isComp && <div className="h-0.5 bg-gradient-to-r from-primary/60 to-primary/20" />}
+    <div className={cn("rounded-xl border transition-all shadow-sm overflow-hidden", typeAccent)}>
+      {/* Top accent line */}
+      {isComp    && <div className="h-0.5 bg-gradient-to-r from-primary/60 to-primary/20" />}
+      {isBoolean && <div className="h-0.5 bg-gradient-to-r from-violet-500/60 to-violet-500/10" />}
+      {isSelect  && <div className="h-0.5 bg-gradient-to-r from-amber-500/60 to-amber-500/10" />}
 
       <div className="p-3">
-        {/* Row 1: Labels + Variable + Unit + Required + Actions */}
-        <div className="grid grid-cols-[1fr_1fr_140px_90px_auto_56px] gap-2.5 items-end">
+        {/* Row 1: Labels + Type + Variable + Unit + Required/Badge + Actions */}
+        <div className="grid grid-cols-[1fr_1fr_110px_110px_80px_auto_56px] gap-2.5 items-end">
           <div>
             <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">Label EN</div>
             <InlineInput value={cur.label_en} onChange={v => patch({ label_en: v })} placeholder="e.g. Length…" />
@@ -252,6 +277,33 @@ function FieldRow({ field, formulaId, allNonMaterialFormulas, units, categoryId 
             <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">Label AR</div>
             <InlineInput value={cur.label_ar} onChange={v => patch({ label_ar: v })} placeholder="الطول…" dir="rtl" />
           </div>
+
+          {/* ── Type selector ───────────────────────────────────────────── */}
+          <div>
+            <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">Type</div>
+            <Select
+              value={cur.field_type_id || "none"}
+              onValueChange={v => patch({
+                field_type_id: v === "none" ? null : v,
+                default_value: v === "none" ? null : cur.default_value,
+              })}
+            >
+              <SelectTrigger className={cn(
+                "h-8 text-xs",
+                isBoolean && "border-violet-400/50 bg-violet-50 text-violet-700",
+                isSelect  && "border-amber-400/50 bg-amber-50 text-amber-700",
+              )}>
+                <SelectValue placeholder="number" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">— number (default) —</SelectItem>
+                {fieldTypes.map(t => (
+                  <SelectItem key={t.field_type_id} value={t.field_type_id}>{t.name_en}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div>
             <div className={cn("text-[10px] mb-1 font-semibold uppercase tracking-wide", isInvalid ? "text-destructive" : "text-muted-foreground")}>
               Variable {isInvalid && <span className="normal-case">(invalid)</span>}
@@ -266,20 +318,33 @@ function FieldRow({ field, formulaId, allNonMaterialFormulas, units, categoryId 
               )}
             />
           </div>
+
+          {/* Unit — replaced with "0 / 1" badge for BOOLEAN */}
           <div>
             <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">Unit</div>
-            <Select value={cur.unit_id || "none"} onValueChange={v => patch({ unit_id: v === "none" ? null : v })}>
-              <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="—" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">— none —</SelectItem>
-                {units.map(u => <SelectItem key={u.unit_id} value={u.unit_id}>{u.symbol}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            {isBoolean ? (
+              <div className="h-8 flex items-center px-2 rounded-md border border-dashed border-violet-300/50 bg-violet-50/50">
+                <span className="text-[10px] text-violet-500 font-semibold">0 / 1</span>
+              </div>
+            ) : (
+              <Select value={cur.unit_id || "none"} onValueChange={v => patch({ unit_id: v === "none" ? null : v })}>
+                <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="—" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— none —</SelectItem>
+                  {units.map(u => <SelectItem key={u.unit_id} value={u.unit_id}>{u.symbol}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            )}
           </div>
+
           <div className="h-8 flex items-center">
             {isComp ? (
               <span className="inline-flex items-center gap-1 text-[11px] text-primary font-semibold px-2 py-0.5 bg-primary/10 rounded-md border border-primary/20">
                 <GitBranch size={10} /> Computed
+              </span>
+            ) : isBoolean ? (
+              <span className="inline-flex items-center gap-1 text-[11px] text-violet-600 font-semibold px-2 py-0.5 bg-violet-100 rounded-md border border-violet-200">
+                <ToggleLeft size={10} /> Bool
               </span>
             ) : (
               <label className="flex items-center gap-1.5 cursor-pointer text-xs text-muted-foreground whitespace-nowrap">
@@ -288,6 +353,7 @@ function FieldRow({ field, formulaId, allNonMaterialFormulas, units, categoryId 
               </label>
             )}
           </div>
+
           <div className="flex gap-1 justify-end h-8 items-center">
             {isDirty && (
               <Button size="icon" variant="default" className="w-7 h-7" title="Save" onClick={() => { const { vTouched: _, ...pl } = cur; upd.mutate({ fieldId: field.field_id, data: pl }, { onSuccess: () => setDraft(null) }); }}>
@@ -300,29 +366,72 @@ function FieldRow({ field, formulaId, allNonMaterialFormulas, units, categoryId 
           </div>
         </div>
 
-        {/* Row 2: Source formula chain */}
-        <div className={cn(
-          "mt-2.5 flex items-center gap-2 flex-wrap px-2 py-1.5 rounded-lg border border-dashed text-[11px]",
-          isComp ? "bg-background border-primary/30" : "bg-muted/50 border-border"
-        )}>
-          <span className={cn("font-semibold flex items-center gap-1", isComp ? "text-primary" : "text-muted-foreground")}>
-            <Sigma size={11} /> {isComp ? "Computed via:" : "Chain source:"}
-          </span>
-          <Select value={cur.source_formula_id || "none"} onValueChange={v => patch({ source_formula_id: v === "none" ? null : v })}>
-            <SelectTrigger className={cn("h-7 text-xs w-[220px] shrink-0", isComp && "border-primary/50 bg-primary/5 text-primary")}>
-              <SelectValue placeholder="— Requires User Input —" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">— Requires User Input —</SelectItem>
-              {chainable.map(f => <SelectItem key={f.formula_id} value={f.formula_id}>{f.name_en}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          {linked && cur.variable_name && (
-            <span className="text-muted-foreground">
-              → injects <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded font-mono text-[11px]">{cur.variable_name}</code>
+        {/* Row 2: Source formula chain — not shown for SELECT or BOOLEAN */}
+        {!isSelect && !isBoolean && (
+          <div className={cn(
+            "mt-2.5 flex items-center gap-2 flex-wrap px-2 py-1.5 rounded-lg border border-dashed text-[11px]",
+            isComp ? "bg-background border-primary/30" : "bg-muted/50 border-border"
+          )}>
+            <span className={cn("font-semibold flex items-center gap-1", isComp ? "text-primary" : "text-muted-foreground")}>
+              <Sigma size={11} /> {isComp ? "Computed via:" : "Chain source:"}
             </span>
-          )}
-        </div>
+            <Select value={cur.source_formula_id || "none"} onValueChange={v => patch({ source_formula_id: v === "none" ? null : v })}>
+              <SelectTrigger className={cn("h-7 text-xs w-[220px] shrink-0", isComp && "border-primary/50 bg-primary/5 text-primary")}>
+                <SelectValue placeholder="— Requires User Input —" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">— Requires User Input —</SelectItem>
+                {chainable.map(f => <SelectItem key={f.formula_id} value={f.formula_id}>{f.name_en}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            {linked && cur.variable_name && (
+              <span className="text-muted-foreground">
+                → injects <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded font-mono text-[11px]">{cur.variable_name}</code>
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Row 3: SELECT options editor */}
+        {isSelect && (
+          <div className="mt-2.5 px-2 py-2 rounded-lg border border-dashed border-amber-300/60 bg-amber-50/40">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[10px] font-semibold text-amber-700 flex items-center gap-1 uppercase tracking-wide">
+                <ListOrdered size={11} /> Options
+                <span className="text-amber-500 font-normal normal-case ml-0.5">(label shown to user · numeric value used in formula)</span>
+              </span>
+              <button
+                onClick={addOption}
+                className="ml-auto flex items-center gap-1 text-[10px] font-semibold text-amber-700 hover:text-amber-900 px-1.5 py-0.5 rounded hover:bg-amber-100 transition-colors"
+              >
+                <Plus size={10} /> Add option
+              </button>
+            </div>
+            {options.length === 0 && (
+              <div className="text-[11px] text-amber-600/70 italic py-1 px-1">No options yet — add at least one.</div>
+            )}
+            {options.map((opt, idx) => (
+              <div key={idx} className="flex items-center gap-1.5 mb-1.5">
+                <Input
+                  value={opt.label || ''}
+                  onChange={e => updateOption(idx, 'label', e.target.value)}
+                  placeholder="Label (e.g. High)"
+                  className="h-7 text-xs flex-1 bg-white border-amber-200 focus-visible:ring-amber-400/40"
+                />
+                <Input
+                  type="number"
+                  value={opt.value ?? 0}
+                  onChange={e => updateOption(idx, 'value', Number(e.target.value))}
+                  placeholder="0"
+                  className="h-7 text-xs w-20 font-mono bg-white border-amber-200 text-amber-800 focus-visible:ring-amber-400/40"
+                />
+                <button onClick={() => removeOption(idx)} className="text-destructive/60 hover:text-destructive transition-colors p-0.5">
+                  <X size={11} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -404,7 +513,7 @@ function OutputRow({ output, units, categoryId, onDelete }) {
 }
 
 // ── NON_MATERIAL Formula card ─────────────────────────────────────────────────
-function FormulaCard({ formula, allNonMaterialFormulas, units, categoryId, onDelete }) {
+function FormulaCard({ formula, allNonMaterialFormulas, units, fieldTypes, categoryId, onDelete }) {
   const [open,  setOpen]  = useState(true);
   const [draft, setDraft] = useState(null);
   const cur     = draft ?? formula;
@@ -508,11 +617,7 @@ function FormulaCard({ formula, allNonMaterialFormulas, units, categoryId, onDel
                 <div className="p-1 rounded-md bg-primary/10 border border-primary/10 text-primary"><Key size={13} /></div>
                 <span className="text-[13px] font-semibold">Output Keys</span>
                 <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/10 h-5 text-[10px]">{outputCount}</Badge>
-                {!hasOutputs && (
-                  <span className="text-[11px] text-amber-600 flex items-center gap-1 ml-1 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                    <AlertTriangle size={11} /> Define outputs so MATERIAL formulas can reference them
-                  </span>
-                )}
+
               </div>
               <Button size="sm" variant="outline" className="h-7 text-xs px-2.5 border-primary/30 text-primary hover:bg-primary/5" onClick={() => addOutput.mutate({
                   formulaId: formula.formula_id,
@@ -543,17 +648,20 @@ function FormulaCard({ formula, allNonMaterialFormulas, units, categoryId, onDel
                 <span className="text-[13px] font-semibold">Input Fields</span>
                 <Badge variant="secondary" className="h-5 text-[10px]">{fieldCount}</Badge>
               </div>
-              <Button size="sm" variant="outline" className="h-7 text-xs px-2.5" onClick={() => addField.mutate({
-                  formulaId: formula.formula_id,
-                  data: { label_en: "New Field", label_ar: "", variable_name: `field_${Date.now().toString(36)}`, required: true, sort_order: formula.fields?.length ?? 0 },
-                })}>
+              <Button size="sm" variant="outline" className="h-7 text-xs px-2.5" onClick={() => {
+                  const numberTypeId = fieldTypes.find(t => t.name_en?.toLowerCase().includes('number'))?.field_type_id || null;
+                  addField.mutate({
+                    formulaId: formula.formula_id,
+                    data: { label_en: "New Field", label_ar: "", variable_name: `field_${Date.now().toString(36)}`, required: true, sort_order: formula.fields?.length ?? 0, field_type_id: numberTypeId },
+                  });
+                }}>
                 {addField.isPending ? <Spin size={12} className="mr-1.5" /> : <Plus size={12} className="mr-1.5" />}
                 Add Field
               </Button>
             </div>
             <div className="flex flex-col gap-2.5">
               {(formula.fields ?? []).map(f => (
-                <FieldRow key={f.field_id} field={f} formulaId={formula.formula_id} allNonMaterialFormulas={allNonMaterialFormulas} units={units} categoryId={categoryId} />
+                <FieldRow key={f.field_id} field={f} formulaId={formula.formula_id} allNonMaterialFormulas={allNonMaterialFormulas} units={units} fieldTypes={fieldTypes} categoryId={categoryId} />
               ))}
               {(!formula.fields || formula.fields.length === 0) && (
                 <div className="text-[13px] text-muted-foreground py-4 text-center bg-muted/40 rounded-lg border border-dashed flex flex-col items-center gap-1.5">
@@ -656,15 +764,7 @@ function MaterialFormulaCard({ formula, units, categoryId, onDelete }) {
         </div>
       </div>
 
-      {/* ── Collapsible note ───────────────────────────────────────────── */}
-      {open && (
-        <div className="px-5 py-3 bg-orange-50/60">
-          <div className="text-[11px] text-orange-700 flex items-start gap-2">
-            <AlertTriangle size={12} className="shrink-0 mt-0.5" />
-            <span>References <strong>NON_MATERIAL</strong> output keys (e.g. <code className="bg-orange-100 px-1 rounded font-mono">volume_beton</code>) and <strong>coefficients</strong> (e.g. <code className="bg-orange-100 px-1 rounded font-mono">ciment_per_m3</code>). Linked to a row in the Resource Catalog.</span>
-          </div>
-        </div>
-      )}
+
     </Card>
   );
 }
@@ -910,7 +1010,8 @@ export default function Modules() {
   const showToast = (m) => { setToast(m); setTimeout(() => setToast(null), 2500); };
 
   const { data: tree  = [], isLoading: treeLoading } = useModulesTree();
-  const { data: units = []                          } = useUnits();
+  const { data: units      = []                     } = useUnits();
+  const { data: fieldTypes = []                     } = useFieldTypes();
 
   const allNodes = useMemo(() => flattenTree(tree), [tree]);
   const node     = useMemo(() => allNodes.find(n => n.category_id === selected), [allNodes, selected]);
@@ -1209,7 +1310,7 @@ export default function Modules() {
                     </div>
                   ) : (
                     (leaf.formulas).map(f => (
-                      <FormulaCard key={f.formula_id} formula={f} allNonMaterialFormulas={leaf.formulas} units={units} categoryId={selected} onDelete={() => askDeleteFormula(f)} />
+                      <FormulaCard key={f.formula_id} formula={f} allNonMaterialFormulas={leaf.formulas} units={units} fieldTypes={fieldTypes} categoryId={selected} onDelete={() => askDeleteFormula(f)} />
                     ))
                   )}
                 </Sec>

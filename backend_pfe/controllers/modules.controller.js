@@ -16,6 +16,11 @@ export async function listUnits(req, res) {
   catch (e) { handleError(res, e); }
 }
 
+export async function listFieldTypes(req, res) {
+  try { ok(res, await svc.getFieldTypes()); }
+  catch (e) { handleError(res, e); }
+}
+
 // ── Tree ──────────────────────────────────────────────────────────────────────
 
 export async function getTree(req, res) {

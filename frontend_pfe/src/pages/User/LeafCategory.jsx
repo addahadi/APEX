@@ -42,19 +42,43 @@ const LeafCategory = ({ node }) => {
     if (fields.length > 0) {
       const initialValues = {};
       fields.forEach(f => {
-        const parsed = parseFloat(f.default_value);
-        initialValues[f.field_id] = isNaN(parsed) ? 0 : parsed;
+        const typeName = (f.field_type_name || 'number').toLowerCase();
+        if (typeName.includes('bool')) {
+          // BOOLEAN — default to 0 (false)
+          initialValues[f.field_id] = 0;
+        } else if (typeName.includes('select')) {
+          // SELECT — default to the value of the first option
+          try {
+            const opts = JSON.parse(f.default_value || '[]');
+            initialValues[f.field_id] = opts[0]?.value ?? 0;
+          } catch {
+            initialValues[f.field_id] = 0;
+          }
+        } else {
+          // NUMBER — original behaviour
+          const parsed = parseFloat(f.default_value);
+          initialValues[f.field_id] = isNaN(parsed) ? 0 : parsed;
+        }
       });
       setFieldValues(initialValues);
       setCalculationResult(null);
     }
   }, [selectedFormulaId, fields]);
 
-  const handleFieldChange = (fieldId, value) => {
-    setFieldValues(prev => ({
-      ...prev,
-      [fieldId]: value === "" ? 0 : parseFloat(value)
-    }));
+  const handleFieldChange = (fieldId, value, fieldTypeName) => {
+    const typeName = (fieldTypeName || 'number').toLowerCase();
+    let coerced;
+    if (typeName.includes('bool')) {
+      // BOOLEAN — value is already 0 or 1 from the toggle
+      coerced = value;
+    } else if (typeName.includes('select')) {
+      // SELECT — value comes from <select> onChange as a string, convert to number
+      coerced = Number(value);
+    } else {
+      // NUMBER — original behaviour
+      coerced = value === "" ? 0 : parseFloat(value);
+    }
+    setFieldValues(prev => ({ ...prev, [fieldId]: coerced }));
   };
 
   const handleCalculate = () => {
@@ -218,27 +242,72 @@ const LeafCategory = ({ node }) => {
               <div className="p-6 text-sm">
                 {fields.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {fields.map((field) => (
-                      <div key={field.field_id}>
-                        <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex justify-between">
-                           <span>{localize(field, 'label') || field.label} {field.required && <span className="text-red-500">*</span>}</span>
-                           {!field.is_computed && <span className="text-[10px] font-mono text-primary bg-primary/10 px-1 rounded">{t("leaf.input")}</span>}
-                           {field.is_computed && <span className="text-[10px] font-mono text-amber-500 bg-amber-500/10 px-1 rounded">{t("leaf.computed")}</span>}
-                        </label>
-                        <div className="relative">
-                          <input
-                            type="number"
-                            value={fieldValues[field.field_id] !== undefined ? fieldValues[field.field_id] : (parseFloat(field.default_value) || 0)}
-                            onChange={(e) => handleFieldChange(field.field_id, e.target.value)}
-                            readOnly={field.is_computed}
-                            className={`w-full border rounded-lg py-2.5 pl-4 pr-12 focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-all focus:outline-none dark:text-white ${field.is_computed ? 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500 cursor-not-allowed' : 'border-slate-300 dark:border-slate-600 dark:bg-slate-800 text-slate-900'}`}
-                          />
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
-                            {field.unit_symbol}
-                          </span>
+                    {fields.map((field) => {
+                      const typeName = (field.field_type_name || 'number').toLowerCase();
+                      const isBoolean = typeName.includes('bool');
+                      const isSelect  = typeName.includes('select');
+                      const currentVal = fieldValues[field.field_id];
+
+                      // Parse SELECT options from JSON stored in default_value
+                      let selectOptions = [];
+                      if (isSelect) {
+                        try { selectOptions = JSON.parse(field.default_value || '[]'); } catch { selectOptions = []; }
+                      }
+
+                      return (
+                        <div key={field.field_id}>
+                          <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex justify-between">
+                            <span>{localize(field, 'label') || field.label} {field.required && <span className="text-red-500">*</span>}</span>
+                            {!field.is_computed && <span className="text-[10px] font-mono text-primary bg-primary/10 px-1 rounded">{t("leaf.input")}</span>}
+                            {field.is_computed  && <span className="text-[10px] font-mono text-amber-500 bg-amber-500/10 px-1 rounded">{t("leaf.computed")}</span>}
+                          </label>
+
+                          {/* ── BOOLEAN toggle ─────────────────────────────── */}
+                          {isBoolean && (
+                            <button
+                              type="button"
+                              onClick={() => handleFieldChange(field.field_id, currentVal === 1 ? 0 : 1, typeName)}
+                              className={`relative inline-flex h-10 w-full items-center justify-between rounded-lg border px-4 text-sm font-semibold transition-all
+                                ${currentVal === 1
+                                  ? 'bg-primary/10 border-primary text-primary'
+                                  : 'bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-slate-500'}`}
+                            >
+                              <span>{currentVal === 1 ? t("leaf.yes") : t("leaf.no")}</span>
+                              <span className={`w-5 h-5 rounded-full transition-colors ${currentVal === 1 ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-600'}`} />
+                            </button>
+                          )}
+
+                          {/* ── SELECT dropdown ────────────────────────────── */}
+                          {isSelect && (
+                            <select
+                              value={currentVal ?? selectOptions[0]?.value ?? 0}
+                              onChange={(e) => handleFieldChange(field.field_id, e.target.value, typeName)}
+                              className="w-full border rounded-lg py-2.5 px-4 focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-all focus:outline-none dark:text-white border-slate-300 dark:border-slate-600 dark:bg-slate-800"
+                            >
+                              {selectOptions.map((opt, idx) => (
+                                <option key={idx} value={opt.value}>{localize(opt, 'label') || opt.label}</option>
+                              ))}
+                            </select>
+                          )}
+
+                          {/* ── NUMBER input (default) ─────────────────────── */}
+                          {!isBoolean && !isSelect && (
+                            <div className="relative">
+                              <input
+                                type="number"
+                                value={currentVal !== undefined ? currentVal : (parseFloat(field.default_value) || 0)}
+                                onChange={(e) => handleFieldChange(field.field_id, e.target.value, typeName)}
+                                readOnly={field.is_computed}
+                                className={`w-full border rounded-lg py-2.5 pl-4 pr-12 focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-all focus:outline-none dark:text-white ${field.is_computed ? 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500 cursor-not-allowed' : 'border-slate-300 dark:border-slate-600 dark:bg-slate-800 text-slate-900'}`}
+                              />
+                              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
+                                {field.unit_symbol}
+                              </span>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="text-slate-400">{t("leaf.selectFormula")}</p>
@@ -288,7 +357,7 @@ const LeafCategory = ({ node }) => {
                          <div className="space-y-4 mt-2">
                             {calculationResult.intermediate_results?.map((res, idx) => (
                               <div key={idx} className="flex justify-between items-end border-b border-blue-500/30 pb-2">
-                                <span className="text-sm font-bold text-blue-100">{res.output_label || res.label || res.output_key}</span>
+                                <span className="text-sm font-bold text-blue-100">{localize(res, 'output_label') || res.output_key}</span>
                                 <div className="flex items-baseline gap-1">
                                   <span className="text-xl font-black">{res.value % 1 !== 0 ? res.value.toFixed(2) : res.value}</span>
                                   <span className="text-xs text-blue-300 font-bold">{res.unit_symbol}</span>
@@ -311,12 +380,12 @@ const LeafCategory = ({ node }) => {
                              calculationResult.material_lines.map((mat, idx) => (
                                <div key={idx} className="flex justify-between items-center bg-blue-800/40 rounded-xl p-3 border border-blue-700/50 hover:bg-blue-700/50 transition-colors">
                                   <div className="flex-1 pr-2 rtl:pl-2 rtl:pr-0">
-                                     <div className="font-semibold text-sm truncate" title={mat.material_name}>{mat.material_name}</div>
-                                     <div className="text-[10px] text-blue-300 font-mono mt-0.5">Waste: {(mat.applied_waste * 100).toFixed(0)}% — {mat.unit_price_snapshot} DZD/{mat.unit_symbol}</div>
+                                     <div className="font-semibold text-sm truncate" title={localize(mat, 'material_name')}>{localize(mat, 'material_name')}</div>
+                                     <div className="text-[10px] text-blue-300 font-mono mt-0.5">{t("history.waste")}: {(mat.waste_factor * 100).toFixed(0)}% — {mat.unit_price_snapshot} DZD/{mat.unit_symbol}</div>
                                   </div>
                                   <div className="text-right rtl:text-left shrink-0">
                                      <div className="font-bold text-sm">{mat.quantity_with_waste?.toFixed(2)} {mat.unit_symbol}</div>
-                                     <div className="text-[10px] text-blue-200 font-mono mt-0.5">{mat.sub_total?.toLocaleString()} DZD</div>
+                                     <div className="text-[10px] text-blue-200 font-mono mt-0.5">{mat.sub_total?.toFixed(2)} DZD</div>
                                   </div>
                                </div>
                              ))
@@ -330,7 +399,7 @@ const LeafCategory = ({ node }) => {
                       <div className="pt-5 border-t border-blue-500/50 flex justify-between items-center mt-2">
                          <span className="text-sm font-bold text-blue-200">{t("leaf.totalLeafCost")}</span>
                          <span className="text-2xl font-black text-white text-emerald-300">
-                           {calculationResult.total_cost?.toLocaleString()} <span className="text-sm font-bold opacity-80">{tc("currency")}</span>
+                           {calculationResult.total_cost?.toFixed(2)} <span className="text-sm font-bold opacity-80">{tc("currency")}</span>
                          </span>
                       </div>
                     </>

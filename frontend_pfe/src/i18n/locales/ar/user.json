@@ -95,7 +95,9 @@
     "noResults": "لا توجد نتائج",
     "calcFirst": "يرجى حساب التقدير أولاً.",
     "input": "إدخال",
-    "computed": "محسوب"
+    "computed": "محسوب",
+    "yes": "نعم",
+    "no": "لا"
   },
   "nonLeaf": {
     "folder": "مجلد",

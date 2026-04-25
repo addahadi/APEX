@@ -73,6 +73,7 @@ export const CreateFieldSchema = z.object({
   required:          z.boolean().default(true),
   default_value:     z.string().nullable().optional(),
   source_formula_id: z.string().nullable().optional(),
+  field_type_id:     z.string().nullable().optional(),
   sort_order:        z.number().int().default(0),
 });
 
@@ -84,6 +85,7 @@ export const UpdateFieldSchema = z.object({
   required:          z.boolean().optional(),
   default_value:     z.string().nullable().optional(),
   source_formula_id: z.string().nullable().optional(),
+  field_type_id:     z.string().nullable().optional(),
   sort_order:        z.number().int().optional(),
 });
 

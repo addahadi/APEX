@@ -95,7 +95,9 @@
     "noResults": "No Results",
     "calcFirst": "Please calculate the estimation first.",
     "input": "Input",
-    "computed": "Computed"
+    "computed": "Computed",
+    "yes": "Yes",
+    "no": "No"
   },
   "nonLeaf": {
     "folder": "FOLDER",

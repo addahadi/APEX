@@ -28,7 +28,7 @@ export class FormulaEvaluator {
     this.expr = expression.trim();
     this.pos = 0;
     this.vars = variables;
-    const result = this.parseAddSub();
+    const result = this.parseComparison();
     if (this.pos < this.expr.length) {
       throw new EvalError(`Unexpected token at position ${this.pos}: "${this.expr[this.pos]}"`);
     }
@@ -36,6 +36,29 @@ export class FormulaEvaluator {
   }
 
   // ── Grammar: addSub > mulDiv > power > unary > primary ──────────────────
+
+  parseComparison() {
+    let left = this.parseAddSub();
+    while (this.pos < this.expr.length) {
+      this.skipWs();
+      let op = '';
+      if (this.expr[this.pos] === '>' && this.expr[this.pos + 1] === '=') { op = '>='; this.pos += 2; }
+      else if (this.expr[this.pos] === '<' && this.expr[this.pos + 1] === '=') { op = '<='; this.pos += 2; }
+      else if (this.expr[this.pos] === '!' && this.expr[this.pos + 1] === '=') { op = '!='; this.pos += 2; }
+      else if (this.expr[this.pos] === '=' && this.expr[this.pos + 1] === '=') { op = '=='; this.pos += 2; }
+      else if (this.expr[this.pos] === '>' && this.expr[this.pos + 1] !== '=') { op = '>'; this.pos += 1; }
+      else if (this.expr[this.pos] === '<' && this.expr[this.pos + 1] !== '=') { op = '<'; this.pos += 1; }
+      else break;
+      const right = this.parseAddSub();
+      if      (op === '>')  left = left >  right ? 1 : 0;
+      else if (op === '>=') left = left >= right ? 1 : 0;
+      else if (op === '<')  left = left <  right ? 1 : 0;
+      else if (op === '<=') left = left <= right ? 1 : 0;
+      else if (op === '==') left = left === right ? 1 : 0;
+      else if (op === '!=') left = left !== right ? 1 : 0;
+    }
+    return left;
+  }
 
   parseAddSub() {
     let left = this.parseMulDiv();
@@ -90,7 +113,7 @@ export class FormulaEvaluator {
     // Grouped expression
     if (ch === '(') {
       this.pos++;
-      const val = this.parseAddSub();
+      const val = this.parseComparison();
       this.skipWs();
       if (this.expr[this.pos] !== ')') throw new EvalError('Expected closing parenthesis');
       this.pos++;
@@ -131,11 +154,48 @@ export class FormulaEvaluator {
     // Function call
     if (this.pos < this.expr.length && this.expr[this.pos] === '(') {
       this.pos++;
+
+      // ── if() is handled lazily: only the taken branch is evaluated ──────
+      // This prevents spurious errors (div-by-zero, unknown var) in the
+      // branch that is never taken.
+      if (name === 'if') {
+        this.skipWs();
+        const cond = this.parseComparison();
+        this.skipWs();
+        if (this.expr[this.pos] !== ',') throw new EvalError('if() expects 3 arguments');
+        this.pos++; // consume ','
+
+        if (cond) {
+          // Condition is true — evaluate thenExpr, skip elseExpr
+          const thenVal = this.parseComparison();
+          this.skipWs();
+          if (this.expr[this.pos] !== ',') throw new EvalError('if() expects 3 arguments');
+          this.pos++; // consume ','
+          this.skipBranch(); // skip elseExpr without evaluating
+          this.skipWs();
+          if (this.expr[this.pos] !== ')') throw new EvalError('if(): expected closing )');
+          this.pos++;
+          return thenVal;
+        } else {
+          // Condition is false — skip thenExpr, evaluate elseExpr
+          this.skipBranch(); // skip thenExpr without evaluating
+          this.skipWs();
+          if (this.expr[this.pos] !== ',') throw new EvalError('if() expects 3 arguments');
+          this.pos++; // consume ','
+          const elseVal = this.parseComparison();
+          this.skipWs();
+          if (this.expr[this.pos] !== ')') throw new EvalError('if(): expected closing )');
+          this.pos++;
+          return elseVal;
+        }
+      }
+
+      // All other functions — eager arg evaluation
       const args = [];
       while (true) {
         this.skipWs();
         if (this.expr[this.pos] === ')') { this.pos++; break; }
-        args.push(this.parseAddSub());
+        args.push(this.parseComparison());
         this.skipWs();
         if (this.expr[this.pos] === ',') this.pos++;
       }
@@ -165,6 +225,26 @@ export class FormulaEvaluator {
       case 'max':   if (args.length < 2) throw new EvalError('max() requires at least 2 args'); return Math.max(...args);
       case 'pi':    requireArgs(0); return Math.PI;
       default: throw new EvalError(`Unknown function: "${name}()"`);
+    }
+  }
+
+  /**
+   * Advance this.pos past one comma-delimited expression without evaluating it.
+   * Tracks parenthesis depth so nested calls (e.g. if(a, min(b,c), d)) are
+   * skipped correctly.
+   */
+  skipBranch() {
+    let depth = 0;
+    while (this.pos < this.expr.length) {
+      const ch = this.expr[this.pos];
+      if (ch === '(') { depth++; this.pos++; }
+      else if (ch === ')') {
+        if (depth === 0) break;   // closing paren of the outer if() — stop
+        depth--;
+        this.pos++;
+      }
+      else if (ch === ',' && depth === 0) break;  // next arg separator — stop
+      else this.pos++;
     }
   }
 

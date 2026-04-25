@@ -5,6 +5,9 @@ import api from "./api";
 /** GET /api/admin/modules/units */
 export const getUnits = () => api.get("/admin/modules/units");
 
+/** GET /api/admin/modules/field-types */
+export const getFieldTypes = () => api.get("/admin/modules/field-types");
+
 // ── Tree ──────────────────────────────────────────────────────────────────────
 
 /** GET /api/admin/modules/tree */

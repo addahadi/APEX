@@ -12,6 +12,9 @@ router.use(authenticate, requireRole('ADMIN'));
 // GET /api/admin/modules/units
 router.get('/units', ctrl.listUnits);
 
+// GET /api/admin/modules/field-types
+router.get('/field-types', ctrl.listFieldTypes);
+
 // ── Tree ──────────────────────────────────────────────────────────────────────
 // GET /api/admin/modules/tree
 router.get('/tree', ctrl.getTree);

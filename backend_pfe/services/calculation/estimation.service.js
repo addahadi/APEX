@@ -156,7 +156,9 @@ export async function getCategoryWithFormulas(category_id) {
               'default_value',  fd.default_value,
               'sort_order',     fd.sort_order,
               'unit_symbol',    fu.symbol,
-              'is_computed',    (fd.source_formula_id IS NOT NULL)
+              'is_computed',    (fd.source_formula_id IS NOT NULL),
+              'field_type_id',  fd.field_type_id,
+              'field_type_name', LOWER(COALESCE(ft.name_en, 'number'))
             ) ORDER BY fd.sort_order
           ) FILTER (WHERE fd.field_id IS NOT NULL),
           '[]'
@@ -165,6 +167,7 @@ export async function getCategoryWithFormulas(category_id) {
       JOIN units u ON u.unit_id = f.output_unit
       LEFT JOIN field_definitions fd ON fd.formula_id = f.formula_id
       LEFT JOIN units fu             ON fu.unit_id     = fd.unit_id
+      LEFT JOIN field_types ft       ON ft.field_type_id = fd.field_type_id
       WHERE f.category_id  = ${category_id}
         AND f.formula_type = 'NON_MATERIAL'
       GROUP BY f.formula_id, u.symbol

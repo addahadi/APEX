@@ -237,12 +237,12 @@ const ProjectHistory = () => {
                                           <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                                             {calc.material_lines.map(mat => (
                                               <tr key={mat.detail_id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                                                <td className="px-5 py-4 font-semibold text-slate-800 dark:text-slate-200">{mat.material_name}</td>
+                                                <td className="px-5 py-4 font-semibold text-slate-800 dark:text-slate-200">{pickLocalizedName(mat, 'material_name_en', 'material_name_ar')}</td>
                                                 <td className="px-5 py-4 text-right rtl:text-left text-slate-600 dark:text-slate-400 font-mono">
                                                   {mat.quantity_with_waste?.toFixed(2)} <span className="text-[10px] text-slate-400">{mat.unit_symbol}</span>
                                                 </td>
                                                 <td className="px-5 py-4 text-right rtl:text-left text-slate-500 text-xs">
-                                                  {(mat.applied_waste * 100).toFixed(0)}%
+                                                  {((mat.waste_factor_snapshot || 0) * 100).toFixed(0)}%
                                                 </td>
                                                 <td className="px-5 py-4 text-right rtl:text-left text-slate-600 dark:text-slate-400 font-mono text-xs">
                                                   {mat.unit_price_snapshot?.toLocaleString()} <span className="text-[9px] opacity-70">{tc("currency")}</span>
