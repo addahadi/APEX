@@ -80,7 +80,7 @@ const UserDashboard = () => {
           </div>
           <div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{t("dashboard.totalEstValue")}</p>
-            <p className="text-3xl font-black text-slate-800 dark:text-white leading-none"><span className="text-lg opacity-60 mr-1 rtl:ml-1 rtl:mr-0">{tc("currency")}</span>{totalValuation.toLocaleString()}</p>
+            <p className="text-3xl font-black text-slate-800 dark:text-white leading-none"><span className="text-lg opacity-60 mr-1 rtl:ml-1 rtl:mr-0">{tc("currency")}</span>{totalValuation.toFixed(2)}</p>
           </div>
         </div>
         <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-5">
@@ -181,7 +181,7 @@ const UserDashboard = () => {
                     <div className="mt-2 flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-4">
                       <div className="flex flex-col gap-1">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t("dashboard.totalCost")}</span>
-                        <span className="text-sm font-black text-slate-700 dark:text-slate-200">${project.total_cost?.toLocaleString() || 0}</span>
+                        <span className="text-sm font-black text-slate-700 dark:text-slate-200">${project.total_cost?.toFixed(2) || 0}</span>
                       </div>
                       <div className="flex flex-col gap-1 text-right rtl:text-left">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{tc("createdAt")}</span>

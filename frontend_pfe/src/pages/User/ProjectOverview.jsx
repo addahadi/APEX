@@ -125,7 +125,7 @@ const ProjectOverview = () => {
            </div>
            <div>
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{t("projectOverview.totalAllocation")}</p>
-              <p className="text-3xl font-black text-slate-800 dark:text-white leading-none"><span className="text-lg opacity-60 mr-1 rtl:ml-1 rtl:mr-0">{tc("currency")}</span>{project.total_cost?.toLocaleString() || 0}</p>
+              <p className="text-3xl font-black text-slate-800 dark:text-white leading-none"><span className="text-lg opacity-60 mr-1 rtl:ml-1 rtl:mr-0">{tc("currency")}</span>{project.total_cost?.toFixed(2) || 0}</p>
            </div>
         </div>
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm flex items-center gap-5">
@@ -157,13 +157,17 @@ const ProjectOverview = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {rootCategories && rootCategories.length > 0 ? (
           rootCategories.map((cat, i) => {
-            const colors = ['blue', 'amber', 'emerald', 'purple'];
+            const colors = ['blue', 'amber', 'emerald', 'purple', 'rose', 'cyan', 'orange', 'indigo'];
             const color = colors[i % colors.length];
             const colorClasses = {
               blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 group-hover:text-blue-600',
               amber: 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 group-hover:text-amber-600',
               emerald: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 group-hover:text-emerald-600',
-              purple: 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 group-hover:text-purple-600'
+              purple: 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 group-hover:text-purple-600',
+              rose: 'bg-rose-50 dark:bg-rose-900/20 text-rose-600 group-hover:text-rose-600',
+              cyan: 'bg-cyan-50 dark:bg-cyan-900/20 text-cyan-600 group-hover:text-cyan-600',
+              orange: 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 group-hover:text-orange-600',
+              indigo: 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 group-hover:text-indigo-600',
             };
             return (
               <Link key={cat.category_id} to={`/projects/${project.project_id}/explorer/${cat.category_id}`} className="group flex flex-col bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-md hover:border-primary/50 transition-all cursor-pointer relative overflow-hidden">
@@ -240,7 +244,7 @@ const ProjectOverview = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 font-black text-emerald-600 dark:text-emerald-400">
-                        ${calc.leaf_total?.toLocaleString() || 0}
+                        ${calc.leaf_total?.toFixed(2) || 0}
                       </td>
                       <td className="px-6 py-4 text-xs font-medium text-slate-500">
                         {new Date(calc.created_at).toLocaleDateString()}

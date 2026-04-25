@@ -165,7 +165,7 @@ const ProjectHistory = () => {
                             {resultEntries.slice(0, 2).map(([k, v]) => (
                                <div key={k} className="flex flex-col">
                                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">{k.replace(/_/g, ' ')}</span>
-                                 <span className="text-lg font-black text-slate-700 dark:text-slate-200 whitespace-nowrap">{v.toLocaleString()}</span>
+                                 <span className="text-lg font-black text-slate-700 dark:text-slate-200 whitespace-nowrap">{v.toFixed(2)}</span>
                                </div>
                             ))}
                             {resultEntries.length > 2 && (
@@ -179,7 +179,7 @@ const ProjectHistory = () => {
                              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">{t("history.segmentCost")}</span>
                              <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 tabular-nums tracking-tight">
                                <span className="text-sm opacity-50 mr-1 rtl:ml-1 rtl:mr-0 font-semibold pr-0.5 rtl:pl-0.5 rtl:pr-0">{tc("currency")}</span>
-                               {calc.leaf_total?.toLocaleString() || 0}
+                               {calc.leaf_total?.toFixed(2) || 0}
                              </span>
                           </div>
                         </div>
@@ -245,10 +245,10 @@ const ProjectHistory = () => {
                                                   {((mat.waste_factor_snapshot || 0) * 100).toFixed(0)}%
                                                 </td>
                                                 <td className="px-5 py-4 text-right rtl:text-left text-slate-600 dark:text-slate-400 font-mono text-xs">
-                                                  {mat.unit_price_snapshot?.toLocaleString()} <span className="text-[9px] opacity-70">{tc("currency")}</span>
+                                                  {mat.unit_price_snapshot?.toFixed(2)} <span className="text-[9px] opacity-70">{tc("currency")}</span>
                                                 </td>
                                                 <td className="px-5 py-4 text-right rtl:text-left font-bold text-slate-800 dark:text-slate-200 bg-slate-50/30 dark:bg-slate-900/30 font-mono">
-                                                  {mat.sub_total?.toLocaleString() || 0} <span className="text-[10px] text-slate-400 font-sans ml-0.5 rtl:mr-0.5 rtl:ml-0">{tc("currency")}</span>
+                                                  {mat.sub_total?.toFixed(2) || 0} <span className="text-[10px] text-slate-400 font-sans ml-0.5 rtl:mr-0.5 rtl:ml-0">{tc("currency")}</span>
                                                 </td>
                                               </tr>
                                             ))}

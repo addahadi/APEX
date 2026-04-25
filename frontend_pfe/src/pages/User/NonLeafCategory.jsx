@@ -16,8 +16,8 @@ const NonLeafCategory = ({ node, childrenData, isChildrenLoading }) => {
         <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="flex items-start gap-5 relative z-10">
-          <div className="w-16 h-16 bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300 rounded-2xl flex items-center justify-center border border-slate-200 dark:border-slate-600 shrink-0 text-3xl shadow-sm">
-            {node.icon ? <DynamicIcon name={node.icon} size={32} /> : '📁'}
+          <div className="w-16 h-16 bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary rounded-2xl flex items-center justify-center border border-primary/20 shrink-0 text-3xl shadow-sm">
+            {node.icon ? <DynamicIcon name={node.icon} size={32} className="text-primary" /> : '📁'}
           </div>
           <div>
             <div className="text-xs font-bold text-primary uppercase tracking-wider mb-1">
@@ -47,14 +47,26 @@ const NonLeafCategory = ({ node, childrenData, isChildrenLoading }) => {
             </div>
         ) : childrenData && childrenData.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-            {childrenData.map((child) => (
+            {childrenData.map((child, i) => {
+              const palette = [
+                { bg: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-blue-600 dark:text-blue-400', ring: 'border-blue-200 dark:border-blue-800' },
+                { bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-600 dark:text-amber-400', ring: 'border-amber-200 dark:border-amber-800' },
+                { bg: 'bg-emerald-50 dark:bg-emerald-900/20', text: 'text-emerald-600 dark:text-emerald-400', ring: 'border-emerald-200 dark:border-emerald-800' },
+                { bg: 'bg-purple-50 dark:bg-purple-900/20', text: 'text-purple-600 dark:text-purple-400', ring: 'border-purple-200 dark:border-purple-800' },
+                { bg: 'bg-rose-50 dark:bg-rose-900/20', text: 'text-rose-600 dark:text-rose-400', ring: 'border-rose-200 dark:border-rose-800' },
+                { bg: 'bg-cyan-50 dark:bg-cyan-900/20', text: 'text-cyan-600 dark:text-cyan-400', ring: 'border-cyan-200 dark:border-cyan-800' },
+                { bg: 'bg-orange-50 dark:bg-orange-900/20', text: 'text-orange-600 dark:text-orange-400', ring: 'border-orange-200 dark:border-orange-800' },
+                { bg: 'bg-indigo-50 dark:bg-indigo-900/20', text: 'text-indigo-600 dark:text-indigo-400', ring: 'border-indigo-200 dark:border-indigo-800' },
+              ];
+              const c = palette[i % palette.length];
+              return (
               <Link
                 key={child.category_id}
                 to={`/projects/${projectId}/explorer/${child.category_id}`}
                 className="group block bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 hover:border-primary/50 hover:shadow-xl transition-all text-left rtl:text-right flex flex-col h-full"
               >
-                <div className="w-12 h-12 bg-slate-50 dark:bg-slate-700/50 rounded-xl flex items-center justify-center text-2xl group-hover:bg-primary/5 group-hover:scale-110 transition-all mb-5 border border-slate-100 dark:border-slate-700 shadow-sm">
-                  {child.icon ? <DynamicIcon name={child.icon} size={24} /> : '📁'}
+                <div className={`w-12 h-12 ${c.bg} rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-all mb-5 border ${c.ring} shadow-sm`}>
+                  {child.icon ? <DynamicIcon name={child.icon} size={24} className={c.text} /> : '📁'}
                 </div>
                 <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1 leading-tight group-hover:text-primary transition-colors">{localize(child, 'name')}</h3>
                 <p className="text-xs text-slate-500 line-clamp-2 mb-6 flex-1">{localize(child, 'description') || child.name_ar}</p>
@@ -74,7 +86,8 @@ const NonLeafCategory = ({ node, childrenData, isChildrenLoading }) => {
                   </div>
                 </div>
               </Link>
-            ))}
+            );
+            })}
           </div>
         ) : (
           <div className="text-center py-20 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl border-dashed">
