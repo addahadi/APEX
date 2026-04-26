@@ -358,7 +358,7 @@ const LeafCategory = ({ node }) => {
                             {calculationResult.intermediate_results?.map((res, idx) => (
                               <div key={idx} className="flex justify-between items-end border-b border-blue-500/30 pb-2">
                                 <span className="text-sm font-bold text-blue-100">{localize(res, 'output_label') || res.output_key}</span>
-                                <div className="flex items-baseline gap-1">
+                                <div className="flex items-baseline gap-1" dir="ltr">
                                   <span className="text-xl font-black">{res.value % 1 !== 0 ? res.value.toFixed(2) : res.value}</span>
                                   <span className="text-xs text-blue-300 font-bold">{res.unit_symbol}</span>
                                 </div>
@@ -381,11 +381,11 @@ const LeafCategory = ({ node }) => {
                                <div key={idx} className="flex justify-between items-center bg-blue-800/40 rounded-xl p-3 border border-blue-700/50 hover:bg-blue-700/50 transition-colors">
                                   <div className="flex-1 pr-2 rtl:pl-2 rtl:pr-0">
                                      <div className="font-semibold text-sm truncate" title={localize(mat, 'material_name')}>{localize(mat, 'material_name')}</div>
-                                     <div className="text-[10px] text-blue-300 font-mono mt-0.5">{t("history.waste")}: {(mat.waste_factor * 100).toFixed(0)}% — {mat.unit_price_snapshot} DZD/{mat.unit_symbol}</div>
+                                     <div className="text-[10px] text-blue-300 font-mono mt-0.5">{t("history.waste")}: <span dir="ltr">{(mat.waste_factor * 100).toFixed(0)}%</span> — <span dir="ltr">{mat.unit_price_snapshot} {tc("currency")}/{mat.unit_symbol}</span></div>
                                   </div>
                                   <div className="text-right rtl:text-left shrink-0">
-                                     <div className="font-bold text-sm">{mat.quantity_with_waste?.toFixed(2)} {mat.unit_symbol}</div>
-                                     <div className="text-[10px] text-blue-200 font-mono mt-0.5">{mat.sub_total?.toFixed(2)} DZD</div>
+                                     <div className="font-bold text-sm" dir="ltr">{mat.quantity_with_waste?.toFixed(2)} {mat.unit_symbol}</div>
+                                     <div className="text-[10px] text-blue-200 font-mono mt-0.5">{mat.sub_total?.toFixed(2)} {tc("currency")}</div>
                                   </div>
                                </div>
                              ))
@@ -398,7 +398,7 @@ const LeafCategory = ({ node }) => {
                       {/* Grand Total */}
                       <div className="pt-5 border-t border-blue-500/50 flex justify-between items-center mt-2">
                          <span className="text-sm font-bold text-blue-200">{t("leaf.totalLeafCost")}</span>
-                         <span className="text-2xl font-black text-white text-emerald-300">
+                         <span className="text-2xl font-black text-white text-emerald-300" dir="ltr">
                            {calculationResult.total_cost?.toFixed(2)} <span className="text-sm font-bold opacity-80">{tc("currency")}</span>
                          </span>
                       </div>

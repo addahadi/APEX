@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Clock, Search, Filter, History, Package, Calculator, FileText, Loader2, AlertCircle, TrendingUp } from "lucide-react";
+import { ArrowLeft, Clock, Search, Filter, History, Package, Calculator, FileText, Loader2, AlertCircle, TrendingUp, ChevronDown, X, SortAsc, SortDesc, Layers } from "lucide-react";
 import { useProject, useProjectEstimation } from "@/hooks/useProjects";
 import DynamicIcon from "@/components/DynamicIcon";
 import { useTranslation } from "react-i18next";
@@ -14,6 +14,76 @@ const ProjectHistory = () => {
   const { data: estimationData, isLoading: isEstimationLoading, isError: isEstimationError } = useProjectEstimation(projectId);
 
   const [expandedRows, setExpandedRows] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortMode, setSortMode] = useState("newest");       // newest | oldest
+  const [filterMode, setFilterMode] = useState("all");       // all | withMaterials | noMaterials
+  const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const filterRef = useRef(null);
+
+  // Close filter menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (filterRef.current && !filterRef.current.contains(e.target)) {
+        setShowFilterMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const calculations = estimationData?.leaf_calculations || [];
+  const isAr = String(i18n.language || "").toLowerCase().startsWith("ar");
+
+  const pickLocalizedName = (item, enKey, arKey) => {
+    if (!item) return "";
+    const en = item[enKey];
+    const ar = item[arKey];
+    return isAr ? (ar || en || "") : (en || ar || "");
+  };
+
+  // ─── Search + Filter + Sort (must be before early returns) ─────────────
+  const filteredCalculations = useMemo(() => {
+    let result = [...calculations];
+
+    // Search — match category name, formula name, config name, material names
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      result = result.filter(calc => {
+        const catName = `${calc.category_name_en || ""} ${calc.category_name_ar || ""}`.toLowerCase();
+        const fName   = `${calc.formula_name_en || ""} ${calc.formula_name_ar || ""}`.toLowerCase();
+        const cName   = (calc.config_name || "").toLowerCase();
+        const matNames = (calc.material_lines || [])
+          .map(m => `${m.material_name_en || ""} ${m.material_name_ar || ""} ${m.material_name || ""}`)
+          .join(" ").toLowerCase();
+        return catName.includes(q) || fName.includes(q) || cName.includes(q) || matNames.includes(q);
+      });
+    }
+
+    // Filter by material presence
+    if (filterMode === "withMaterials") {
+      result = result.filter(c => c.material_lines && c.material_lines.length > 0);
+    } else if (filterMode === "noMaterials") {
+      result = result.filter(c => !c.material_lines || c.material_lines.length === 0);
+    }
+
+    // Sort
+    result.sort((a, b) => {
+      const da = new Date(a.created_at).getTime();
+      const db = new Date(b.created_at).getTime();
+      return sortMode === "oldest" ? da - db : db - da;
+    });
+
+    return result;
+  }, [calculations, searchQuery, filterMode, sortMode]);
+
+  const hasActiveFilters = filterMode !== "all" || sortMode !== "newest";
+  const activeFilterCount = (filterMode !== "all" ? 1 : 0) + (sortMode !== "newest" ? 1 : 0);
+
+  const clearFilters = () => {
+    setFilterMode("all");
+    setSortMode("newest");
+    setSearchQuery("");
+  };
 
   const toggleRow = (id) => {
     if (expandedRows.includes(id)) {
@@ -23,6 +93,7 @@ const ProjectHistory = () => {
     }
   };
 
+  // ─── Early returns (after all hooks) ───────────────────────────────────
   if (isProjectLoading || isEstimationLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-32 text-slate-400">
@@ -46,14 +117,6 @@ const ProjectHistory = () => {
   }
 
   const project = projectData;
-  const calculations = estimationData?.leaf_calculations || [];
-  const isAr = String(i18n.language || "").toLowerCase().startsWith("ar");
-  const pickLocalizedName = (item, enKey, arKey) => {
-    if (!item) return "";
-    const en = item[enKey];
-    const ar = item[arKey];
-    return isAr ? (ar || en || "") : (en || ar || "");
-  };
 
   return (
     <div className="py-8 px-4 md:px-8 max-w-7xl mx-auto">
@@ -66,7 +129,7 @@ const ProjectHistory = () => {
           <ArrowLeft className="w-4 h-4" />
           {t("history.returnOverview")}
         </Link>
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm relative">
           <div className="absolute top-0 right-0 rtl:right-auto rtl:left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/4 rtl:-translate-x-1/4"></div>
           <div className="relative z-10">
             <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white flex items-center gap-4 tracking-tight">
@@ -83,24 +146,141 @@ const ProjectHistory = () => {
             <div className="relative flex-1 md:w-64">
               <Search className="w-4 h-4 absolute left-4 rtl:left-auto rtl:right-4 top-1/2 -translate-y-1/2 text-slate-400" />
               <input 
-                type="text" 
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t("history.searchLedger")} 
                 className="w-full pl-10 rtl:pl-4 rtl:pr-10 pr-4 py-3 border border-slate-200 dark:border-slate-800 rounded-xl text-sm bg-slate-50 dark:bg-slate-950 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all shadow-inner"
               />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery("")} className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
-            <button className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-3 text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm shrink-0">
-              <Filter className="w-4 h-4" />
-              <span className="hidden sm:inline">{tc("filter")}</span>
-            </button>
+            <div className="relative" ref={filterRef}>
+              <button
+                onClick={() => setShowFilterMenu(!showFilterMenu)}
+                className={`flex items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-bold transition-colors shadow-sm shrink-0 ${
+                  hasActiveFilters
+                    ? 'border-primary bg-primary/5 text-primary hover:bg-primary/10'
+                    : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
+                }`}
+              >
+                <Filter className="w-4 h-4" />
+                <span className="hidden sm:inline">{tc("filter")}</span>
+                {activeFilterCount > 0 && (
+                  <span className="w-5 h-5 rounded-full bg-primary text-white text-[10px] font-black flex items-center justify-center">{activeFilterCount}</span>
+                )}
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showFilterMenu ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Filter Dropdown */}
+              {showFilterMenu && (
+                <div className="absolute top-full right-0 rtl:right-auto rtl:left-0 mt-2 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                  {/* Sort Section */}
+                  <div className="px-4 pt-4 pb-2">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t("history.sortBy")}</span>
+                  </div>
+                  <div className="px-2 pb-2 space-y-0.5">
+                    <button
+                      onClick={() => { setSortMode("newest"); }}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                        sortMode === "newest" ? 'bg-primary/10 text-primary' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <SortDesc className="w-4 h-4" />
+                      {t("history.newestFirst")}
+                    </button>
+                    <button
+                      onClick={() => { setSortMode("oldest"); }}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                        sortMode === "oldest" ? 'bg-primary/10 text-primary' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <SortAsc className="w-4 h-4" />
+                      {t("history.oldestFirst")}
+                    </button>
+                  </div>
+
+                  <div className="border-t border-slate-100 dark:border-slate-800" />
+
+                  {/* Filter Section */}
+                  <div className="px-4 pt-3 pb-2">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t("history.filterByType")}</span>
+                  </div>
+                  <div className="px-2 pb-2 space-y-0.5">
+                    <button
+                      onClick={() => { setFilterMode("all"); }}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                        filterMode === "all" ? 'bg-primary/10 text-primary' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <Layers className="w-4 h-4" />
+                      {t("history.allEntries")}
+                    </button>
+                    <button
+                      onClick={() => { setFilterMode("withMaterials"); }}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                        filterMode === "withMaterials" ? 'bg-primary/10 text-primary' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <Package className="w-4 h-4" />
+                      {t("history.withMaterials")}
+                    </button>
+                    <button
+                      onClick={() => { setFilterMode("noMaterials"); }}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                        filterMode === "noMaterials" ? 'bg-primary/10 text-primary' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <Calculator className="w-4 h-4" />
+                      {t("history.pureCalcOnly")}
+                    </button>
+                  </div>
+
+                  {/* Clear All */}
+                  {hasActiveFilters && (
+                    <>
+                      <div className="border-t border-slate-100 dark:border-slate-800" />
+                      <div className="p-2">
+                        <button
+                          onClick={() => { clearFilters(); setShowFilterMenu(false); }}
+                          className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                          {t("history.clearAll")}
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
+
+        {/* Results Count */}
+        {(searchQuery || hasActiveFilters) && (
+          <div className="mt-4 flex items-center justify-between">
+            <p className="text-sm text-slate-500">
+              {t("history.showingResults", { count: filteredCalculations.length, total: calculations.length })}
+            </p>
+            {(searchQuery || hasActiveFilters) && (
+              <button onClick={clearFilters} className="text-xs font-bold text-primary hover:underline">
+                {t("history.clearAll")}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ─── Timeline Architecture ─── */}
       <div className="relative">
         {calculations.length > 0 ? (
+          filteredCalculations.length > 0 ? (
           <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-1 before:bg-gradient-to-b before:from-transparent before:via-slate-200 dark:before:via-slate-800 before:to-transparent">
-            {calculations.map((calc, index) => {
+            {filteredCalculations.map((calc, index) => {
               const isExpanded = expandedRows.includes(calc.project_details_id);
               
               const fieldValues = typeof calc.field_values === 'string' ? JSON.parse(calc.field_values) : (calc.field_values || {});
@@ -177,10 +357,10 @@ const ProjectHistory = () => {
                           
                           <div className="text-left rtl:text-right sm:text-right rtl:sm:text-left shrink-0 border-t sm:border-l rtl:sm:border-l-0 rtl:sm:border-r sm:border-t-0 border-slate-200 dark:border-slate-800 pt-3 sm:pt-0 sm:pl-5 rtl:sm:pl-0 rtl:sm:pr-5">
                              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">{t("history.segmentCost")}</span>
-                             <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 tabular-nums tracking-tight">
-                               <span className="text-sm opacity-50 mr-1 rtl:ml-1 rtl:mr-0 font-semibold pr-0.5 rtl:pl-0.5 rtl:pr-0">{tc("currency")}</span>
-                               {calc.leaf_total?.toFixed(2) || 0}
-                             </span>
+                             <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 tabular-nums tracking-tight" dir="ltr">
+                                {calc.leaf_total?.toFixed(2) || 0}
+                                <span className="text-sm opacity-50 ml-1 font-semibold pl-0.5">{tc("currency")}</span>
+                              </span>
                           </div>
                         </div>
                       </div>
@@ -239,16 +419,16 @@ const ProjectHistory = () => {
                                               <tr key={mat.detail_id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
                                                 <td className="px-5 py-4 font-semibold text-slate-800 dark:text-slate-200">{pickLocalizedName(mat, 'material_name_en', 'material_name_ar')}</td>
                                                 <td className="px-5 py-4 text-right rtl:text-left text-slate-600 dark:text-slate-400 font-mono">
-                                                  {mat.quantity_with_waste?.toFixed(2)} <span className="text-[10px] text-slate-400">{mat.unit_symbol}</span>
+                                                  <span dir="ltr">{mat.quantity_with_waste?.toFixed(2)} <span className="text-[10px] text-slate-400">{mat.unit_symbol}</span></span>
                                                 </td>
                                                 <td className="px-5 py-4 text-right rtl:text-left text-slate-500 text-xs">
                                                   {((mat.waste_factor_snapshot || 0) * 100).toFixed(0)}%
                                                 </td>
                                                 <td className="px-5 py-4 text-right rtl:text-left text-slate-600 dark:text-slate-400 font-mono text-xs">
-                                                  {mat.unit_price_snapshot?.toFixed(2)} <span className="text-[9px] opacity-70">{tc("currency")}</span>
+                                                   <span dir="ltr">{mat.unit_price_snapshot?.toFixed(2)} <span className="text-[9px] opacity-70">{tc("currency")}</span></span>
                                                 </td>
                                                 <td className="px-5 py-4 text-right rtl:text-left font-bold text-slate-800 dark:text-slate-200 bg-slate-50/30 dark:bg-slate-900/30 font-mono">
-                                                  {mat.sub_total?.toFixed(2) || 0} <span className="text-[10px] text-slate-400 font-sans ml-0.5 rtl:mr-0.5 rtl:ml-0">{tc("currency")}</span>
+                                                   <span dir="ltr">{mat.sub_total?.toFixed(2) || 0} <span className="text-[10px] text-slate-400 font-sans ml-0.5">{tc("currency")}</span></span>
                                                 </td>
                                               </tr>
                                             ))}
@@ -274,6 +454,23 @@ const ProjectHistory = () => {
               );
             })}
           </div>
+          ) : (
+            /* No results from search/filter */
+            <div className="py-16 px-6 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl border-dashed shadow-sm">
+              <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-5">
+                <Search className="w-8 h-8 text-slate-300 dark:text-slate-600" />
+              </div>
+              <h3 className="text-xl font-black text-slate-800 dark:text-white tracking-tight">{t("history.noResultsTitle")}</h3>
+              <p className="text-slate-500 mt-2 max-w-sm mx-auto text-sm">{t("history.noResultsDesc")}</p>
+              <button
+                onClick={clearFilters}
+                className="inline-flex items-center gap-2 mt-6 px-5 py-2.5 bg-primary/10 text-primary font-bold rounded-xl hover:bg-primary/20 transition-all text-sm"
+              >
+                <X className="w-4 h-4" />
+                {t("history.clearAll")}
+              </button>
+            </div>
+          )
         ) : (
           <div className="py-24 px-6 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl border-dashed shadow-sm">
             <div className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">

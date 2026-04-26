@@ -75,7 +75,18 @@
     "calculateNow": "Calculate Now",
     "errorTitle": "Error Loading History",
     "errorDesc": "Failed to retrieve calculation records for this project.",
-    "returnOverview": "Return to Overview"
+    "returnOverview": "Return to Overview",
+    "sortBy": "Sort By",
+    "newestFirst": "Newest First",
+    "oldestFirst": "Oldest First",
+    "filterByType": "Filter By Type",
+    "allEntries": "All Entries",
+    "withMaterials": "With Materials",
+    "pureCalcOnly": "Pure Calculations Only",
+    "clearAll": "Clear All",
+    "showingResults": "Showing {{count}} of {{total}} entries",
+    "noResultsTitle": "No Results Found",
+    "noResultsDesc": "No calculation entries match your current search or filter criteria. Try adjusting your filters."
   },
   "leaf": {
     "methodology": "Methodology",

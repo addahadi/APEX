@@ -75,7 +75,18 @@
     "calculateNow": "احسب الآن",
     "errorTitle": "خطأ في تحميل السجل",
     "errorDesc": "فشل استرجاع سجلات الحسابات لهذا المشروع.",
-    "returnOverview": "العودة للملخص"
+    "returnOverview": "العودة للملخص",
+    "sortBy": "ترتيب حسب",
+    "newestFirst": "الأحدث أولاً",
+    "oldestFirst": "الأقدم أولاً",
+    "filterByType": "تصفية حسب النوع",
+    "allEntries": "جميع الإدخالات",
+    "withMaterials": "مع مواد",
+    "pureCalcOnly": "حسابات صرفة فقط",
+    "clearAll": "مسح الكل",
+    "showingResults": "عرض {{count}} من {{total}} إدخالات",
+    "noResultsTitle": "لا توجد نتائج",
+    "noResultsDesc": "لا توجد إدخالات حسابية تطابق معايير البحث أو التصفية الحالية. حاول تعديل عوامل التصفية."
   },
   "leaf": {
     "methodology": "المنهجية",
