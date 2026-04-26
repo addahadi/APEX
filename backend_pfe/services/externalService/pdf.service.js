@@ -1,20 +1,30 @@
 import PDFDocument from 'pdfkit';
 
-const MARGIN = 50;
+/* ═══════════════════════════════════════════════════════════════════════════════
+   PDF Generation Service — Professional Estimation Report
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const MARGIN = 48;
 const COLORS = {
-  header: '#0f172a',
-  primary: '#1d4ed8',
-  text: '#111827',
-  muted: '#6b7280',
-  border: '#d1d5db',
-  panel: '#f8fafc',
-  tableHeader: '#e2e8f0',
-  rowAlt: '#f8fafc',
-  danger: '#dc2626',
+  headerBg:    '#0f172a',
+  primary:     '#2563eb',
+  primaryDark: '#1e40af',
+  text:        '#1e293b',
+  muted:       '#64748b',
+  light:       '#94a3b8',
+  border:      '#cbd5db',
+  panelBg:     '#f8fafc',
+  tableHead:   '#e2e8f0',
+  rowAlt:      '#f1f5f9',
+  success:     '#059669',
+  danger:      '#dc2626',
+  white:       '#ffffff',
 };
 
-function ensureSpace(doc, needed = 24) {
-  const bottom = doc.page.height - doc.page.margins.bottom;
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+function ensureSpace(doc, needed = 30) {
+  const bottom = doc.page.height - doc.page.margins.bottom - 30; // reserve footer
   if (doc.y + needed > bottom) doc.addPage();
 }
 
@@ -23,227 +33,394 @@ function n(value, fallback = 0) {
   return Number.isFinite(num) ? num : fallback;
 }
 
+function fmt(value, decimals = 2) {
+  return n(value).toLocaleString('en-US', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+}
+
+function formatMoney(value) {
+  return `${fmt(value)} DZD`;
+}
+
 function asText(value) {
   if (value === null || value === undefined) return '-';
   if (typeof value === 'number') return Number.isFinite(value) ? String(value) : '-';
-  if (typeof value === 'boolean') return value ? 'true' : 'false';
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
   if (typeof value === 'string') return value;
   if (Array.isArray(value)) return value.map(asText).join(', ');
-  try {
-    return JSON.stringify(value);
-  } catch {
-    return String(value);
-  }
+  try { return JSON.stringify(value); } catch { return String(value); }
 }
 
-function parseObject(value) {
+function pickName(obj, enKey = 'material_name_en', arKey = 'material_name_ar', fallbackKey = 'material_name') {
+  if (!obj) return '-';
+  return obj[enKey] || obj[arKey] || obj[fallbackKey] || '-';
+}
+
+function parseJsonSafe(value) {
   if (value == null) return {};
   if (typeof value === 'string') {
-    try {
-      const parsed = JSON.parse(value);
-      return parsed && typeof parsed === 'object' ? parsed : { value: parsed };
-    } catch {
-      return { raw: value };
-    }
+    try { return JSON.parse(value); } catch { return { raw: value }; }
   }
   if (typeof value === 'object') return value;
   return { value };
 }
 
-function objectEntries(value) {
-  const obj = parseObject(value);
-  return Object.entries(obj || {});
+// ── Page Footer (page numbers) ──────────────────────────────────────────────
+
+function addFooter(doc) {
+  const range = doc.bufferedPageRange();
+  for (let i = range.start; i < range.start + range.count; i++) {
+    doc.switchToPage(i);
+    const pageW = doc.page.width;
+    const y = doc.page.height - doc.page.margins.bottom - 10;
+    doc.save();
+    doc.font('Helvetica').fontSize(8).fillColor(COLORS.light)
+      .text(`Page ${i + 1} of ${range.count}`, 0, y, { width: pageW, align: 'center' });
+    // Divider line above footer
+    doc.moveTo(MARGIN, y - 6).lineTo(pageW - MARGIN, y - 6)
+      .strokeColor(COLORS.border).lineWidth(0.5).stroke();
+    doc.restore();
+  }
 }
 
-function formatMoney(value) {
-  return `${n(value, 0).toFixed(2)} DZD`;
-}
+// ── Drawing Primitives ──────────────────────────────────────────────────────
 
-function drawHeader(doc, data) {
-  const width = doc.page.width - MARGIN * 2;
+function drawReportHeader(doc, data) {
+  const w = doc.page.width - MARGIN * 2;
   const startY = doc.y;
 
+  // Dark banner
   doc.save();
-  doc.roundedRect(MARGIN, startY, width, 72, 10).fill(COLORS.header);
+  doc.roundedRect(MARGIN, startY, w, 80, 8).fill(COLORS.headerBg);
   doc.restore();
 
-  doc.fillColor('white').font('Helvetica-Bold').fontSize(18)
-    .text('Project Report', MARGIN + 16, startY + 14, { width: width - 32 });
-  doc.fillColor('#cbd5e1').font('Helvetica').fontSize(10)
-    .text(`Generated: ${data.date || new Date().toLocaleDateString()}`, MARGIN + 16, startY + 44);
+  // Title
+  doc.fillColor(COLORS.white).font('Helvetica-Bold').fontSize(22)
+    .text('Estimation Report', MARGIN + 20, startY + 16, { width: w - 40 });
 
-  doc.y = startY + 84;
+  // Subtitle
+  doc.fillColor('#94a3b8').font('Helvetica').fontSize(10)
+    .text(data.projectName || 'Untitled Project', MARGIN + 20, startY + 46, { width: w / 2 });
 
+  // Date badge (right side)
+  doc.fillColor('#94a3b8').font('Helvetica').fontSize(9)
+    .text(`Generated: ${data.date || new Date().toLocaleDateString()}`, MARGIN + 20, startY + 62, {
+      width: w - 40, align: 'right',
+    });
+
+  doc.y = startY + 94;
+
+  // Project info card
   doc.save();
-  doc.roundedRect(MARGIN, doc.y, width, 78, 8).fill(COLORS.panel).stroke(COLORS.border);
+  doc.roundedRect(MARGIN, doc.y, w, 70, 6)
+    .fillAndStroke(COLORS.panelBg, COLORS.border);
   doc.restore();
 
-  const leftX = MARGIN + 14;
-  const rightX = MARGIN + width / 2;
-  const topY = doc.y + 12;
+  const lx = MARGIN + 16;
+  const rx = MARGIN + w * 0.55;
+  let ty = doc.y + 12;
 
-  doc.fillColor(COLORS.text).font('Helvetica-Bold').fontSize(10).text('Project', leftX, topY);
-  doc.font('Helvetica').text(data.projectName || 'N/A', leftX + 58, topY, { width: width / 2 - 72 });
+  // Row 1
+  doc.fillColor(COLORS.muted).font('Helvetica-Bold').fontSize(8);
+  doc.text('PROJECT', lx, ty, { lineBreak: false });
+  doc.fillColor(COLORS.text).font('Helvetica').fontSize(10);
+  doc.text(data.projectName || 'N/A', lx + 60, ty, { width: w * 0.4, lineBreak: false });
 
-  doc.font('Helvetica-Bold').text('Status', rightX, topY);
-  doc.font('Helvetica').text(data.projectStatus || '-', rightX + 42, topY, { width: width / 2 - 56 });
+  doc.fillColor(COLORS.muted).font('Helvetica-Bold').fontSize(8);
+  doc.text('STATUS', rx, ty, { lineBreak: false });
+  doc.fillColor(COLORS.text).font('Helvetica').fontSize(10);
+  doc.text(data.projectStatus || '-', rx + 60, ty, { width: w * 0.3, lineBreak: false });
 
-  doc.font('Helvetica-Bold').text('Created', leftX, topY + 22);
-  doc.font('Helvetica').text(
-    data.projectCreatedAt ? new Date(data.projectCreatedAt).toLocaleString() : '-',
-    leftX + 58,
-    topY + 22,
-    { width: width / 2 - 72 }
-  );
+  ty += 22;
 
-  doc.font('Helvetica-Bold').text('Estimation ID', rightX, topY + 22);
-  doc.font('Helvetica').text(data.estimationId || '-', rightX + 74, topY + 22, { width: width / 2 - 88 });
+  // Row 2
+  doc.fillColor(COLORS.muted).font('Helvetica-Bold').fontSize(8);
+  doc.text('CREATED', lx, ty, { lineBreak: false });
+  doc.fillColor(COLORS.text).font('Helvetica').fontSize(10);
+  doc.text(data.projectCreatedAt ? new Date(data.projectCreatedAt).toLocaleDateString() : '-', lx + 60, ty, { lineBreak: false });
 
-  doc.font('Helvetica-Bold').text('Description', leftX, topY + 44);
-  doc.font('Helvetica').text(data.projectDescription || '-', leftX + 58, topY + 44, { width: width - 80 });
+  doc.fillColor(COLORS.muted).font('Helvetica-Bold').fontSize(8);
+  doc.text('SEGMENTS', rx, ty, { lineBreak: false });
+  doc.fillColor(COLORS.text).font('Helvetica').fontSize(10);
+  doc.text(String((data.leaf_calculations || []).length), rx + 60, ty, { lineBreak: false });
 
-  doc.y += 92;
+  doc.x = MARGIN;
+  doc.y = ty + 34;
+
+  // Description
+  if (data.projectDescription) {
+    doc.fillColor(COLORS.muted).font('Helvetica').fontSize(9)
+      .text(data.projectDescription, MARGIN, doc.y, { width: w });
+    doc.y += 10;
+  }
 }
 
-function drawSectionTitle(doc, text) {
-  ensureSpace(doc, 28);
-  const width = doc.page.width - MARGIN * 2;
-  doc.save();
-  doc.roundedRect(MARGIN, doc.y, width, 22, 5).fill(COLORS.primary);
-  doc.restore();
-  doc.fillColor('white').font('Helvetica-Bold').fontSize(11)
-    .text(text, MARGIN + 10, doc.y + 6, { width: width - 20 });
-  doc.y += 28;
-}
+function drawSectionBanner(doc, text, index) {
+  ensureSpace(doc, 36);
+  const w = doc.page.width - MARGIN * 2;
 
-function drawInfoLine(doc, label, value) {
-  ensureSpace(doc, 16);
-  doc.font('Helvetica-Bold').fillColor(COLORS.text).fontSize(10).text(`${label}: `, MARGIN, doc.y, { continued: true });
-  doc.font('Helvetica').text(value || '-');
-}
-
-function drawSimpleTable(doc, title, rows) {
-  ensureSpace(doc, 40);
-  doc.font('Helvetica-Bold').fillColor(COLORS.text).fontSize(10).text(title, MARGIN, doc.y);
   doc.y += 6;
+  doc.save();
+  doc.roundedRect(MARGIN, doc.y, w, 28, 5).fill(COLORS.primary);
+  doc.restore();
 
-  const width = doc.page.width - MARGIN * 2;
-  const col1 = 0.55 * width;
-  const col2 = width - col1;
-  const rowH = 18;
+  doc.fillColor(COLORS.white).font('Helvetica-Bold').fontSize(12)
+    .text(text, MARGIN + 12, doc.y + 7, { width: w - 24 });
 
-  const drawHeader = () => {
-    ensureSpace(doc, rowH + 8);
+  doc.y += 36;
+}
+
+function drawKeyValuePair(doc, label, value) {
+  ensureSpace(doc, 18);
+  doc.font('Helvetica-Bold').fillColor(COLORS.muted).fontSize(9)
+    .text(`${label}:`, MARGIN + 8, doc.y, { continued: true, width: 120 });
+  doc.font('Helvetica').fillColor(COLORS.text).fontSize(9)
+    .text(`  ${value || '-'}`);
+  doc.y += 2;
+}
+
+function drawInputsTable(doc, rows) {
+  if (!rows || rows.length === 0) return;
+
+  ensureSpace(doc, 50);
+  doc.font('Helvetica-Bold').fillColor(COLORS.text).fontSize(10)
+    .text('Input Parameters', MARGIN + 8, doc.y);
+  doc.y += 8;
+
+  const w = doc.page.width - MARGIN * 2;
+  const colName = w * 0.55;
+  const colVal  = w - colName;
+  const rowH = 22;
+
+  // Table header
+  const drawHead = () => {
+    ensureSpace(doc, rowH + 4);
+    const hy = doc.y;
     doc.save();
-    doc.rect(MARGIN, doc.y, width, rowH).fill(COLORS.tableHeader).stroke(COLORS.border);
+    doc.rect(MARGIN, hy, w, rowH).fill(COLORS.tableHead);
     doc.restore();
-    doc.font('Helvetica-Bold').fontSize(9).fillColor(COLORS.text)
-      .text('Field', MARGIN + 6, doc.y + 5, { width: col1 - 12 })
-      .text('Value', MARGIN + col1 + 6, doc.y + 5, { width: col2 - 12 });
-    doc.y += rowH;
+    doc.font('Helvetica-Bold').fontSize(9).fillColor(COLORS.text);
+    doc.text('Parameter', MARGIN + 8, hy + 6, { width: colName - 16, lineBreak: false });
+    doc.text('Value', MARGIN + colName + 8, hy + 6, { width: colVal - 16, lineBreak: false });
+    doc.x = MARGIN;
+    doc.y = hy + rowH;
   };
 
-  drawHeader();
+  drawHead();
 
-  if (!rows || rows.length === 0) {
-    doc.font('Helvetica').fontSize(9).fillColor(COLORS.muted).text('No data', MARGIN + 6, doc.y + 5);
-    doc.y += rowH;
-    return;
-  }
-
-  rows.forEach((row, index) => {
-    if (doc.y + rowH > doc.page.height - doc.page.margins.bottom) {
+  rows.forEach((row, i) => {
+    if (doc.y + rowH > doc.page.height - doc.page.margins.bottom - 30) {
       doc.addPage();
-      drawHeader();
+      drawHead();
     }
-
+    const ry = doc.y;
     doc.save();
-    doc.rect(MARGIN, doc.y, width, rowH)
-      .fill(index % 2 === 0 ? 'white' : COLORS.rowAlt)
-      .stroke(COLORS.border);
+    doc.rect(MARGIN, ry, w, rowH)
+      .fillAndStroke(i % 2 === 0 ? COLORS.white : COLORS.rowAlt, COLORS.border);
     doc.restore();
 
-    doc.font('Helvetica').fontSize(9).fillColor(COLORS.text)
-      .text(asText(row.name), MARGIN + 6, doc.y + 5, { width: col1 - 12, ellipsis: true })
-      .text(asText(row.value), MARGIN + col1 + 6, doc.y + 5, { width: col2 - 12, ellipsis: true });
+    doc.font('Helvetica').fontSize(9).fillColor(COLORS.text);
+    doc.text(asText(row.name), MARGIN + 8, ry + 6, { width: colName - 16, ellipsis: true, lineBreak: false });
+    doc.text(asText(row.value), MARGIN + colName + 8, ry + 6, { width: colVal - 16, ellipsis: true, lineBreak: false });
+    doc.x = MARGIN;
+    doc.y = ry + rowH;
+  });
 
-    doc.y += rowH;
+  doc.y += 8;
+}
+
+function drawResultsTable(doc, rows) {
+  if (!rows || rows.length === 0) return;
+
+  ensureSpace(doc, 50);
+  doc.font('Helvetica-Bold').fillColor(COLORS.text).fontSize(10)
+    .text('Calculated Results', MARGIN + 8, doc.y);
+  doc.y += 8;
+
+  const w = doc.page.width - MARGIN * 2;
+  const colName = w * 0.55;
+  const colVal  = w - colName;
+  const rowH = 22;
+
+  const drawHead = () => {
+    ensureSpace(doc, rowH + 4);
+    const hy = doc.y;
+    doc.save();
+    doc.rect(MARGIN, hy, w, rowH).fill(COLORS.tableHead);
+    doc.restore();
+    doc.font('Helvetica-Bold').fontSize(9).fillColor(COLORS.text);
+    doc.text('Result', MARGIN + 8, hy + 6, { width: colName - 16, lineBreak: false });
+    doc.text('Value', MARGIN + colName + 8, hy + 6, { width: colVal - 16, lineBreak: false });
+    doc.x = MARGIN;
+    doc.y = hy + rowH;
+  };
+
+  drawHead();
+
+  rows.forEach((row, i) => {
+    if (doc.y + rowH > doc.page.height - doc.page.margins.bottom - 30) {
+      doc.addPage();
+      drawHead();
+    }
+    const ry = doc.y;
+    doc.save();
+    doc.rect(MARGIN, ry, w, rowH)
+      .fillAndStroke(i % 2 === 0 ? COLORS.white : COLORS.rowAlt, COLORS.border);
+    doc.restore();
+
+    doc.font('Helvetica-Bold').fontSize(9).fillColor(COLORS.primary);
+    doc.text(asText(row.name), MARGIN + 8, ry + 6, { width: colName - 16, ellipsis: true, lineBreak: false });
+    doc.font('Helvetica-Bold').fontSize(9).fillColor(COLORS.text);
+    doc.text(asText(row.value), MARGIN + colName + 8, ry + 6, { width: colVal - 16, ellipsis: true, lineBreak: false });
+    doc.x = MARGIN;
+    doc.y = ry + rowH;
   });
 
   doc.y += 8;
 }
 
 function drawMaterialsTable(doc, lines = []) {
-  ensureSpace(doc, 44);
-  doc.font('Helvetica-Bold').fillColor(COLORS.text).fontSize(10).text('Materials', MARGIN, doc.y);
-  doc.y += 6;
-
-  const width = doc.page.width - MARGIN * 2;
-  const cols = [0.40, 0.14, 0.11, 0.17, 0.18].map((r) => Math.floor(width * r));
-  cols[cols.length - 1] = width - cols.slice(0, -1).reduce((a, b) => a + b, 0);
-  const rowH = 18;
-
-  const drawHeader = () => {
-    ensureSpace(doc, rowH + 8);
-    doc.save();
-    doc.rect(MARGIN, doc.y, width, rowH).fill(COLORS.tableHeader).stroke(COLORS.border);
-    doc.restore();
-
-    let x = MARGIN;
-    const headers = ['Material', 'Qty', 'Unit', 'Unit Price', 'Subtotal'];
-    headers.forEach((h, i) => {
-      doc.font('Helvetica-Bold').fontSize(8).fillColor(COLORS.text)
-        .text(h, x + 4, doc.y + 5, { width: cols[i] - 8, ellipsis: true });
-      x += cols[i];
-    });
-
-    doc.y += rowH;
-  };
-
-  drawHeader();
-
   if (!Array.isArray(lines) || lines.length === 0) {
-    doc.font('Helvetica').fontSize(9).fillColor(COLORS.muted).text('No material lines', MARGIN + 6, doc.y + 5);
-    doc.y += rowH + 4;
+    ensureSpace(doc, 30);
+    doc.font('Helvetica').fontSize(9).fillColor(COLORS.muted)
+      .text('No materials — pure formula calculation', MARGIN + 8, doc.y);
+    doc.y += 16;
     return;
   }
 
-  lines.forEach((line, index) => {
-    if (doc.y + rowH > doc.page.height - doc.page.margins.bottom) {
-      doc.addPage();
-      drawHeader();
-    }
+  ensureSpace(doc, 60);
+  doc.font('Helvetica-Bold').fillColor(COLORS.text).fontSize(10)
+    .text('Material Resources', MARGIN + 8, doc.y);
+  doc.y += 8;
 
+  const w = doc.page.width - MARGIN * 2;
+  // Columns: Material | Qty | Waste | Unit Price | Subtotal
+  const colWidths = [0.32, 0.15, 0.13, 0.20, 0.20].map(r => Math.floor(w * r));
+  // Adjust last col to fill remaining
+  colWidths[colWidths.length - 1] = w - colWidths.slice(0, -1).reduce((a, b) => a + b, 0);
+  const rowH = 24;
+  const headers = ['Material', 'Quantity', 'Waste %', 'Unit Price', 'Subtotal'];
+
+  const drawHead = () => {
+    ensureSpace(doc, rowH + 4);
+    const hy = doc.y;
     doc.save();
-    doc.rect(MARGIN, doc.y, width, rowH)
-      .fill(index % 2 === 0 ? 'white' : COLORS.rowAlt)
-      .stroke(COLORS.border);
+    doc.rect(MARGIN, hy, w, rowH).fill(COLORS.tableHead);
     doc.restore();
 
-    const qty = n(line.quantity_with_waste ?? line.quantity, 0);
-    const subtotal = n(line.sub_total, 0);
-    const unitPrice = qty > 0 ? subtotal / qty : 0;
+    let x = MARGIN;
+    doc.font('Helvetica-Bold').fontSize(8).fillColor(COLORS.text);
+    headers.forEach((h, i) => {
+      doc.text(h, x + 6, hy + 7, { width: colWidths[i] - 12, ellipsis: true, lineBreak: false });
+      x += colWidths[i];
+    });
+    doc.x = MARGIN;
+    doc.y = hy + rowH;
+  };
+
+  drawHead();
+
+  lines.forEach((line, i) => {
+    if (doc.y + rowH > doc.page.height - doc.page.margins.bottom - 30) {
+      doc.addPage();
+      drawHead();
+    }
+
+    const ry = doc.y;
+    doc.save();
+    doc.rect(MARGIN, ry, w, rowH)
+      .fillAndStroke(i % 2 === 0 ? COLORS.white : COLORS.rowAlt, COLORS.border);
+    doc.restore();
+
+    const matName   = pickName(line, 'material_name_en', 'material_name_ar', 'material_name');
+    const qty       = n(line.quantity_with_waste ?? line.quantity, 0);
+    const unitSym   = line.unit_symbol || '';
+    const wastePct  = `${(n(line.waste_factor_snapshot, 0) * 100).toFixed(0)}%`;
+    const unitPrice = n(line.unit_price_snapshot, 0);
+    const subtotal  = n(line.sub_total, 0);
 
     const cells = [
-      line.material_name || '-',
-      String(qty),
-      line.unit_symbol || '-',
+      matName,
+      `${fmt(qty)} ${unitSym}`,
+      wastePct,
       formatMoney(unitPrice),
       formatMoney(subtotal),
     ];
 
     let x = MARGIN;
-    cells.forEach((cell, i) => {
-      doc.font('Helvetica').fontSize(8.5).fillColor(COLORS.text)
-        .text(cell, x + 4, doc.y + 5, { width: cols[i] - 8, ellipsis: true });
-      x += cols[i];
+    cells.forEach((cell, ci) => {
+      const isLast = ci === cells.length - 1;
+      doc.font(isLast ? 'Helvetica-Bold' : 'Helvetica')
+        .fontSize(8.5)
+        .fillColor(COLORS.text);
+      doc.text(cell, x + 6, ry + 7, { width: colWidths[ci] - 12, ellipsis: true, lineBreak: false });
+      x += colWidths[ci];
     });
 
-    doc.y += rowH;
+    doc.x = MARGIN;
+    doc.y = ry + rowH;
   });
 
-  doc.y += 8;
+  // Material subtotal row
+  const matTotal = lines.reduce((s, l) => s + n(l.sub_total, 0), 0);
+  const ty = doc.y;
+  doc.save();
+  doc.rect(MARGIN, ty, w, rowH).fill(COLORS.tableHead);
+  doc.restore();
+  doc.font('Helvetica-Bold').fontSize(9).fillColor(COLORS.text);
+  doc.text('Materials Total', MARGIN + 6, ty + 7, { width: w * 0.6, lineBreak: false });
+  doc.font('Helvetica-Bold').fontSize(9).fillColor(COLORS.success);
+  doc.text(formatMoney(matTotal), MARGIN + 6, ty + 7, { width: w - 12, align: 'right', lineBreak: false });
+  doc.x = MARGIN;
+  doc.y = ty + rowH + 10;
 }
+
+function drawLeafTotal(doc, total) {
+  ensureSpace(doc, 32);
+  const w = doc.page.width - MARGIN * 2;
+
+  doc.save();
+  doc.roundedRect(MARGIN, doc.y, w, 28, 4)
+    .fillAndStroke(COLORS.panelBg, COLORS.border);
+  doc.restore();
+
+  const ty = doc.y;
+  doc.font('Helvetica-Bold').fontSize(11).fillColor(COLORS.text);
+  doc.text('Segment Total:', MARGIN + 12, ty + 8, { width: w * 0.5, lineBreak: false });
+  doc.font('Helvetica-Bold').fontSize(11).fillColor(COLORS.success);
+  doc.text(formatMoney(total), MARGIN + 12, ty + 8, { width: w - 24, align: 'right', lineBreak: false });
+
+  doc.x = MARGIN;
+  doc.y = ty + 36;
+}
+
+function drawGrandTotal(doc, total) {
+  ensureSpace(doc, 52);
+  const w = doc.page.width - MARGIN * 2;
+
+  // Divider
+  doc.moveTo(MARGIN, doc.y).lineTo(doc.page.width - MARGIN, doc.y)
+    .strokeColor(COLORS.border).lineWidth(1).stroke();
+  doc.y += 12;
+
+  // Grand total box
+  doc.save();
+  doc.roundedRect(MARGIN, doc.y, w, 40, 6).fill(COLORS.headerBg);
+  doc.restore();
+
+  const bty = doc.y;
+  doc.fillColor(COLORS.white).font('Helvetica-Bold').fontSize(13);
+  doc.text('GRAND TOTAL', MARGIN + 16, bty + 12, { width: w * 0.4, lineBreak: false });
+  doc.fillColor('#4ade80').font('Helvetica-Bold').fontSize(16);
+  doc.text(formatMoney(total), MARGIN + 16, bty + 10, { width: w - 32, align: 'right', lineBreak: false });
+
+  doc.x = MARGIN;
+  doc.y = bty + 52;
+}
+
+// ── Input / Result Row Builders ─────────────────────────────────────────────
 
 function toInputRows(leaf) {
   if (Array.isArray(leaf.input_values_display) && leaf.input_values_display.length > 0) {
@@ -252,8 +429,8 @@ function toInputRows(leaf) {
       value: entry.unit ? `${asText(entry.value)} ${entry.unit}` : asText(entry.value),
     }));
   }
-
-  return objectEntries(leaf.field_values).map(([key, value]) => ({ name: key, value: asText(value) }));
+  const fv = parseJsonSafe(leaf.field_values);
+  return Object.entries(fv).map(([key, value]) => ({ name: key, value: asText(value) }));
 }
 
 function toResultRows(leaf) {
@@ -263,71 +440,78 @@ function toResultRows(leaf) {
       value: asText(entry.value),
     }));
   }
-
-  return objectEntries(leaf.results).map(([key, value]) => ({
+  const res = parseJsonSafe(leaf.results);
+  return Object.entries(res).map(([key, value]) => ({
     name: key.replace(/_/g, ' '),
     value: asText(value),
   }));
 }
 
+// ── Main PDF Generators ─────────────────────────────────────────────────────
+
 function generateDetailedProjectPdf(doc, data) {
-  drawHeader(doc, data);
+  drawReportHeader(doc, data);
 
   const leaves = Array.isArray(data.leaf_calculations) ? data.leaf_calculations : [];
 
   leaves.forEach((leaf, index) => {
-    drawSectionTitle(
-      doc,
-      `Detail ${index + 1} - ${leaf.category_name_en || leaf.category_name_ar || 'Category'}`
-    );
+    const catName = leaf.category_name_en || leaf.category_name_ar || 'Category';
+    drawSectionBanner(doc, `${index + 1}. ${catName}`, index);
 
-    drawInfoLine(doc, 'Formula', leaf.formula_name || '-');
-    drawInfoLine(doc, 'Config', leaf.config_name || '-');
-    drawInfoLine(doc, 'Saved at', leaf.created_at ? new Date(leaf.created_at).toLocaleString() : '-');
-
+    // Metadata
+    const formulaName = leaf.formula_name_en || leaf.formula_name_ar || leaf.formula_name || '-';
+    drawKeyValuePair(doc, 'Formula', formulaName);
+    drawKeyValuePair(doc, 'Configuration', leaf.config_name || 'Default');
+    drawKeyValuePair(doc, 'Calculated On', leaf.created_at ? new Date(leaf.created_at).toLocaleString() : '-');
     doc.y += 6;
-    drawSimpleTable(doc, 'Input Values', toInputRows(leaf));
-    drawSimpleTable(doc, 'Calculated Results', toResultRows(leaf));
+
+    // Tables
+    drawInputsTable(doc, toInputRows(leaf));
+    drawResultsTable(doc, toResultRows(leaf));
     drawMaterialsTable(doc, leaf.material_lines || []);
 
-    ensureSpace(doc, 20);
-    doc.font('Helvetica-Bold').fontSize(11).fillColor(COLORS.text)
-      .text(`Leaf Total: ${formatMoney(leaf.leaf_total)}`, MARGIN, doc.y, { align: 'right' });
-    doc.y += 14;
+    // Leaf total
+    drawLeafTotal(doc, n(leaf.leaf_total, 0));
   });
 
-  ensureSpace(doc, 30);
-  doc.moveTo(MARGIN, doc.y).lineTo(doc.page.width - MARGIN, doc.y).strokeColor(COLORS.border).stroke();
-  doc.y += 8;
-  doc.font('Helvetica-Bold').fontSize(16).fillColor(COLORS.danger)
-    .text(`Grand Total: ${formatMoney(data.total_cost)}`, MARGIN, doc.y, { align: 'right' });
+  // Grand total
+  drawGrandTotal(doc, n(data.total_cost, 0));
 }
 
 function generateLegacyPdf(doc, data) {
-  drawHeader(doc, data);
-  drawSectionTitle(doc, data.categoryName || 'Estimation');
+  drawReportHeader(doc, data);
+  drawSectionBanner(doc, data.categoryName || 'Estimation', 0);
 
-  const inputRows = objectEntries(data.dimensions).map(([key, value]) => ({ name: key, value: asText(value) }));
-  drawSimpleTable(doc, 'Input Values', inputRows);
+  const inputRows = Object.entries(parseJsonSafe(data.dimensions))
+    .map(([key, value]) => ({ name: key, value: asText(value) }));
+  drawInputsTable(doc, inputRows);
 
-  const resultRows = (Array.isArray(data.intermediateResults) ? data.intermediateResults : []).map((r) => ({
-    name: r.label || r.output_key || 'result',
-    value: r.unit ? `${asText(r.value)} ${r.unit}` : asText(r.value),
-  }));
-  drawSimpleTable(doc, 'Calculated Results', resultRows);
+  const resultRows = (Array.isArray(data.intermediateResults) ? data.intermediateResults : [])
+    .map((r) => ({
+      name: r.label || r.output_key || 'result',
+      value: r.unit ? `${asText(r.value)} ${r.unit}` : asText(r.value),
+    }));
+  drawResultsTable(doc, resultRows);
 
   drawMaterialsTable(doc, data.material_lines || []);
-
-  ensureSpace(doc, 30);
-  doc.font('Helvetica-Bold').fontSize(16).fillColor(COLORS.danger)
-    .text(`Grand Total: ${formatMoney(data.total_cost)}`, MARGIN, doc.y, { align: 'right' });
+  drawGrandTotal(doc, n(data.total_cost, 0));
 }
+
+// ── Public API ──────────────────────────────────────────────────────────────
 
 const generatePDF = (data) =>
   new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ margin: MARGIN });
-    const chunks = [];
+    const doc = new PDFDocument({
+      margin: MARGIN,
+      size: 'A4',
+      bufferPages: true,   // needed for page numbering
+      info: {
+        Title: `Estimation Report - ${data?.projectName || 'Project'}`,
+        Author: 'APEX Estimation Platform',
+      },
+    });
 
+    const chunks = [];
     doc.on('data', (chunk) => chunks.push(chunk));
     doc.on('end', () => resolve(Buffer.concat(chunks)));
     doc.on('error', reject);
@@ -338,6 +522,7 @@ const generatePDF = (data) =>
       generateLegacyPdf(doc, data || {});
     }
 
+    addFooter(doc);
     doc.end();
   });
 
