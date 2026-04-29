@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Outlet, Link } from "react-router-dom";
-import { Bot as BotIcon } from "lucide-react";
+import { Outlet, Link, NavLink } from "react-router-dom";
+import { Bot as BotIcon, BookOpen } from "lucide-react";
 import AIChatbot from "@/components/AIChatbot";
 import { useAuthContext } from "@/contexts/AuthContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -34,6 +34,19 @@ const UserLayout = () => {
 
           {/* Action Area */}
           <div className="flex items-center gap-3">
+            <NavLink
+              to="/articles"
+              className={({ isActive }) =>
+                `hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold transition-colors px-3 py-1.5 rounded-lg ${
+                  isActive
+                    ? "text-primary bg-primary/8"
+                    : "text-slate-600 hover:text-primary hover:bg-primary/5"
+                }`
+              }
+            >
+              <BookOpen className="w-4 h-4" />
+              Articles
+            </NavLink>
             <LanguageSwitcher variant="minimal" />
             <button 
               onClick={() => setIsChatOpen(true)}

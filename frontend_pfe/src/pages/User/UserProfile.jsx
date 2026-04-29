@@ -2,8 +2,8 @@ import React from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useUsage, useMySubscription } from "@/hooks/useSubscription";
 import { useLogout } from "@/hooks/useAuth";
-// Added Calculator icon here
-import { User, Mail, Shield, Calendar, LogOut, CreditCard, Activity, Package, Bot, Calculator, ArrowRight, Loader2 } from "lucide-react";
+import { useMyLiked, useMySaved } from "@/hooks/useBlog";
+import { User, Mail, Shield, Calendar, LogOut, CreditCard, Activity, Package, Bot, Calculator, ArrowRight, Loader2, Heart, Bookmark, BookOpen } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useLocalizedField } from "@/hooks/useLocalizedField";
@@ -17,6 +17,8 @@ const UserProfile = () => {
   const { data: subData } = useMySubscription();
   const logoutMutation = useLogout();
   const navigate = useNavigate();
+  const { data: likedArticles = [], isLoading: likedLoading } = useMyLiked();
+  const { data: savedArticles = [], isLoading: savedLoading } = useMySaved();
 
   const handleLogout = () => {
     logoutMutation.mutate();
@@ -226,6 +228,123 @@ const UserProfile = () => {
                 </div>
               )}
             </div>
+
+            {/* Liked Articles */}
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <Heart className="w-5 h-5 text-red-500" />
+                  <h3 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-sm">{t("profile.likedArticles")}</h3>
+                </div>
+                {likedArticles.length > 0 && (
+                  <Link to="/articles" className="text-xs text-primary hover:underline font-medium flex items-center gap-1">
+                    {t("profile.viewAll")} <ArrowRight className="w-3 h-3 rtl:rotate-180" />
+                  </Link>
+                )}
+              </div>
+
+              {likedLoading ? (
+                <div className="py-8 flex justify-center text-slate-400">
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                </div>
+              ) : likedArticles.length === 0 ? (
+                <div className="py-8 text-center">
+                  <Heart className="w-10 h-10 text-slate-200 mx-auto mb-3" />
+                  <p className="text-sm text-slate-400">{t("profile.noLiked")}</p>
+                  <Link to="/articles" className="text-xs text-primary hover:underline mt-2 inline-block">{t("profile.browseArticles")}</Link>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {likedArticles.slice(0, 5).map((article) => (
+                    <Link
+                      key={article.article_id}
+                      to={`/articles/${article.slug}`}
+                      className="group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border border-transparent hover:border-slate-100 dark:hover:border-slate-800"
+                    >
+                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 flex-shrink-0">
+                        {article.cover_img ? (
+                          <img src={article.cover_img} alt={article.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-slate-300">
+                            <BookOpen className="w-5 h-5" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 line-clamp-1 group-hover:text-primary transition-colors">
+                          {article.title}
+                        </h4>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[11px] text-slate-400 flex items-center gap-1">
+                            <Heart className="w-3 h-3" /> {article.likes_count}
+                          </span>
+                        </div>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-primary group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 rtl:rotate-180 transition-all flex-shrink-0" />
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Saved Articles */}
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <Bookmark className="w-5 h-5 text-yellow-500" />
+                  <h3 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-sm">{t("profile.savedArticles")}</h3>
+                </div>
+                {savedArticles.length > 0 && (
+                  <Link to="/articles" className="text-xs text-primary hover:underline font-medium flex items-center gap-1">
+                    {t("profile.viewAll")} <ArrowRight className="w-3 h-3 rtl:rotate-180" />
+                  </Link>
+                )}
+              </div>
+
+              {savedLoading ? (
+                <div className="py-8 flex justify-center text-slate-400">
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                </div>
+              ) : savedArticles.length === 0 ? (
+                <div className="py-8 text-center">
+                  <Bookmark className="w-10 h-10 text-slate-200 mx-auto mb-3" />
+                  <p className="text-sm text-slate-400">{t("profile.noSaved")}</p>
+                  <Link to="/articles" className="text-xs text-primary hover:underline mt-2 inline-block">{t("profile.browseArticles")}</Link>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {savedArticles.slice(0, 5).map((article) => (
+                    <Link
+                      key={article.article_id}
+                      to={`/articles/${article.slug}`}
+                      className="group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border border-transparent hover:border-slate-100 dark:hover:border-slate-800"
+                    >
+                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 flex-shrink-0">
+                        {article.cover_img ? (
+                          <img src={article.cover_img} alt={article.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-slate-300">
+                            <BookOpen className="w-5 h-5" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 line-clamp-1 group-hover:text-primary transition-colors">
+                          {article.title}
+                        </h4>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[11px] text-slate-400">
+                            {t("profile.saved")} {article.saved_at ? new Date(article.saved_at).toLocaleDateString() : ''}
+                          </span>
+                        </div>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-primary group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 rtl:rotate-180 transition-all flex-shrink-0" />
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
         </div>
       </div>
     </div>

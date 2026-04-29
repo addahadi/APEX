@@ -1,65 +1,64 @@
 import { NavLink, Outlet, Link, useLocation } from "react-router-dom";
 import { Plus } from "lucide-react";
-import { P } from "../../lib/design-tokens";
-import { Btn, SectionTitle } from "../../components/admin/ui-atoms.jsx"; 
-
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export default function ArticleLayout() {
   const location = useLocation(); 
   const isEditor =
-  location.pathname.includes("/articles/new") ||
-  (location.pathname.includes("/articles/") &&
-   location.pathname.includes("/edit"));
-  const tabStyle = ({ isActive }) => ({
-    padding: "10px 20px",
-    background: "none",
-    border: "none",
-    borderBottom: `2px solid ${isActive ? P.main : "transparent"}`,
-    color: isActive ? P.main : P.txt3,
-    fontSize: 14,
-    fontFamily: P.font,
-    cursor: "pointer",
-    fontWeight: isActive ? 600 : 400,
-    transition: "all .15s",
-    marginBottom: -1,
-    textDecoration: "none",
-    display: "inline-block"
-  });
+    location.pathname.includes("/articles/new") ||
+    (location.pathname.includes("/articles/") && location.pathname.includes("/edit"));
+
+  const tabClass = ({ isActive }) => cn(
+    "px-4 py-2.5 text-sm font-medium transition-all relative whitespace-nowrap",
+    isActive 
+      ? "text-primary border-b-2 border-primary" 
+      : "text-muted-foreground hover:text-foreground border-b-2 border-transparent"
+  );
 
   return (
-    <div style={{ padding: "28px 30px", animation: "fadeUp .3s ease" }}>
-      
-      {/*  Header */}
-      <SectionTitle 
-        title="Articles" 
-        subtitle="Content management & tags"
-        action={
-          <Link to="/admin/articles/new">
-            <Btn icon={<Plus size={14}/>}>New Article</Btn>
-          </Link>
-        } 
-      />
-
-      {/* ✅ Tabs */}
-      <div style={{ display: "flex", borderBottom: `1px solid ${P.border}`, marginBottom: 24 }}>
+    <div className="flex flex-1 overflow-hidden h-full flex-col">
+      <div className="flex-1 overflow-y-auto p-7 animate-in fade-in slide-in-from-bottom-2 duration-300">
         
-        <NavLink to="/admin/articles" end style={tabStyle}>
-          All Articles
-        </NavLink>
+        {/* Header */}
+        <div className="flex justify-between items-end mb-8">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Blog System</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Content management & tags
+            </p>
+          </div>
+          
+          <Link to="/admin/articles/new">
+            <Button size="sm" className="gap-2">
+              <Plus className="h-4 w-4" />
+              New Article
+            </Button>
+          </Link>
+        </div>
 
-        <NavLink to="/admin/articles/tags" style={tabStyle}>
-          Tags
-        </NavLink>
-        {isEditor && (
-  <span style={{ ...tabStyle({ isActive: true }), cursor: "default" }}>
-    {location.pathname.includes("edit") ? "Edit Article" : "New Article"}
-  </span>
-)}
+        {/* Tabs */}
+        <div className="flex border-b mb-6 overflow-x-auto no-scrollbar">
+          <NavLink to="/admin/articles" end className={tabClass}>
+            All Articles
+          </NavLink>
+          <NavLink to="/admin/articles/tags" className={tabClass}>
+            Tags
+          </NavLink>
+          
+          {isEditor && (
+            <span className={cn(tabClass({ isActive: true }), "cursor-default border-primary text-primary")}>
+              {location.pathname.includes("edit") ? "Edit Article" : "New Article"}
+            </span>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="pb-10">
+          <Outlet />
+        </div>
+
       </div>
-
-      {/* ✅ Content (يتبدل حسب route) */}
-      <Outlet />
-
     </div>
   );
 }

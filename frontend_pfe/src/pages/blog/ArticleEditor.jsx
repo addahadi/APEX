@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import React, { useState, useEffect } from "react";
-import { getTags, createArticle, updateArticle } from "../../services/blog.service";
-import { Save, Globe, ImageIcon, X, Tag, ArrowLeft } from "lucide-react";
+import { useAdminTags, useCreateArticle, useUpdateArticle, useArticleTypes } from "@/hooks/useBlog";
+import { Save, Globe, ImageIcon, X, Tag, ArrowLeft, Loader2, Info } from "lucide-react";
 import { $getRoot } from "lexical";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
@@ -25,7 +25,15 @@ import { ImageNode } from "../../lexical/ImageNode.jsx";
 import ImagePlugin from "../../lexical/ImagePlugin";
 import ToolbarPlugin from "../../lexical/ToolbarPlugin";
 import PreFillPlugin from "../../lexical/PreFillPlugin";
-import { Toast, CharacterCountDisplay, TagSelector } from "../../components/Blog";
+import { CharacterCountDisplay, TagSelector } from "../../components/Blog";
+import { toast } from "sonner";
+
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 const editorTheme = {
   heading: { h1: "editor-h1", h2: "editor-h2", h3: "editor-h3" },
@@ -43,7 +51,7 @@ const editorTheme = {
 };
 
 const URL_REGEX = /((https?:\/\/(www\.)?)|(www\.))[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
-const EMAIL_REGEX = /(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/;
+const EMAIL_REGEX = /(([^<>()[\]\\.,;:\s@"]+(\\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/;
 const AUTO_LINK_MATCHERS = [
   (text) => { const m = URL_REGEX.exec(text); if (!m) return null; const f = m[0]; return { index: m.index, length: f.length, text: f, url: f.startsWith("http") ? f : `https://${f}` }; },
   (text) => { const m = EMAIL_REGEX.exec(text); if (!m) return null; const f = m[0]; return { index: m.index, length: f.length, text: f, url: `mailto:${f}` }; },
@@ -51,37 +59,52 @@ const AUTO_LINK_MATCHERS = [
 
 const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation = false }) => {
 
-
   const isEditMode = !!articleToEdit;
 
-  const [availableTags] = useState(getTags());
+  // ── API hooks ──
+  const { data: availableTagsRaw = [] } = useAdminTags();
+  const { data: articleTypesRaw = [] } = useArticleTypes();
+  const createMutation = useCreateArticle();
+  const updateMutation = useUpdateArticle();
+
+  // Transform tags to match the old { id, name } format used by TagSelector
+  const availableTags = availableTagsRaw.map((t) => ({
+    id: t.tag_id,
+    name: t.name,
+  }));
+
+  // Article types for the type selector
+  const articleTypes = articleTypesRaw;
+
   const [selectedTags, setSelectedTags] = useState(() => {
     if (!isEditMode) return [];
-    const rawTags = articleToEdit.tag_ids ?? articleToEdit.tags ?? [];
-    const allTags = getTags();
-    const areIds = rawTags.every((t) => allTags.some((tag) => tag.id === t));
-    if (areIds) return rawTags;
-    return rawTags.map((name) => allTags.find((tag) => tag.name === name)?.id).filter(Boolean);
+    // tags come as [{ tag_id, name }, ...]
+    const rawTags = articleToEdit.tags ?? [];
+    return rawTags.map((t) => t.tag_id).filter(Boolean);
   });
 
   const [title, setTitle] = useState(isEditMode ? articleToEdit.title : "");
-  const [excerpt, setExcerpt] = useState(isEditMode ? (articleToEdit.excerpt ?? articleToEdit.description ?? "") : "");
-  const [type, setType] = useState(isEditMode ? articleToEdit.type : "BLOG");
+  const [excerpt, setExcerpt] = useState(isEditMode ? (articleToEdit.excerpt ?? "") : "");
+  const [type, setType] = useState(() => {
+    if (!isEditMode) return articleTypes[0]?.name || "BLOG";
+    return articleToEdit.type || "BLOG";
+  });
   const [status, setStatus] = useState(isEditMode ? articleToEdit.status : "DRAFT");
   const [coverImage, setCoverImage] = useState(isEditMode ? articleToEdit.cover_img : null);
   const [editorState, setEditorState] = useState(null);
   const [wordCount, setWordCount] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
-  const [toast, setToast] = useState(null);
   const [errors, setErrors] = useState({});
-  const [editorKey,] = useState(0); // Force re-render if needed
+  const [editorKey,] = useState(0);
 
-  // Toast helper
-  const showToast = (message, type = "success") => {
-    setToast({ message, type });
+  const showToast = (message, toastType = "success") => {
+    if (toastType === "error") {
+      toast.error(message);
+    } else {
+      toast.success(message);
+    }
   };
 
-  // Validation function
   const validateForPublish = (showMessages = true) => {
     const newErrors = {};
 
@@ -97,7 +120,6 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
       newErrors.coverImage = "Cover image is required for publishing";
     }
 
-    // Check content
     if (editorState) {
       editorState.read(() => {
         const textContent = $getRoot().getTextContent().trim();
@@ -106,7 +128,6 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
         }
       });
     } else {
-      // If no editor state yet, check if we have initial content from article
       if (!articleToEdit?.content || articleToEdit.content === "{}" || articleToEdit.content === "") {
         newErrors.content = "Content is required for publishing";
       }
@@ -117,12 +138,10 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
     if (showMessages && Object.keys(newErrors).length > 0) {
       showToast("Please complete all required fields before publishing", "error");
 
-      // Scroll to first error after render
       setTimeout(() => {
-        const errorElements = document.querySelectorAll('.border-red-500, .ring-red-500, .border-red-400');
+        const errorElements = document.querySelectorAll('.border-destructive, .ring-destructive');
         if (errorElements.length > 0) {
           errorElements[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-          // Try to focus the input inside
           const input = errorElements[0].querySelector('input, textarea') || errorElements[0];
           if (input.focus) input.focus();
         }
@@ -132,10 +151,8 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle forceValidation from AdminArticles (when clicking Publish on incomplete article) 
   useEffect(() => {
     if (forceValidation) {
-      // Wait for editor to be ready
       const timer = setTimeout(() => {
         validateForPublish(true);
       }, 300);
@@ -161,10 +178,15 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
       const words = $getRoot().getTextContent().trim().split(/\s+/).filter(Boolean).length;
       setWordCount(words);
     });
-    // Clear content error if user starts typing
     if (errors.content) {
       setErrors(prev => ({ ...prev, content: null }));
     }
+  };
+
+  // Resolve article_type_id from the type name
+  const resolveTypeId = (typeName) => {
+    const found = articleTypes.find((t) => t.name === typeName);
+    return found?.article_type_id ?? null;
   };
 
   const handleSave = async (publish = false) => {
@@ -175,41 +197,43 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
     }
 
     setIsSaving(true);
-    await new Promise((r) => setTimeout(r, 800));
 
     const payload = {
       title: title.trim(),
       slug: slug || "untitled",
       excerpt: excerpt.trim(),
-      type,
+      article_type_id: resolveTypeId(type),
       status: publish ? "PUBLISHED" : "DRAFT",
       tags: selectedTags,
       cover_img: coverImage || "",
       content: editorState ? JSON.stringify(editorState.toJSON()) : (articleToEdit?.content || ""),
     };
 
-    if (isEditMode) {
-      updateArticle(articleToEdit.article_id, payload);
-    } else {
-      createArticle(payload);
-    }
+    try {
+      if (isEditMode) {
+        await updateMutation.mutateAsync({ id: articleToEdit.article_id, data: payload });
+      } else {
+        await createMutation.mutateAsync(payload);
+      }
 
-    setIsSaving(false);
+      if (publish) {
+        setStatus("PUBLISHED");
+        showToast("🎉 Article published successfully!", "success");
+      } else {
+        const action = isEditMode ? "updated" : "saved";
+        showToast(`📝 Draft ${action} successfully!`, "draft");
+      }
 
-    // Fixed toast logic with proper type handling
-    if (publish) {
-      setStatus("PUBLISHED");
-      showToast("🎉 Article published successfully!", "success");
-    } else {
-      // Fixed: Use info or draft type, and ensure isEditMode is checked correctly
-      const action = isEditMode ? "updated" : "saved";
-      showToast(`📝 Draft ${action} successfully!`, "draft");
+      // Auto-close after a short delay for create
+      if (!isEditMode && onClose) {
+        setTimeout(() => onClose(), 1200);
+      }
+    } catch (err) {
+      showToast(err?.response?.data?.error || "Failed to save article", "error");
+    } finally {
+      setIsSaving(false);
     }
   };
-
-  const metaBtn = (active, colorClass) =>
-    `px-4 py-1.5 text-xs font-semibold rounded-lg border-2 transition-all duration-150 select-none ${active ? colorClass : "border-gray-200 text-gray-400 hover:border-gray-300"
-    }`;
 
   const initialConfig = {
     namespace: "ArticleEditor",
@@ -223,8 +247,6 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
 
   return (
     <>
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-
       <style>{`
         .editor-h1 { font-size:2rem; font-weight:700; color:#111827; margin:1rem 0 .5rem; }
         .editor-h2 { font-size:1.5rem; font-weight:700; color:#1f2937; margin:.75rem 0 .4rem; }
@@ -242,40 +264,31 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
         .editor-placeholder { position:absolute; top:0; left:0; right:0; pointer-events:none; color:#9ca3af; }
       `}</style>
 
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-7 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <div className="max-w-6xl mx-auto">
 
-          {/* Back button */}
-          {isEditMode && onClose && (
-            <button
-              onClick={onClose}
-              className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 mb-6 transition-colors group"
-            >
-              <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
-              Back to Articles
-            </button>
-          )}
+          {/* Back button & Edit mode banner */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
 
-          {/* Edit mode banner */}
-          {isEditMode && (
-            <div className="mb-6 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-700">
-              <span className="font-semibold">Editing:</span>
-              <span className="truncate font-medium text-blue-900">{articleToEdit.title}</span>
-              <span className="ml-auto text-xs text-blue-400 font-mono">{articleToEdit.article_id}</span>
-            </div>
-          )}
+            {isEditMode && (
+              <Badge variant="secondary" className="px-3 py-1.5 flex items-center gap-2 bg-primary/5 text-primary border-primary/20 hover:bg-primary/10 transition-colors w-fit">
+                <span className="font-semibold uppercase tracking-wider text-[10px] opacity-70">Editing</span>
+                <span className="truncate max-w-[200px] sm:max-w-[300px]">{articleToEdit.title}</span>
+              </Badge>
+            )}
+          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
             {/* LEFT — Editor */}
-            <div className="lg:col-span-2 space-y-5">
+            <div className="lg:col-span-2 space-y-6">
 
               {/* Title */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Title <span className="text-red-500">*</span>
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Title <span className="text-destructive">*</span>
                 </label>
-                <input
+                <Input
                   type="text"
                   value={title}
                   onChange={(e) => {
@@ -283,33 +296,32 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
                     if (errors.title) setErrors(prev => ({ ...prev, title: null }));
                   }}
                   placeholder="Enter your article title…"
-                  className={`w-full border rounded-xl px-4 py-2.5 text-gray-900 text-lg font-medium placeholder-gray-400 transition-all outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.title ? 'border-red-500 bg-red-50' : 'border-gray-200'
-                    }`}
+                  className={cn("text-lg font-medium py-6", errors.title && "border-destructive focus-visible:ring-destructive")}
                 />
                 {errors.title && (
-                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1 animate-pulse">
-                    <span>●</span> {errors.title}
+                  <p className="text-[13px] font-medium text-destructive flex items-center gap-1.5 animate-in fade-in slide-in-from-top-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-destructive" /> {errors.title}
                   </p>
                 )}
               </div>
 
               {/* Slug */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Slug <span className="font-normal text-gray-400 text-xs">(auto-generated)</span>
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none text-muted-foreground flex items-center gap-2">
+                  Slug <span className="text-[10px] uppercase tracking-wider bg-muted px-1.5 py-0.5 rounded">Auto-generated</span>
                 </label>
-                <div className="flex items-center gap-2 border border-gray-100 rounded-xl px-4 py-2.5 bg-gray-100">
-                  <span className="text-gray-400 text-sm">/articles/</span>
-                  <span className="text-gray-500 text-sm font-mono truncate">{slug || "your-article-title"}</span>
+                <div className="flex items-center h-10 w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+                  <span className="opacity-50">/articles/</span>
+                  <span className="font-mono truncate">{slug || "your-article-title"}</span>
                 </div>
               </div>
 
               {/* Excerpt */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Excerpt <span className="text-red-500">*</span>
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none">
+                  Excerpt <span className="text-destructive">*</span>
                 </label>
-                <textarea
+                <Textarea
                   value={excerpt}
                   onChange={(e) => {
                     setExcerpt(e.target.value);
@@ -318,35 +330,34 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
                   rows={3}
                   maxLength={200}
                   placeholder="Short summary shown in article previews…"
-                  className={`w-full border rounded-xl px-4 py-2.5 resize-none outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 placeholder-gray-400 transition-all ${errors.excerpt ? 'border-red-500 bg-red-50' : 'border-gray-200'
-                    }`}
+                  className={cn("resize-none", errors.excerpt && "border-destructive focus-visible:ring-destructive")}
                 />
-                <div className="flex justify-between mt-0.5">
+                <div className="flex justify-between items-center">
                   {errors.excerpt ? (
-                    <p className="text-red-500 text-xs flex items-center gap-1 animate-pulse">
-                      <span>●</span> {errors.excerpt}
+                    <p className="text-[13px] font-medium text-destructive flex items-center gap-1.5 animate-in fade-in slide-in-from-top-1">
+                      <span className="h-1.5 w-1.5 rounded-full bg-destructive" /> {errors.excerpt}
                     </p>
-                  ) : <span></span>}
-                  <p className="text-xs text-gray-400">{excerpt.length}/200</p>
+                  ) : <span />}
+                  <p className="text-xs text-muted-foreground">{excerpt.length}/200</p>
                 </div>
               </div>
 
               {/* Content */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Content <span className="text-red-500">*</span>
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none">
+                  Content <span className="text-destructive">*</span>
                 </label>
-                <div className={`rounded-xl overflow-hidden transition-all ${errors.content ? 'ring-2 ring-red-500' : ''}`}>
+                <div className={cn("rounded-md overflow-hidden transition-all", errors.content && "ring-1 ring-destructive ring-offset-1")}>
                   <LexicalComposer initialConfig={initialConfig} key={editorKey}>
-                    <div className="border border-gray-200 rounded-xl shadow-sm overflow-visible bg-white">
+                    <div className="border border-input rounded-md overflow-visible bg-background relative flex flex-col">
                       <ToolbarPlugin />
-                      <div className="relative rounded-b-xl">
+                      <div className="relative flex-1">
                         <RichTextPlugin
                           contentEditable={
-                            <ContentEditable className="min-h-[320px] max-h-[600px] overflow-y-auto px-5 py-4 text-gray-800 leading-relaxed outline-none" />
+                            <ContentEditable className="min-h-[350px] max-h-[650px] overflow-y-auto px-5 py-4 text-sm leading-relaxed outline-none" />
                           }
                           placeholder={
-                            <div className="editor-placeholder px-5 py-4 text-gray-400 pointer-events-none">
+                            <div className="editor-placeholder px-5 py-4 text-sm text-muted-foreground pointer-events-none">
                               Start writing your article… (Markdown shortcuts supported)
                             </div>
                           }
@@ -365,7 +376,7 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
                           <PreFillPlugin initialContent={articleToEdit.content} />
                         )}
                       </div>
-                      <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-t border-gray-100 rounded-b-xl text-xs text-gray-400">
+                      <div className="flex items-center justify-between px-4 py-2 bg-muted/30 border-t border-input text-xs text-muted-foreground h-9">
                         <span>{wordCount} words</span>
                         <CharacterCountDisplay limit={10000} />
                       </div>
@@ -373,139 +384,198 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
                   </LexicalComposer>
                 </div>
                 {errors.content && (
-                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1 animate-pulse">
-                    <span>●</span> {errors.content}
+                  <p className="text-[13px] font-medium text-destructive flex items-center gap-1.5 mt-1.5 animate-in fade-in slide-in-from-top-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-destructive" /> {errors.content}
                   </p>
                 )}
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap gap-3 pt-2">
-                <button
+              <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-border">
+                <Button
                   onClick={() => handleSave(false)}
                   disabled={isSaving}
-                  className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-blue-700 active:scale-95 transition-all disabled:opacity-60"
+                  className="gap-2"
                 >
-                  {isSaving ? (
-                    <svg className="animate-spin" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                    </svg>
-                  ) : <Save size={16} />}
+                  {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                   {isEditMode ? "Update Draft" : "Save Draft"}
-                </button>
+                </Button>
 
-                <button
+                <Button
                   onClick={() => handleSave(true)}
                   disabled={isSaving}
-                  className="flex items-center gap-2 border-2 border-green-500 text-green-600 px-5 py-2.5 rounded-xl font-medium hover:bg-green-50 active:scale-95 transition-all disabled:opacity-60"
+                  variant="outline"
+                  className="gap-2 border-primary text-primary hover:bg-primary/5"
                 >
-                  <Globe size={16} /> {isEditMode ? "Update & Publish" : "Publish"}
-                </button>
+                  <Globe className="h-4 w-4" /> 
+                  {isEditMode ? "Update & Publish" : "Publish"}
+                </Button>
 
-                <button
+                <Button
                   onClick={() => onClose ? onClose() : window.history.back()}
-                  className="flex items-center gap-2 text-gray-500 px-5 py-2.5 rounded-xl font-medium hover:bg-gray-100 active:scale-95 transition-all"
+                  variant="ghost"
+                  className="text-muted-foreground"
                 >
                   Cancel
-                </button>
+                </Button>
               </div>
             </div>
 
             {/* RIGHT — Sidebar */}
-            <div className="space-y-5">
+            <div className="space-y-6">
 
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 space-y-5">
-                <h3 className="text-xs font-bold text-gray-400 tracking-widest uppercase">Metadata</h3>
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 mb-2">Type</p>
-                  <div className="flex gap-2">
-                    <button onClick={() => setType("BLOG")} className={metaBtn(type === "BLOG", "border-blue-300 bg-blue-50 text-blue-700")}>Blog</button>
-                    <button onClick={() => setType("ACTUALITE")} className={metaBtn(type === "ACTUALITE", "border-purple-300 bg-purple-50 text-purple-700")}>Actualité</button>
+              <Card className="shadow-none border-border">
+                <CardHeader className="p-4 border-b pb-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <Info className="h-4 w-4 text-muted-foreground" />
+                    Metadata
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 space-y-5">
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Type</label>
+                    <div className="flex gap-2 flex-wrap">
+                      {articleTypes.map((at) => (
+                        <Badge
+                          key={at.article_type_id}
+                          variant={type === at.name ? "default" : "secondary"}
+                          className={cn("cursor-pointer hover:bg-primary/80", type !== at.name && "hover:bg-muted/80")}
+                          onClick={() => setType(at.name)}
+                        >
+                          {at.name}
+                        </Badge>
+                      ))}
+                      {articleTypes.length === 0 && (
+                        <>
+                          <Badge variant={type === "BLOG" ? "default" : "secondary"} className="cursor-pointer" onClick={() => setType("BLOG")}>Blog</Badge>
+                          <Badge variant={type === "ACTUALITE" ? "default" : "secondary"} className="cursor-pointer" onClick={() => setType("ACTUALITE")}>Actualité</Badge>
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 mb-2">Status</p>
-                  <div className="flex gap-2">
-                    <button onClick={() => setStatus("DRAFT")} className={metaBtn(status === "DRAFT", "border-yellow-300 bg-yellow-50 text-yellow-700")}>Draft</button>
-                    <button onClick={() => setStatus("PUBLISHED")} className={metaBtn(status === "PUBLISHED", "border-green-300 bg-green-50 text-green-700")}>Published</button>
+                  
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</label>
+                    <div className="flex gap-2">
+                      <Badge
+                        variant={status === "DRAFT" ? "default" : "secondary"}
+                        className={cn("cursor-pointer", status === "DRAFT" ? "bg-amber-500 hover:bg-amber-600" : "hover:bg-muted/80")}
+                        onClick={() => setStatus("DRAFT")}
+                      >
+                        Draft
+                      </Badge>
+                      <Badge
+                        variant={status === "PUBLISHED" ? "default" : "secondary"}
+                        className={cn("cursor-pointer", status === "PUBLISHED" ? "bg-green-500 hover:bg-green-600 text-white" : "hover:bg-muted/80")}
+                        onClick={() => setStatus("PUBLISHED")}
+                      >
+                        Published
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      {status === "PUBLISHED" ? "Visible to public." : "Hidden from public view."}
+                    </p>
                   </div>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <span className={`w-2 h-2 rounded-full ${status === "PUBLISHED" ? "bg-green-400" : "bg-yellow-400"}`} />
-                  <span className="text-gray-500">{status === "PUBLISHED" ? "Live on site" : "Not yet published"}</span>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-                <div className="flex items-center gap-2 mb-4">
-                  <Tag size={14} className="text-gray-400" />
-                  <h3 className="text-xs font-bold text-gray-400 tracking-widest uppercase">Tags</h3>
-                </div>
-                <TagSelector options={availableTags} selected={selectedTags} onChange={setSelectedTags} />
-              </div>
+              <Card className="shadow-none border-border">
+                <CardHeader className="p-4 border-b pb-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <Tag className="h-4 w-4 text-muted-foreground" />
+                    Tags
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <TagSelector options={availableTags} selected={selectedTags} onChange={setSelectedTags} />
+                </CardContent>
+              </Card>
 
               {/* Cover Image */}
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-                <h3 className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-4">
-                  Cover Image <span className="text-red-500">*</span>
-                </h3>
-                <input
-                  type="file"
-                  accept="image/*"
-                  id="cover-upload"
-                  className="hidden"
-                  onChange={handleImageChange}
-                />
-                <label
-                  htmlFor="cover-upload"
-                  className={`relative group block border-2 border-dashed h-36 rounded-xl cursor-pointer overflow-hidden transition-all ${errors.coverImage ? 'border-red-400 bg-red-50' : 'border-gray-200 hover:border-blue-400'
-                    }`}
-                >
-                  {coverImage ? (
-                    <>
-                      <img src={coverImage} alt="cover" className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <span className="text-white text-xs font-medium">Change Image</span>
+              <Card className="shadow-none border-border">
+                <CardHeader className="p-4 border-b pb-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                    Cover Image <span className="text-destructive">*</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="cover-upload"
+                    className="hidden"
+                    onChange={handleImageChange}
+                  />
+                  <label
+                    htmlFor="cover-upload"
+                    className={cn(
+                      "relative group block border-2 border-dashed h-36 rounded-md cursor-pointer overflow-hidden transition-all bg-muted/20",
+                      errors.coverImage ? "border-destructive bg-destructive/5" : "border-muted-foreground/20 hover:border-primary/50 hover:bg-muted/40"
+                    )}
+                  >
+                    {coverImage ? (
+                      <>
+                        <img src={coverImage} alt="cover" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 backdrop-blur-sm">
+                          <ImageIcon className="h-6 w-6 text-foreground" />
+                          <span className="text-foreground text-xs font-medium">Change Image</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="h-full flex flex-col items-center justify-center gap-2 text-muted-foreground group-hover:text-primary transition-colors">
+                        <ImageIcon className="h-6 w-6 opacity-50 group-hover:opacity-100" />
+                        <span className="text-xs font-medium">Click to upload</span>
+                        <span className="text-[10px] opacity-60 uppercase tracking-wider">PNG, JPG, WebP</span>
                       </div>
-                    </>
-                  ) : (
-                    <div className="h-full flex flex-col items-center justify-center gap-2 text-gray-400 group-hover:text-blue-500 transition-colors">
-                      <ImageIcon size={22} />
-                      <span className="text-xs font-medium">Click to upload</span>
-                      <span className="text-xs opacity-60">PNG, JPG, WebP</span>
+                    )}
+                  </label>
+                  {errors.coverImage && (
+                    <p className="text-[13px] font-medium text-destructive flex items-center gap-1.5 mt-2 animate-in fade-in slide-in-from-top-1">
+                      <span className="h-1.5 w-1.5 rounded-full bg-destructive" /> {errors.coverImage}
+                    </p>
+                  )}
+                  {coverImage && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full mt-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCoverImage(null);
+                        if (errors.coverImage) setErrors(prev => ({ ...prev, coverImage: null }));
+                      }}
+                    >
+                      <X className="mr-2 h-3.5 w-3.5" /> Remove image
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Stats/Info */}
+              <Card className="shadow-none border-border bg-muted/20">
+                <CardContent className="p-4 space-y-2 text-[13px]">
+                  <div className="flex justify-between items-center py-1">
+                    <span className="text-muted-foreground">Words</span>
+                    <span className="font-semibold text-foreground">{wordCount}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-1 border-t border-border/50">
+                    <span className="text-muted-foreground">Reading time</span>
+                    <span className="font-semibold text-foreground">~{Math.max(1, Math.round(wordCount / 200))} min</span>
+                  </div>
+                  <div className="flex justify-between items-center py-1 border-t border-border/50">
+                    <span className="text-muted-foreground">Tags count</span>
+                    <span className="font-semibold text-foreground">{selectedTags.length}</span>
+                  </div>
+                  {isEditMode && (
+                    <div className="flex justify-between items-center py-1 border-t border-border/50">
+                      <span className="text-muted-foreground">Article ID</span>
+                      <span className="font-mono text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded truncate max-w-[120px]">{articleToEdit.article_id}</span>
                     </div>
                   )}
-                </label>
-                {errors.coverImage && (
-                  <p className="text-red-500 text-xs mt-2 flex items-center gap-1 animate-pulse">
-                    <span>●</span> {errors.coverImage}
-                  </p>
-                )}
-                {coverImage && (
-                  <button
-                    onClick={() => {
-                      setCoverImage(null);
-                      if (errors.coverImage) setErrors(prev => ({ ...prev, coverImage: null }));
-                    }}
-                    className="mt-2 flex items-center gap-1 text-xs text-red-400 hover:text-red-600 transition-colors"
-                  >
-                    <X size={12} /> Remove image
-                  </button>
-                )}
-              </div>
+                </CardContent>
+              </Card>
 
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 space-y-2 text-xs text-gray-500">
-                <h3 className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-3">Info</h3>
-                <div className="flex justify-between"><span>Words</span><span className="font-medium text-gray-700">{wordCount}</span></div>
-                <div className="flex justify-between"><span>Reading time</span><span className="font-medium text-gray-700">~{Math.max(1, Math.round(wordCount / 200))} min</span></div>
-                <div className="flex justify-between"><span>Tags</span><span className="font-medium text-gray-700">{selectedTags.length}</span></div>
-                {isEditMode && (
-                  <div className="flex justify-between pt-1 border-t border-gray-100 mt-1">
-                    <span>Article ID</span>
-                    <span className="font-mono text-gray-400 text-[10px]">{articleToEdit.article_id}</span>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         </div>

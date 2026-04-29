@@ -137,7 +137,14 @@
     "unlimited": "Unlimited",
     "logout": "Sign Out",
     "switchSubscription": "Switch Subscription",
-    "freeTier": "Free Tier"
+    "freeTier": "Free Tier",
+    "likedArticles": "Liked Articles",
+    "savedArticles": "Saved Articles",
+    "viewAll": "View all",
+    "noLiked": "No liked articles yet",
+    "noSaved": "No saved articles yet",
+    "browseArticles": "Browse articles",
+    "saved": "Saved"
   },
   "chatbot": {
     "name": "APEX Assistant",

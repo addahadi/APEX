@@ -137,7 +137,14 @@
     "unlimited": "غير محدود",
     "logout": "تسجيل الخروج",
     "switchSubscription": "تغيير الاشتراك",
-    "freeTier": "الباقة المجانية"
+    "freeTier": "الباقة المجانية",
+    "likedArticles": "المقالات المعجب بها",
+    "savedArticles": "المقالات المحفوظة",
+    "viewAll": "عرض الكل",
+    "noLiked": "لا توجد مقالات معجب بها بعد",
+    "noSaved": "لا توجد مقالات محفوظة بعد",
+    "browseArticles": "تصفح المقالات",
+    "saved": "حُفظ في"
   },
   "chatbot": {
     "name": "مساعد APEX",

@@ -1,53 +1,62 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import { Plus, Trash2, AlertTriangle } from 'lucide-react';
-import { getTagsWithCount, addTag, deleteTag } from "../../services/blog.service";
+import React, { useState, useCallback } from 'react';
+import { Plus, Trash2, AlertTriangle, Loader2 } from 'lucide-react';
+import { useAdminTags, useCreateTag, useDeleteTag } from '@/hooks/useBlog';
+import { toast } from "sonner";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Confirm Dialog
 // ═══════════════════════════════════════════════════════════════════════════════
 const ConfirmDialog = ({ title, message, subMessage, confirmText, cancelText, onConfirm, onCancel, isDanger = true }) => (
   <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
-    <div className="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4 animate-[popIn_0.2s_ease-out]">
-      <div className={`flex items-center justify-center w-12 h-12 rounded-full mx-auto mb-4 ${isDanger ? 'bg-red-100' : 'bg-amber-100'}`}>
+    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={onCancel} />
+    <div className="relative bg-background border rounded-lg shadow-lg p-6 w-full max-w-sm mx-4 animate-in zoom-in-95 duration-200">
+      <div className={`flex items-center justify-center w-12 h-12 rounded-full mx-auto mb-4 ${isDanger ? 'bg-destructive/10' : 'bg-amber-500/10'}`}>
         {isDanger ? (
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="3 6 5 6 21 6" />
-            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-            <path d="M10 11v6M14 11v6" />
-            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-          </svg>
+          <Trash2 size={22} className="text-destructive" />
         ) : (
           <AlertTriangle size={22} className="text-amber-500" />
         )}
       </div>
-      <h3 className="text-center text-gray-900 font-bold text-base mb-1">{title}</h3>
-      <p className="text-center text-gray-500 text-sm mb-1">{message}</p>
+      <h3 className="text-center font-bold text-lg mb-2">{title}</h3>
+      <p className="text-center text-muted-foreground text-sm mb-2">{message}</p>
       {subMessage && (
-        <p className="text-center text-gray-800 font-semibold text-sm mb-5 px-2 truncate">
+        <p className="text-center font-semibold text-sm mb-5 px-2 truncate">
           "{subMessage}"
         </p>
       )}
-      <p className={`text-center text-xs mb-6 ${isDanger ? 'text-red-500' : 'text-gray-400'}`}>
-        This action cannot be undone.
-      </p>
-      <div className="flex gap-3">
+      {isDanger && (
+        <p className="text-center text-xs mb-6 text-destructive font-medium">
+          This action cannot be undone.
+        </p>
+      )}
+      <div className="flex gap-3 mt-6">
         {cancelText && (
-          <button onClick={onCancel} className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors">
+          <Button onClick={onCancel} variant="outline" className="flex-1">
             {cancelText}
-          </button>
+          </Button>
         )}
-        <button
+        <Button
           onClick={onConfirm}
-          className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-white transition-colors ${isDanger ? 'bg-red-500 hover:bg-red-600' : 'bg-amber-500 hover:bg-amber-600'}`}
+          variant={isDanger ? "destructive" : "default"}
+          className="flex-1"
         >
           {confirmText || 'Confirm'}
-        </button>
+        </Button>
       </div>
     </div>
-    <style>{`
-      @keyframes popIn { from { opacity:0; transform:scale(0.92); } to { opacity:1; transform:scale(1); } }
-    `}</style>
   </div>
 );
 
@@ -56,23 +65,24 @@ const ConfirmDialog = ({ title, message, subMessage, confirmText, cancelText, on
 // Main Tags Component
 // ═══════════════════════════════════════════════════════════════════════════════
 const Tags = () => {
-  const [refreshKey, setRefreshKey] = useState(0);
   const [newTagName, setNewTagName] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState(null);
 
-  // ── Use getTagsWithCount so counts are always computed live from articles ──
-  const tags = useMemo(() => getTagsWithCount(), [refreshKey]);
+  const { data: tags = [], isLoading, isFetching } = useAdminTags();
+  const createMutation = useCreateTag();
+  const deleteMutation = useDeleteTag();
+
+  const isProcessing = createMutation.isPending || deleteMutation.isPending;
 
   const closeDialog = useCallback(() => setConfirmDialog(null), []);
 
   const handleDeleteClick = useCallback((tag) => {
-    if (tag.count > 0) {
+    if (tag.articles_count > 0) {
       setConfirmDialog({
         type: 'warning',
         tag,
         title: 'Tag In Use',
-        message: `"${tag.name}" is used in ${tag.count} article${tag.count !== 1 ? 's' : ''}.`,
+        message: `"${tag.name}" is used in ${tag.articles_count} article${tag.articles_count !== 1 ? 's' : ''}.`,
         subMessage: null,
         confirmText: 'OK',
         cancelText: null,
@@ -93,19 +103,20 @@ const Tags = () => {
     }
   }, [closeDialog]);
 
-  const handleConfirmDelete = useCallback(async () => {
+  const handleConfirmDelete = useCallback(() => {
     if (!confirmDialog?.tag) return;
-    setIsLoading(true);
-    try {
-      deleteTag(confirmDialog.tag.id);
-      setRefreshKey(prev => prev + 1);
-    } catch (err) {
-      console.error('Error deleting tag:', err);
-    } finally {
-      setIsLoading(false);
-      setConfirmDialog(null);
-    }
-  }, [confirmDialog]);
+    deleteMutation.mutate(confirmDialog.tag.tag_id, {
+      onSuccess: () => {
+        setConfirmDialog(null);
+        toast.success("Tag deleted successfully");
+      },
+      onError: (err) => {
+        console.error('Error deleting tag:', err);
+        setConfirmDialog(null);
+        toast.error("Failed to delete tag");
+      },
+    });
+  }, [confirmDialog, deleteMutation]);
 
   const handleAddTag = useCallback(() => {
     const trimmed = newTagName.trim();
@@ -126,113 +137,128 @@ const Tags = () => {
       return;
     }
 
-    try {
-      addTag(trimmed);
-      setRefreshKey(prev => prev + 1);
-      setNewTagName("");
-    } catch (err) {
-      console.error('Error adding tag:', err);
-    }
-  }, [newTagName, tags, closeDialog]);
+    createMutation.mutate(trimmed, {
+      onSuccess: () => {
+        setNewTagName("");
+        toast.success("Tag added successfully");
+      },
+      onError: (err) => {
+        console.error('Error adding tag:', err);
+        toast.error(err?.response?.data?.error || "Failed to add tag");
+      },
+    });
+  }, [newTagName, tags, closeDialog, createMutation]);
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-gray-50 min-h-screen">
+    <div className="flex-1 overflow-y-auto animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <div className="w-full">
+        {confirmDialog && (
+          <ConfirmDialog
+            {...confirmDialog}
+            onConfirm={confirmDialog.onConfirm || (confirmDialog.type === 'delete' ? handleConfirmDelete : closeDialog)}
+            onCancel={closeDialog}
+          />
+        )}
 
-      {confirmDialog && (
-        <ConfirmDialog
-          {...confirmDialog}
-          onConfirm={confirmDialog.onConfirm || (confirmDialog.type === 'delete' ? handleConfirmDelete : closeDialog)}
-          onCancel={closeDialog}
-        />
-      )}
 
-      {/* ── Input ── */}
-      <div className="flex gap-2 mb-6">
-        <input
-          type="text"
-          value={newTagName}
-          onChange={(e) => setNewTagName(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
-          placeholder="New tag name..."
-          disabled={isLoading}
-          className="flex-1 px-4 py-3 rounded-lg border border-gray-200 outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm disabled:opacity-50 transition-all"
-        />
-        <button
-          onClick={handleAddTag}
-          disabled={isLoading || !newTagName.trim()}
-          className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg flex items-center gap-2 font-semibold transition-all active:scale-95 disabled:cursor-not-allowed shadow-sm"
-        >
-          <Plus size={20} />
-          Add Tag
-        </button>
-      </div>
+        {/* ── Input ── */}
+        <Card className="mb-6 shadow-sm">
+          <CardContent className="p-4 flex gap-3 sm:items-center flex-col sm:flex-row">
+            <Input
+              type="text"
+              value={newTagName}
+              onChange={(e) => setNewTagName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
+              placeholder="New tag name..."
+              disabled={isProcessing}
+              className="flex-1"
+            />
+            <Button
+              onClick={handleAddTag}
+              disabled={isProcessing || !newTagName.trim()}
+              className="gap-2 shrink-0 w-full sm:w-auto"
+            >
+              {createMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              Add Tag
+            </Button>
+          </CardContent>
+        </Card>
 
-      {/* ── Table ── */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden">
-        <table className="w-full text-left border-collapse">
-          <thead className="bg-gray-50">
-            <tr className="border-b border-gray-200 text-gray-500 text-xs uppercase tracking-wider">
-              <th className="px-6 py-4 font-semibold">Tag Name</th>
-              <th className="px-6 py-4 font-semibold text-center w-32">ID</th>
-              <th className="px-6 py-4 font-semibold text-center w-32">Used in</th>
-              <th className="px-6 py-4 font-semibold text-center w-32">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {tags.map((tag) => (
-              <tr key={tag.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4 font-medium text-gray-900">{tag.name}</td>
-                <td className="px-6 py-4 text-center text-gray-400 font-mono text-xs">{tag.id}</td>
-                <td className="px-6 py-4 text-center">
-                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${tag.count > 0
-                      ? 'bg-blue-50 text-blue-700 border-blue-200'
-                      : 'bg-gray-100 text-gray-500 border-gray-200'
-                    }`}>
-                    {tag.count} {tag.count === 1 ? 'article' : 'articles'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-center">
-                  <button
-                    onClick={() => handleDeleteClick(tag)}
-                    disabled={isLoading}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all border ${tag.count > 0
-                        ? 'border-amber-200 text-amber-600 hover:bg-amber-50 cursor-help'
-                        : 'border-red-200 text-red-600 hover:bg-red-50'
-                      } disabled:opacity-50 disabled:cursor-not-allowed`}
-                  >
-                    {tag.count > 0 ? <AlertTriangle size={14} /> : <Trash2 size={14} />}
-                    {tag.count > 0 ? 'In Use' : 'Delete'}
-                  </button>
-                </td>
-              </tr>
-            ))}
-
-            {tags.length === 0 && (
-              <tr>
-                <td colSpan={4} className="px-6 py-12 text-center text-gray-400">
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
-                      <Plus className="text-gray-400" size={32} />
-                    </div>
-                    <p className="text-sm font-medium">No tags yet</p>
-                    <p className="text-xs text-gray-400">Add your first tag above</p>
-                  </div>
-                </td>
-              </tr>
+        {/* ── Table ── */}
+        <Card className="shadow-sm border-none overflow-hidden relative">
+          <CardContent className="p-0">
+            {/* Loading overlay */}
+            {(isLoading || isFetching) && (
+              <div className="absolute inset-0 bg-background/60 z-10 flex items-center justify-center">
+                <Loader2 className="w-6 h-6 text-primary animate-spin" />
+              </div>
             )}
-          </tbody>
-        </table>
-      </div>
 
-      {/* ── Legend ── */}
-      <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
-        <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-amber-400" />
-          <span>Tags in use cannot be deleted</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-red-400" />
-          <span>Available for deletion</span>
+            <Table>
+              <TableHeader className="bg-muted/50">
+                <TableRow>
+                  <TableHead className="font-semibold h-10 uppercase text-xs tracking-wider">Tag Name</TableHead>
+                  <TableHead className="font-semibold h-10 uppercase text-xs tracking-wider text-center w-32">ID</TableHead>
+                  <TableHead className="font-semibold h-10 uppercase text-xs tracking-wider text-center w-32">Used in</TableHead>
+                  <TableHead className="font-semibold h-10 uppercase text-xs tracking-wider text-center w-32">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {tags.map((tag) => (
+                  <TableRow key={tag.tag_id} className="hover:bg-muted/50 transition-colors">
+                    <TableCell className="font-medium">{tag.name}</TableCell>
+                    <TableCell className="text-center text-muted-foreground font-mono text-xs">
+                      {tag.tag_id?.slice(0, 8)}…
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant={tag.articles_count > 0 ? "default" : "secondary"}>
+                        {tag.articles_count} {tag.articles_count === 1 ? 'article' : 'articles'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Button
+                        variant={tag.articles_count > 0 ? "outline" : "destructive"}
+                        size="sm"
+                        disabled={isProcessing}
+                        onClick={() => handleDeleteClick(tag)}
+                        className={tag.articles_count > 0 ? "text-amber-600 border-amber-500/30 bg-amber-50 hover:bg-amber-100 hover:text-amber-700" : ""}
+                        title={tag.articles_count > 0 ? "Cannot delete tags that are in use" : "Delete this tag"}
+                      >
+                        {tag.articles_count > 0 ? <AlertTriangle className="h-3.5 w-3.5 mr-1" /> : <Trash2 className="h-3.5 w-3.5 mr-1" />}
+                        {tag.articles_count > 0 ? 'In Use' : 'Delete'}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+
+                {!isLoading && tags.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="w-12 h-12 bg-muted/50 rounded-full flex items-center justify-center">
+                          <Tag className="h-5 w-5 text-muted-foreground/50" />
+                        </div>
+                        <p className="text-sm font-medium">No tags yet</p>
+                        <p className="text-xs">Add your first tag above</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        {/* ── Legend ── */}
+        <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-full bg-amber-400" />
+            <span>Tags in use cannot be deleted</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-full bg-destructive" />
+            <span>Available for deletion</span>
+          </div>
         </div>
       </div>
     </div>

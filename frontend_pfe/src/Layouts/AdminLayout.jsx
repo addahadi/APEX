@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation, Link, Outlet } from "react-router-dom";
-import { LayoutDashboard, Users, CreditCard, FileText, FolderOpen, Settings, Package, Zap, Bot } from "lucide-react";
+import { LayoutDashboard, Users, CreditCard, FileText, FolderOpen, Settings, Package, Zap, Bot, BookOpen } from "lucide-react";
 import { Avatar } from "../components/admin/ui-atoms.jsx";
 import { P } from "../lib/design-tokens.js";
 import AIChatbot from "../components/AIChatbot.jsx";
@@ -49,6 +49,15 @@ export default function AdminLayout() {
         <div style={{ flex: 1 }} />
 
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <Link
+            to="/articles"
+            style={{ display: "flex", alignItems: "center", gap: 7, padding: "8px 14px", borderRadius: 8, background: "transparent", color: P.txt2, fontSize: 13, fontFamily: P.font, fontWeight: 600, cursor: "pointer", border: `1px solid ${P.border}`, textDecoration: "none", transition: "all .15s" }}
+            onMouseEnter={e => { e.currentTarget.style.background = P.bg; e.currentTarget.style.color = P.main; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = P.txt2; }}
+          >
+            <BookOpen size={15} /> View Blog
+          </Link>
+
           <button style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 16px", borderRadius: 8, background: P.main, color: "#fff", fontSize: 14, fontFamily: P.font, fontWeight: 600, cursor: "pointer", border: "none", boxShadow: `0 1px 3px rgba(16,78,216,.3)`, transition: "background .15s" }}
             onClick={() => setChatOpen(true)}
             onMouseEnter={e => e.currentTarget.style.background = P.mainD}

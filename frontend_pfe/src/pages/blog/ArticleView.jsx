@@ -1,56 +1,50 @@
-import React, { useState, useEffect, } from "react";
-import { useParams, Link } from "react-router-dom";
-import {
-  Link as LinkIcon,
-
-  ChevronLeft,
-} from "lucide-react";
-import {
-  getLikesCount,
-  getPublishedArticles,
-} from "../../services/blog.service";
+import React, { useState, useEffect, useRef } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { ChevronLeft, Loader2, LayoutDashboard, ShieldCheck, BookOpen } from "lucide-react";
+import { useArticle, useToggleLike, useToggleSave } from "@/hooks/useBlog";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { createEditor } from "lexical";
 import { $generateHtmlFromNodes } from "@lexical/html";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { ListNode, ListItemNode } from "@lexical/list";
 import { CodeNode, CodeHighlightNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
-import { ImageNode } from "../../lexical/ImageNode";
-import { isLexicalJson } from "../../utils/blog.utils";
-import { Hero, TagList, RelatedArticles, PopularTags, ShareSection } from "../../components/Blog";
+import { ImageNode } from "@/lexical/ImageNode";
+import { isLexicalJson } from "@/utils/blog.utils";
+import { Hero, TagList, RelatedArticles, PopularTags, ShareSection } from "@/components/Blog";
+import { toast } from "sonner";
+import { Separator } from "@/components/ui/separator";
 
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+gsap.registerPlugin(ScrollTrigger);
 
 // ── Hook: converts raw content (JSON or HTML) → HTML string ─────────────────
-// Fix: move setState into a microtask / setTimeout so it never fires
-// synchronously inside the effect body, eliminating both "cascading setState"
-// warnings while keeping the conversion logic unchanged.
 const useRenderedContent = (rawContent) => {
   const [html, setHtml] = useState("");
 
   useEffect(() => {
     if (!rawContent) return;
 
-    // Plain HTML — defer the setState so it isn't synchronous in the effect
     if (!isLexicalJson(rawContent)) {
       const id = setTimeout(() => setHtml(rawContent), 0);
       return () => clearTimeout(id);
     }
 
-    // Lexical JSON — convert to HTML (includes ImageNode so <img> tags appear)
     const editor = createEditor({
       nodes: [
         HeadingNode, QuoteNode,
         ListNode, ListItemNode,
         CodeNode, CodeHighlightNode,
         AutoLinkNode, LinkNode,
-        ImageNode, // ← required so the serialiser knows about image nodes
+        ImageNode,
       ],
     });
 
     const parsed = editor.parseEditorState(rawContent);
     editor.setEditorState(parsed);
 
-    // $generateHtmlFromNodes is synchronous; defer the setState call
     let html = "";
     editor.read(() => {
       html = $generateHtmlFromNodes(editor, null);
@@ -63,151 +57,210 @@ const useRenderedContent = (rawContent) => {
   return html;
 };
 
-
-
-// ── Sub Components ───────────────────────────────────────────────────────────
-
-
+// ── Article Content Sub Component ───────────────────────────────────────────
 const ArticleContent = ({ article }) => {
-  const html = useRenderedContent(article.content);
+  const content = typeof article.content === "object"
+    ? JSON.stringify(article.content)
+    : article.content;
+  const html = useRenderedContent(content);
 
   return (
     <div className="prose max-w-none">
-      <p className="text-base md:text-lg text-gray-600 italic leading-relaxed mb-6 border-l-4 border-blue-500 pl-4 bg-blue-50/50 py-2 pr-4 rounded-r-lg">
+      <p className="text-xl md:text-2xl text-slate-500 font-medium leading-relaxed mb-12 border-l-4 border-primary pl-6 py-2 bg-slate-50 rounded-r-2xl">
         {article.excerpt}
       </p>
+      
+      <Separator className="mb-12" />
 
       <div
-        className="text-gray-700 leading-relaxed text-sm md:text-base
-          [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:mt-8 [&_h1]:mb-3
-          [&_h2]:text-xl  [&_h2]:font-bold [&_h2]:text-gray-800 [&_h2]:mt-6 [&_h2]:mb-2
-          [&_h3]:text-lg  [&_h3]:font-semibold [&_h3]:text-gray-700 [&_h3]:mt-5 [&_h3]:mb-2
-          [&_h4]:text-base [&_h4]:font-semibold [&_h4]:text-gray-700 [&_h4]:mt-4 [&_h4]:mb-1
-          [&_p]:mb-4 [&_p]:leading-relaxed
-          [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-4 [&_ul]:space-y-1
-          [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-4 [&_ol]:space-y-1
+        className="text-slate-800 leading-relaxed text-base md:text-lg
+          [&_h1]:text-4xl [&_h1]:font-black [&_h1]:text-slate-900 [&_h1]:mt-12 [&_h1]:mb-6 [&_h1]:tracking-tight
+          [&_h2]:text-3xl [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:mt-10 [&_h2]:mb-4 [&_h2]:tracking-tight
+          [&_h3]:text-2xl [&_h3]:font-bold [&_h3]:text-slate-800 [&_h3]:mt-8 [&_h3]:mb-4
+          [&_h4]:text-xl [&_h4]:font-bold [&_h4]:text-slate-800 [&_h4]:mt-6 [&_h4]:mb-3
+          [&_p]:mb-6 [&_p]:leading-loose
+          [&_ul]:list-disc [&_ul]:pl-8 [&_ul]:mb-6 [&_ul]:space-y-2 [&_ul]:text-slate-700
+          [&_ol]:list-decimal [&_ol]:pl-8 [&_ol]:mb-6 [&_ol]:space-y-2 [&_ol]:text-slate-700
           [&_li]:leading-relaxed
-          [&_blockquote]:border-l-4 [&_blockquote]:border-blue-400 [&_blockquote]:pl-4
-          [&_blockquote]:italic [&_blockquote]:text-gray-500 [&_blockquote]:my-4
-          [&_code]:bg-gray-100 [&_code]:text-red-600 [&_code]:px-1.5 [&_code]:py-0.5
+          [&_blockquote]:border-l-4 [&_blockquote]:border-slate-300 [&_blockquote]:pl-6 [&_blockquote]:py-1
+          [&_blockquote]:italic [&_blockquote]:text-slate-500 [&_blockquote]:my-8 [&_blockquote]:bg-slate-50 [&_blockquote]:rounded-r-xl
+          [&_code]:bg-slate-100 [&_code]:text-primary [&_code]:px-1.5 [&_code]:py-0.5
           [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
-          [&_pre]:bg-gray-900 [&_pre]:text-gray-100 [&_pre]:p-4 [&_pre]:rounded-xl
-          [&_pre]:overflow-x-auto [&_pre]:my-4 [&_pre]:text-sm
-          [&_a]:text-blue-600 [&_a]:underline [&_a]:hover:text-blue-800
-          [&_strong]:font-bold [&_strong]:text-gray-900
+          [&_pre]:bg-slate-900 [&_pre]:text-slate-100 [&_pre]:p-6 [&_pre]:rounded-2xl
+          [&_pre]:overflow-x-auto [&_pre]:my-8 [&_pre]:text-sm
+          [&_a]:text-primary [&_a]:underline [&_a]:hover:text-blue-700 [&_a]:font-medium
+          [&_strong]:font-black [&_strong]:text-slate-900
           [&_em]:italic
-          [&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4 [&_img]:block"
+          [&_img]:max-w-full [&_img]:rounded-2xl [&_img]:my-10 [&_img]:block [&_img]:shadow-xl [&_img]:border [&_img]:border-slate-100"
         dangerouslySetInnerHTML={{ __html: html }}
       />
     </div>
   );
 };
 
-
-
-
-
-
 // ── Main Component ───────────────────────────────────────────────────────────
 
 const ArticleView = () => {
-  const { id } = useParams();
+  const container = useRef();
+  const { id: slug } = useParams();
+  const { isAuthenticated, user } = useAuthContext();
+  const navigate = useNavigate();
 
-  // Fix warning 2: initialise loading as true so we never call setLoading(true)
-  // synchronously inside an effect body.
-  const [loading, setLoading] = useState(true);
-  const [article, setArticle] = useState(null);
-  // eslint-disable-next-line 
-  const [allArticles, setAllArticles] = useState([]);
-  const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [likesCount, setLikesCount] = useState(0);
+  const isAdmin = user?.role === "ADMIN";
+  const dashboardPath = isAdmin ? "/admin" : "/dashboard";
 
-  useEffect(() => {
-    // `loading` is already true from initial state — no synchronous setState here
-    const timer = setTimeout(() => {
-      const published = getPublishedArticles();
-      setAllArticles(published);
+  const handleBack = () => {
+    // Go back in history if there's a previous page, otherwise fall back to /articles
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/articles");
+    }
+  };
 
-      const found = published.find((a) => a.slug === id || a.article_id === id);
-      if (found) {
-        setArticle(found);
-        setLikesCount(getLikesCount(found.article_id));
-        setLiked(false);
-        setSaved(false);
-      }
+  const { data: article, isLoading, isError } = useArticle(slug);
+  const likeMutation = useToggleLike();
+  const saveMutation = useToggleSave();
 
-      setLoading(false);
-    }, 300);
+  useGSAP(() => {
+    if (!isLoading && article) {
+      gsap.from(".article-content-anim", {
+        y: 40,
+        opacity: 0,
+        duration: 1,
+        ease: "power3.out",
+        delay: 0.2
+      });
 
-    return () => clearTimeout(timer);
-  }, [id]);
+      gsap.from(".sidebar-widget", {
+        scrollTrigger: {
+          trigger: ".sidebar-widget",
+          start: "top 80%",
+        },
+        y: 30,
+        opacity: 0,
+        stagger: 0.15,
+        duration: 0.8,
+        ease: "power2.out"
+      });
+    }
+  }, { scope: container, dependencies: [isLoading, article] });
 
   const handleLike = () => {
+    if (!isAuthenticated) {
+      toast.error("Please log in to like articles");
+      return;
+    }
     if (!article) return;
-    setLiked((prev) => !prev);
-    setLikesCount((prev) => (liked ? prev - 1 : prev + 1));
+    likeMutation.mutate(article.article_id);
   };
 
   const handleSave = () => {
+    if (!isAuthenticated) {
+      toast.error("Please log in to save articles");
+      return;
+    }
     if (!article) return;
-    setSaved((prev) => !prev);
+    saveMutation.mutate(article.article_id);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-          <p className="text-gray-500 text-sm">Loading article...</p>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4 bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+          <Loader2 className="w-12 h-12 text-primary animate-spin" />
+          <p className="text-slate-500 font-bold tracking-widest uppercase text-xs">Loading...</p>
         </div>
       </div>
     );
   }
 
-  if (!article) {
+  if (isError || !article) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Article Not Found</h2>
-          <p className="text-gray-500 mb-4">The article you're looking for doesn't exist.</p>
-          <Link
-            to="/articles"
-            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
-          >
-            <ChevronLeft size={18} />
-            Back to Articles
-          </Link>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center bg-white p-12 rounded-[32px] shadow-sm border border-slate-100 max-w-md">
+          <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span className="text-4xl">404</span>
+          </div>
+          <h2 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">Article Not Found</h2>
+          <p className="text-slate-500 mb-8 font-medium">The article you're looking for doesn't exist or has been removed.</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={handleBack}
+              className="inline-flex items-center justify-center px-8 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-black transition-colors shadow-lg"
+            >
+              <ChevronLeft size={18} className="mr-2" />
+              Go Back
+            </button>
+            {isAuthenticated && (
+              <Link
+                to={dashboardPath}
+                className="inline-flex items-center justify-center px-8 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors shadow-lg"
+              >
+                {isAdmin ? <ShieldCheck size={18} className="mr-2" /> : <LayoutDashboard size={18} className="mr-2" />}
+                {isAdmin ? "Admin Panel" : "Dashboard"}
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div ref={container} className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
+        {/* ─── Context-Aware Navigation Bar ─── */}
+        <div className="flex items-center justify-between mb-8">
+          <button
+            onClick={handleBack}
+            className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors group"
+          >
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white border border-slate-200 shadow-sm group-hover:border-primary/30 group-hover:shadow-md transition-all">
+              <ChevronLeft size={16} />
+            </span>
+            <span>Back</span>
+          </button>
+
+          {isAuthenticated && (
+            <Link
+              to={dashboardPath}
+              className="inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700 hover:border-primary/30 hover:text-primary hover:shadow-md transition-all"
+            >
+              {isAdmin
+                ? <><ShieldCheck size={15} className="text-primary" /> Admin Panel</>
+                : <><LayoutDashboard size={15} className="text-primary" /> Dashboard</>
+              }
+            </Link>
+          )}
+        </div>
         <Hero
           article={article}
-          likesCount={likesCount}
-          isLiked={liked}
-          isSaved={saved}
+          likesCount={article.likes_count}
+          isLiked={article.is_liked}
+          isSaved={article.is_saved}
           onLike={handleLike}
           onSave={handleSave}
+          isAuthenticated={isAuthenticated}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          <div className="lg:col-span-2 article-content-anim">
+            <div className="bg-white rounded-[40px] shadow-sm border border-slate-100 p-8 md:p-12 xl:p-16">
               <ArticleContent article={article} />
-              <TagList tags={article.tags} />
+              <TagList tags={article.tags || []} />
               <ShareSection title={article.title} />
             </div>
           </div>
 
           <div className="lg:col-span-1">
-            <div className="sticky top-6 space-y-6">
-              <RelatedArticles currentArticle={article} />
-              <PopularTags />
+            <div className="sticky top-10 space-y-8">
+              <div className="sidebar-widget">
+                <RelatedArticles articles={article.related || []} />
+              </div>
+              <div className="sidebar-widget">
+                <PopularTags />
+              </div>
             </div>
           </div>
         </div>

@@ -22,6 +22,9 @@ import estimationRoutes from './routes/calculation/routes.js';
 // AI routes
 import chatRoutes from './routes/Ai/chat.route.js';
 
+// Blog
+import blogRoutes from './routes/blog.routes.js';
+
 // Admin modules (categories / formulas / fields / outputs / coefficients)
 import modulesRouter from './routes/modules.routes.js';
 
@@ -53,6 +56,9 @@ app.use('/api', estimationRoutes);
 
 // ─── AI Chat ──────────────────────────────────────────────────────────────────
 app.use('/api/ai', chatRoutes);
+
+// ─── Blog ──────────────────────────────────────────────────────────────────────
+app.use('/api/blog', blogRoutes);
 
 // ─── Admin: modules (categories / formulas / formula outputs / fields …) ─────
 app.use('/api/admin/modules', modulesRouter);
