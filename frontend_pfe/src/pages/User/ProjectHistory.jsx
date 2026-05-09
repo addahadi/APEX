@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Clock, Search, Filter, History, Package, Calculator, FileText, Loader2, AlertCircle, TrendingUp, ChevronDown, X, SortAsc, SortDesc, Layers } from "lucide-react";
+import { ArrowLeft, Clock, Search, Filter, History, Package, Calculator, FileText, Loader2, AlertCircle, TrendingUp, ChevronDown, X, SortAsc, SortDesc, Layers, Wrench } from "lucide-react";
 import { useProject, useProjectEstimation } from "@/hooks/useProjects";
 import DynamicIcon from "@/components/DynamicIcon";
 import { useTranslation } from "react-i18next";
@@ -444,6 +444,54 @@ const ProjectHistory = () => {
                                     </div>
                                   )}
                                </div>
+
+                               {/* Service Resources */}
+                               {calc.service_lines && calc.service_lines.length > 0 && (
+                                 <div className="mt-6">
+                                   <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                     <Wrench className="w-4 h-4 text-slate-400" />
+                                     {t('history.serviceLines')}
+                                   </h4>
+                                   <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+                                     <div className="overflow-x-auto">
+                                       <table className="w-full text-left rtl:text-right text-sm whitespace-nowrap">
+                                         <thead className="bg-slate-50 dark:bg-slate-900/80 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200 dark:border-slate-800">
+                                           <tr>
+                                             <th className="px-5 py-3">{t('history.service')}</th>
+                                             <th className="px-5 py-3 text-right rtl:text-left">{t('history.qty')}</th>
+                                             <th className="px-5 py-3 text-right rtl:text-left">{t('history.unitRate')}</th>
+                                             <th className="px-5 py-3 text-right rtl:text-left">{t('history.totalPrice')}</th>
+                                           </tr>
+                                         </thead>
+                                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                                           {calc.service_lines.map(svc => (
+                                             <tr key={svc.detail_id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                                               <td className="px-5 py-4 font-semibold text-slate-800 dark:text-slate-200">
+                                                 {pickLocalizedName(svc, 'service_name_en', 'service_name_ar')}
+                                               </td>
+                                               <td className="px-5 py-4 text-right rtl:text-left font-mono">
+                                                 <span dir="ltr">{svc.quantity?.toFixed(2)}
+                                                   <span className="text-[10px] text-slate-400 ml-1">{svc.unit_symbol}</span>
+                                                 </span>
+                                               </td>
+                                               <td className="px-5 py-4 text-right rtl:text-left font-mono text-xs">
+                                                 <span dir="ltr">{svc.unit_price_snapshot?.toLocaleString()}
+                                                   <span className="text-[9px] opacity-70 ml-1">{tc('currency')}</span>
+                                                 </span>
+                                               </td>
+                                               <td className="px-5 py-4 text-right rtl:text-left font-bold font-mono">
+                                                 <span dir="ltr">{svc.sub_total?.toLocaleString()}
+                                                   <span className="text-[10px] text-slate-400 ml-1">{tc('currency')}</span>
+                                                 </span>
+                                               </td>
+                                             </tr>
+                                           ))}
+                                         </tbody>
+                                       </table>
+                                     </div>
+                                   </div>
+                                 </div>
+                               )}
                             </div>
                             
                         </div>

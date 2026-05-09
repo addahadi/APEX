@@ -115,6 +115,10 @@ const ProjectExplorerLayout = () => {
     }
   }, [categoryId]);
 
+  const activeNode = categoryId ? findNode(treeData, categoryId) : null;
+  const isEstimation = activeNode && (activeNode.category_level === 'SUB_TYPE' || !activeNode.children?.length);
+  const currentLocation = isEstimation ? 'ESTIMATION' : 'CATEGORY_EXPLORER';
+
   const activeRoot = categoryId ? findRootCategory(treeData, categoryId) : null;
   const nodesToRender = treeData;
 
@@ -209,7 +213,7 @@ const ProjectExplorerLayout = () => {
         <AIChatbot 
           isOpen={isChatOpen} 
           onClose={() => setIsChatOpen(false)} 
-          location="ESTIMATION"
+          location={currentLocation}
         />
       </div>
     </div>

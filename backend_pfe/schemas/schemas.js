@@ -46,6 +46,14 @@ export const SaveLeafResultSchema = z.object({
     waste_factor_snapshot: z.number().nonnegative(),
     sub_total:             z.number().nonnegative(),
   })),
+  service_lines: z.array(z.object({
+    service_id:          UUID,
+    service_name:        z.string().optional(),
+    quantity:            z.number().finite(),
+    unit_price_snapshot: z.number().finite(),
+    sub_total:           z.number().finite(),
+    unit_id:             UUID.optional().nullable(),
+  })).optional().default([]),
   leaf_total: z.number().nonnegative(),
 });
 

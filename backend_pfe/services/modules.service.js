@@ -45,12 +45,13 @@ export async function getAdminTree() {
 
 // ── Leaf details ──────────────────────────────────────────────────────────────
 // Returns:
-//   formulas         – NON_MATERIAL formulas (each with fields[] and outputs[])
+//   formulas          – NON_MATERIAL formulas (each with fields[] and outputs[])
 //   material_formulas – MATERIAL formulas (expression only, no fields/outputs)
+//   service_formulas  – SERVICE formulas (expression only, for service quantity computation)
 //   configs, coefficients
 
 export async function getLeafDetails(category_id) {
-  const [[category], formulas, materialFormulas, configs, coefficients] = await Promise.all([
+  const [[category], formulas, materialFormulas, serviceFormulas, configs, coefficients] = await Promise.all([
 
     sql`
       SELECT category_id, parent_id, category_level, name_en, name_ar,
@@ -141,6 +142,24 @@ export async function getLeafDetails(category_id) {
       ORDER  BY f.name_en
     `,
 
+    // SERVICE formulas — expression-only, linked to service_config rows
+    sql`
+      SELECT
+        f.formula_id,
+        f.name_en,
+        f.name_ar,
+        f.expression,
+        f.formula_type,
+        f.version,
+        f.output_unit          AS output_unit_id,
+        u.symbol               AS output_unit_symbol
+      FROM   formulas f
+      LEFT JOIN units u ON u.unit_id = f.output_unit
+      WHERE  f.category_id  = ${category_id}
+        AND  f.formula_type = 'SERVICE'
+      ORDER  BY f.name_en
+    `,
+
     sql`
       SELECT config_id, name, description
       FROM   material_config
@@ -159,7 +178,7 @@ export async function getLeafDetails(category_id) {
   ]);
 
   if (!category) return null;
-  return { ...category, formulas, material_formulas: materialFormulas, configs, coefficients };
+  return { ...category, formulas, material_formulas: materialFormulas, service_formulas: serviceFormulas, configs, coefficients };
 }
 
 // ── Category CRUD ─────────────────────────────────────────────────────────────

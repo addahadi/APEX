@@ -925,18 +925,20 @@ function NewCatModal({ parentId, allNodes, onClose, onCreate, isPending }) {
 function NewFormulaModal({ units, onClose, onSave, isPending }) {
   const [form, setForm] = useState({ name_en: "", name_ar: "", expression: "", output_unit_id: "none", formula_type: "NON_MATERIAL" });
   const isMat = form.formula_type === "MATERIAL";
+  const isSvc = form.formula_type === "SERVICE";
   const valid = form.name_en.trim() && form.expression.trim();
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-xl z-[100]">
         <DialogHeader>
-          <DialogTitle>New {isMat ? "Material" : "Geometry"} Formula</DialogTitle>
+          <DialogTitle>New {isMat ? "Material" : isSvc ? "Service" : "Geometry"} Formula</DialogTitle>
         </DialogHeader>
         <div className="flex gap-0 mb-2 rounded-lg overflow-hidden border">
           {[
             { t: "NON_MATERIAL", label: "NON_MATERIAL", hint: "Geometry — defines shape inputs", icon: <FlaskConical size={14} />, colorClass: "text-primary bg-primary/10", defaultBg: "bg-background" },
-            { t: "MATERIAL",     label: "MATERIAL",     hint: "Quantity — computes resource needs", icon: <Package size={14} />, colorClass: "text-orange-600 bg-orange-50", defaultBg: "bg-background" }
+            { t: "MATERIAL",     label: "MATERIAL",     hint: "Quantity — computes resource needs", icon: <Package size={14} />, colorClass: "text-orange-600 bg-orange-50", defaultBg: "bg-background" },
+            { t: "SERVICE",      label: "SERVICE",      hint: "Service — computes service quantities", icon: <Wrench size={14} />, colorClass: "text-cyan-600 bg-cyan-50", defaultBg: "bg-background" }
           ].map(({ t, label, hint, icon, colorClass, defaultBg }) => (
             <button key={t} onClick={() => setForm(f => ({ ...f, formula_type: t }))} className={cn(
               "flex-1 p-3 text-left transition-colors border-r last:border-r-0 flex gap-2.5",
@@ -954,17 +956,17 @@ function NewFormulaModal({ units, onClose, onSave, isPending }) {
           <BilingualRow valueEN={form.name_en} onChangeEN={v => setForm(f => ({ ...f, name_en: v }))} placeholderEN={isMat ? "e.g. Cement Quantity" : "e.g. Volume Béton"} valueAR={form.name_ar} onChangeAR={v => setForm(f => ({ ...f, name_ar: v }))} placeholderAR={isMat ? "كمية الأسمنت" : "حجم الخرسانة"} />
           <div>
             <div className="text-xs font-semibold text-muted-foreground mb-1.5 flex items-center gap-1">
-              <Braces size={11} /> {isMat ? "Quantity Expression" : "Expression"}
+              <Braces size={11} /> {isMat ? "Quantity Expression" : isSvc ? "Service Expression" : "Expression"}
             </div>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs font-bold select-none pointer-events-none" style={{ color: isMat ? "rgb(234,88,12,0.5)" : "rgb(16,78,216,0.5)" }}>ƒ</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs font-bold select-none pointer-events-none" style={{ color: isMat ? "rgb(234,88,12,0.5)" : isSvc ? "rgb(8,145,178,0.5)" : "rgb(16,78,216,0.5)" }}>ƒ</span>
               <Input
                 value={form.expression}
                 onChange={e => setForm(f => ({ ...f, expression: e.target.value }))}
                 placeholder={isMat ? "e.g. volume_beton * ciment_per_m3" : "e.g. L * l * h"}
                 className={cn(
                   "pl-7 font-mono border-2 h-9",
-                  isMat ? "border-orange-500/30 text-orange-600 focus-visible:ring-orange-500/40" : "border-primary/30 text-primary focus-visible:ring-primary/40"
+                  isMat ? "border-orange-500/30 text-orange-600 focus-visible:ring-orange-500/40" : isSvc ? "border-cyan-500/30 text-cyan-600 focus-visible:ring-cyan-500/40" : "border-primary/30 text-primary focus-visible:ring-primary/40"
                 )}
               />
             </div>
@@ -979,10 +981,16 @@ function NewFormulaModal({ units, onClose, onSave, isPending }) {
               </SelectContent>
             </Select>
           </div>
-          {!isMat && (
+          {!isMat && !isSvc && (
             <div className="text-sm p-3 bg-primary/10 rounded-lg border border-primary/20 text-foreground flex items-start gap-2">
               <BookOpen size={14} className="text-primary shrink-0 mt-0.5" />
               <span>After creating, add <strong>Output keys</strong> so MATERIAL formulas can reference this formula's computed values.</span>
+            </div>
+          )}
+          {isSvc && (
+            <div className="text-sm p-3 bg-cyan-50 rounded-lg border border-cyan-200 text-foreground flex items-start gap-2">
+              <Wrench size={14} className="text-cyan-600 shrink-0 mt-0.5" />
+              <span>This formula will be available to link with services in the <strong>Resources → Services</strong> page.</span>
             </div>
           )}
         </div>
@@ -1185,7 +1193,7 @@ export default function Modules() {
                       <Badge variant={node.is_active ? "default" : "secondary"} className={node.is_active ? "bg-green-100 text-green-700 hover:bg-green-100 border-green-200" : ""}>{node.is_active ? "Active" : "Inactive"}</Badge>
                       {isLeaf && leaf && !leafLoading && (
                         <Badge variant="secondary" className="text-muted-foreground text-[10px]">
-                          {leaf.formulas?.length ?? 0} NON_MAT · {leaf.material_formulas?.length ?? 0} MAT · {leaf.coefficients?.length ?? 0} coef
+                          {leaf.formulas?.length ?? 0} NON_MAT · {leaf.material_formulas?.length ?? 0} MAT · {leaf.service_formulas?.length ?? 0} SVC · {leaf.coefficients?.length ?? 0} coef
                         </Badge>
                       )}
                     </div>
@@ -1345,6 +1353,35 @@ export default function Modules() {
                 </Sec>
               )}
 
+              {/* ── SERVICE Formulas ─────────────────────────────────────── */}
+              {isLeaf && (
+                <Sec
+                  title="Service Formulas (SERVICE)"
+                  icon={<Wrench size={16} />}
+                  accentClass="border-l-cyan-500 text-cyan-600"
+                  subtitle={leafLoading ? "Loading…" : `${leaf?.service_formulas?.length ?? 0} formulas · compute service quantities for labor & equipment`}
+                  action={!leafLoading && (
+                    <Button variant="outline" size="sm" className="h-8 text-xs text-cyan-600 border-cyan-500/30 hover:bg-cyan-50 hover:text-cyan-700" onClick={() => setModal({ type: "formula", formulaType: "SERVICE" })}>
+                      <Plus size={14} className="mr-1.5" /> Add Service Formula
+                    </Button>
+                  )}
+                >
+                  {leafLoading ? (
+                    <div className="flex justify-center p-8"><Spin size={24} /></div>
+                  ) : (leaf?.service_formulas ?? []).length === 0 ? (
+                    <div className="text-sm text-muted-foreground py-8 text-center bg-cyan-50/60 rounded-lg border border-dashed border-cyan-300/50 flex flex-col items-center gap-2">
+                      <Wrench size={24} className="text-cyan-300" />
+                      <span className="text-cyan-800/70">No service formulas yet.</span>
+                      <span className="text-xs max-w-xs text-cyan-700/60">These compute service quantities (e.g. labor hours, equipment usage) and can be linked to services in the Resources tab.</span>
+                    </div>
+                  ) : (
+                    (leaf.service_formulas).map(f => (
+                      <MaterialFormulaCard key={f.formula_id} formula={f} units={units} categoryId={selected} onDelete={() => askDeleteFormula(f)} />
+                    ))
+                  )}
+                </Sec>
+              )}
+
               {/* ── Configurations ───────────────────────────────────────── */}
               {isLeaf && !leafLoading && (
                 <Sec
@@ -1407,7 +1444,7 @@ export default function Modules() {
         <NewCatModal parentId={modal?.type === "cat-child" ? modal.parentId : null} allNodes={allNodes} onClose={() => setModal(null)} onCreate={doCreateCat} isPending={createCat.isPending} />
       )}
       {modal?.type === "formula" && (
-        <NewFormulaModal units={units} onClose={() => setModal(null)} onSave={(dto) => createFml.mutate({ ...dto, formula_type: modal.formulaType }, { onSuccess: () => { setModal(null); showToast(`${modal.formulaType === "MATERIAL" ? "Material" : "Geometry"} formula created`); } })} isPending={createFml.isPending} />
+        <NewFormulaModal units={units} onClose={() => setModal(null)} onSave={(dto) => createFml.mutate({ ...dto, formula_type: modal.formulaType }, { onSuccess: () => { setModal(null); showToast(`${modal.formulaType === "MATERIAL" ? "Material" : modal.formulaType === "SERVICE" ? "Service" : "Geometry"} formula created`); } })} isPending={createFml.isPending} />
       )}
 
       <Dialog open={!!confirm} onOpenChange={(open) => !open && setConfirm(null)}>

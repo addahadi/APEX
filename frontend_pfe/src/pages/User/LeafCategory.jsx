@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Calculator, Save, SlidersHorizontal, Package, Loader2, Play, BarChart2 } from "lucide-react";
+import { Calculator, Save, SlidersHorizontal, Package, Loader2, Play, BarChart2, Wrench } from "lucide-react";
 import { useCalculate, useSaveLeafResult } from "@/hooks/useCategories";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
@@ -127,6 +127,7 @@ const LeafCategory = ({ node }) => {
       field_values: fieldValues,
       results: formattedResults,
       material_lines: calculationResult.material_lines || [],
+      service_lines:  calculationResult.service_lines ?? [],
       leaf_total: calculationResult.total_cost ?? 0,
     }, {
       onSuccess: () => {
@@ -394,6 +395,40 @@ const LeafCategory = ({ node }) => {
                            )}
                          </div>
                       </div>
+
+                      {/* Service Resources */}
+                      {calculationResult.service_lines?.length > 0 && (
+                        <div>
+                          <div className="flex items-center gap-2 mb-3">
+                            <Wrench className="w-4 h-4 text-blue-300"/>
+                            <h5 className="text-xs font-bold text-white uppercase tracking-wider">
+                              {t('leaf.requiredServices')}
+                            </h5>
+                          </div>
+                          <div className="space-y-2">
+                            {calculationResult.service_lines.map((svc, idx) => (
+                              <div key={idx} className="flex justify-between items-center
+                                bg-blue-800/40 rounded-xl p-3 border border-blue-700/50
+                                hover:bg-blue-700/50 transition-colors">
+                                <div className="flex-1 pr-2 rtl:pl-2 rtl:pr-0">
+                                  <div className="font-semibold text-sm truncate">{localize(svc, 'service_name')}</div>
+                                  <div className="text-[10px] text-blue-300 font-mono mt-0.5">
+                                    <span dir="ltr">{svc.unit_price?.toLocaleString()} {tc('currency')}/{svc.unit_symbol}</span>
+                                  </div>
+                                </div>
+                                <div className="text-right rtl:text-left shrink-0">
+                                  <div className="font-bold text-sm" dir="ltr">
+                                    {svc.quantity?.toFixed(2)} {svc.unit_symbol}
+                                  </div>
+                                  <div className="text-[10px] text-blue-200 font-mono mt-0.5">
+                                    <span dir="ltr">{svc.sub_total?.toLocaleString()} {tc('currency')}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
                       {/* Grand Total */}
                       <div className="pt-5 border-t border-blue-500/50 flex justify-between items-center mt-2">

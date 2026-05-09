@@ -377,6 +377,94 @@ function drawMaterialsTable(doc, lines = []) {
   doc.y = ty + rowH + 10;
 }
 
+function drawServicesTable(doc, lines = []) {
+  if (!Array.isArray(lines) || lines.length === 0) return;
+
+  ensureSpace(doc, 60);
+  doc.font('Helvetica-Bold').fillColor(COLORS.text).fontSize(10)
+    .text('Service Resources', MARGIN + 8, doc.y);
+  doc.y += 8;
+
+  const w = doc.page.width - MARGIN * 2;
+  // Columns: Service | Qty | Unit Price | Subtotal
+  const colWidths = [0.45, 0.15, 0.20, 0.20].map(r => Math.floor(w * r));
+  // Adjust last col to fill remaining
+  colWidths[colWidths.length - 1] = w - colWidths.slice(0, -1).reduce((a, b) => a + b, 0);
+  const rowH = 24;
+  const headers = ['Service', 'Quantity', 'Unit Price', 'Subtotal'];
+
+  const drawHead = () => {
+    ensureSpace(doc, rowH + 4);
+    const hy = doc.y;
+    doc.save();
+    doc.rect(MARGIN, hy, w, rowH).fill(COLORS.tableHead);
+    doc.restore();
+
+    let x = MARGIN;
+    doc.font('Helvetica-Bold').fontSize(8).fillColor(COLORS.text);
+    headers.forEach((h, i) => {
+      doc.text(h, x + 6, hy + 7, { width: colWidths[i] - 12, ellipsis: true, lineBreak: false });
+      x += colWidths[i];
+    });
+    doc.x = MARGIN;
+    doc.y = hy + rowH;
+  };
+
+  drawHead();
+
+  lines.forEach((line, i) => {
+    if (doc.y + rowH > doc.page.height - doc.page.margins.bottom - 30) {
+      doc.addPage();
+      drawHead();
+    }
+
+    const ry = doc.y;
+    doc.save();
+    doc.rect(MARGIN, ry, w, rowH)
+      .fillAndStroke(i % 2 === 0 ? COLORS.white : COLORS.rowAlt, COLORS.border);
+    doc.restore();
+
+    const svcName   = pickName(line, 'service_name_en', 'service_name_ar', 'service_name');
+    const qty       = n(line.quantity, 0);
+    const unitSym   = line.unit_symbol || '';
+    const unitPrice = n(line.unit_price_snapshot, 0);
+    const subtotal  = n(line.sub_total, 0);
+
+    const cells = [
+      svcName,
+      `${fmt(qty)} ${unitSym}`,
+      formatMoney(unitPrice),
+      formatMoney(subtotal),
+    ];
+
+    let x = MARGIN;
+    cells.forEach((cell, ci) => {
+      const isLast = ci === cells.length - 1;
+      doc.font(isLast ? 'Helvetica-Bold' : 'Helvetica')
+        .fontSize(8.5)
+        .fillColor(COLORS.text);
+      doc.text(cell, x + 6, ry + 7, { width: colWidths[ci] - 12, ellipsis: true, lineBreak: false });
+      x += colWidths[ci];
+    });
+
+    doc.x = MARGIN;
+    doc.y = ry + rowH;
+  });
+
+  // Service subtotal row
+  const svcTotal = lines.reduce((s, l) => s + n(l.sub_total, 0), 0);
+  const ty = doc.y;
+  doc.save();
+  doc.rect(MARGIN, ty, w, rowH).fill(COLORS.tableHead);
+  doc.restore();
+  doc.font('Helvetica-Bold').fontSize(9).fillColor(COLORS.text);
+  doc.text('Services Total', MARGIN + 6, ty + 7, { width: w * 0.6, lineBreak: false });
+  doc.font('Helvetica-Bold').fontSize(9).fillColor(COLORS.success);
+  doc.text(formatMoney(svcTotal), MARGIN + 6, ty + 7, { width: w - 12, align: 'right', lineBreak: false });
+  doc.x = MARGIN;
+  doc.y = ty + rowH + 10;
+}
+
 function drawLeafTotal(doc, total) {
   ensureSpace(doc, 32);
   const w = doc.page.width - MARGIN * 2;
@@ -469,6 +557,7 @@ function generateDetailedProjectPdf(doc, data) {
     drawInputsTable(doc, toInputRows(leaf));
     drawResultsTable(doc, toResultRows(leaf));
     drawMaterialsTable(doc, leaf.material_lines || []);
+    drawServicesTable(doc, leaf.service_lines || []);
 
     // Leaf total
     drawLeafTotal(doc, n(leaf.leaf_total, 0));
@@ -494,6 +583,7 @@ function generateLegacyPdf(doc, data) {
   drawResultsTable(doc, resultRows);
 
   drawMaterialsTable(doc, data.material_lines || []);
+  drawServicesTable(doc, data.service_lines || []);
   drawGrandTotal(doc, n(data.total_cost, 0));
 }
 

@@ -119,6 +119,62 @@ export class CalculationEngine {
       });
     }
 
+    // ── 7b. Evaluate service formulas ─────────────────────────────────
+    const services = await this.repo.getServicesForCategory(input.category_id);
+    const svcLines = [];
+    const skippedServices = [];
+
+    for (const svc of services) {
+      if (!svc.formula_id) {
+        skippedServices.push({ service_id: svc.service_id,
+          service_name: svc.service_name, reason: 'No formula linked' });
+        continue;
+      }
+
+      let sf;
+      try {
+        sf = await this.repo.getFormula(svc.formula_id);
+        // Only accept SERVICE formula_type
+        if (sf.formula_type !== 'SERVICE')
+          throw new EngineError(`Wrong type: ${sf.formula_type}`);
+      } catch(e) {
+        skippedServices.push({ service_id: svc.service_id,
+          service_name: svc.service_name, reason: e.message }); continue;
+      }
+
+      let rawQty;
+      try { rawQty = this.evalExpr(sf.expression, vars, sf); }
+      catch(e) {
+        skippedServices.push({ service_id: svc.service_id,
+          service_name: svc.service_name, reason: e.message }); continue;
+      }
+
+      if (rawQty < 0) throw new EngineError(
+        `Negative qty for service "${svc.service_name}" (${rawQty})`);
+
+      const unit = svc.unit_id
+        ? await this.repo.getUnit(svc.unit_id)
+        : { symbol: svc.unit_en || '' };
+
+      const sub_dzd = this.r2(
+        rawQty * svc.unit_price * latestRate * adminMarketFactor);
+
+      svcLines.push({
+        service_id:         svc.service_id,
+        service_name:       svc.service_name,
+        service_name_en:    svc.service_name_en,
+        service_name_ar:    svc.service_name_ar,
+        quantity:           this.r4(rawQty),
+        unit_symbol:        unit.symbol,
+        unit_price:         svc.unit_price,
+        unit_price_snapshot:svc.unit_price,
+        equipment_cost:     svc.equipment_cost,
+        manpower_cost:      svc.manpower_cost,
+        install_labor_price:svc.install_labor_price,
+        sub_total:          sub_dzd,
+      });
+    }
+
     // ── 8. Roll up ────────────────────────────────────────────────────────
     const primSub = this.r2(
       matLines.filter(m => m.material_type === 'PRIMARY')
@@ -128,6 +184,7 @@ export class CalculationEngine {
       matLines.filter(m => m.material_type === 'ACCESSORY')
               .reduce((s, m) => s + m.sub_total, 0)
     );
+    const svcSub = this.r2(svcLines.reduce((s, sv) => s + sv.sub_total, 0));
 
     return {
       category_id:              input.category_id,
@@ -139,7 +196,10 @@ export class CalculationEngine {
       skipped_materials:        skippedMaterials,
       subtotal_primary:         primSub,
       subtotal_accessory:       accSub,
-      total_cost:               this.r2(primSub + accSub),
+      service_lines:            svcLines,
+      skipped_services:         skippedServices,
+      subtotal_services:        svcSub,
+      total_cost:               this.r2(primSub + accSub + svcSub),
       computed_at:              new Date().toISOString(),
     };
   }

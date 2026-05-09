@@ -211,13 +211,14 @@ export async function getEstimationByProject(project_id) {
       pd.values                AS field_values,
       pd.results,
       pd.created_at,
-      COALESCE(SUM(edm.sub_total), 0)::float AS leaf_total
+      (
+        COALESCE((SELECT SUM(edm.sub_total) FROM estimation_detail_material edm WHERE edm.project_details_id = pd.id), 0) +
+        COALESCE((SELECT SUM(eds.sub_total) FROM estimation_detail_service  eds WHERE eds.project_details_id = pd.id), 0)
+      )::float AS leaf_total
     FROM project_details pd
     JOIN categories c            ON c.category_id  = pd.category_id
     JOIN formulas f              ON f.formula_id   = pd.selected_formula_id
     LEFT JOIN material_config mc ON mc.config_id   = pd.selected_config_id
-    LEFT JOIN estimation_detail_material edm
-           ON edm.project_details_id = pd.id
     WHERE pd.estimation_id = ${estimation.estimation_id}
     GROUP BY pd.id, c.name_en, c.name_ar, f.name_en, f.name_ar, mc.name
     ORDER BY pd.created_at
@@ -256,9 +257,39 @@ export async function getEstimationByProject(project_id) {
     return acc;
   }, {});
 
+  // ── Service lines per leaf ────────────────────────────────────────────
+  const allServiceLines = leafIds.length > 0
+    ? await sql`
+        SELECT
+          eds.detail_id,
+          eds.project_details_id,
+          eds.service_id,
+          sc.service_name_en,
+          sc.service_name_ar,
+          COALESCE(sc.service_name_en, sc.service_name_ar) AS service_name,
+          u.symbol AS unit_symbol,
+          eds.quantity,
+          eds.unit_price_snapshot,
+          eds.sub_total
+        FROM estimation_detail_service eds
+        JOIN service_config sc ON sc.service_id = eds.service_id
+        LEFT JOIN units u      ON u.unit_id      = sc.unit_id
+        WHERE eds.project_details_id = ANY(${leafIds})
+        ORDER BY sc.service_name_en
+      `
+    : [];
+
+  const servicesByLeaf = allServiceLines.reduce((acc, line) => {
+    const key = line.project_details_id;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(line);
+    return acc;
+  }, {});
+
   const leafCalculations = leaves.map(leaf => ({
     ...leaf,
     material_lines: linesByLeaf[leaf.project_details_id] ?? [],
+    service_lines:  servicesByLeaf[leaf.project_details_id] ?? [],
   }));
 
   return { ...estimation, leaf_calculations: leafCalculations };
@@ -348,13 +379,41 @@ export async function saveLeafResult(dto) {
       `;
     }
 
-    // Recompute total from ALL leaves in this estimation
+    // ── Service lines ──────────────────────────────────────────────────
+    if (dto.service_lines && dto.service_lines.length > 0) {
+      // Remove old service lines for this leaf on recalculation
+      await tx`
+        DELETE FROM estimation_detail_service
+        WHERE project_details_id = ${projectDetailsId}
+      `;
+
+      await tx`
+        INSERT INTO estimation_detail_service ${tx(
+          dto.service_lines.map(sv => ({
+            estimation_id:        estimationId,
+            project_details_id:   projectDetailsId,
+            service_id:           sv.service_id,
+            unit_id:              sv.unit_id ?? null,
+            quantity:             sv.quantity,
+            unit_price_snapshot:  sv.unit_price_snapshot,
+            exchange_rate_snapshot: dto.exchange_rate_snapshot ?? null,
+            sub_total:            sv.sub_total,
+          }))
+        )}
+      `;
+    }
+
+    // Recompute total from ALL leaves in this estimation (materials + services)
     await tx`
       UPDATE estimation
       SET total_budget = (
-        SELECT COALESCE(SUM(sub_total), 0)
-        FROM   estimation_detail_material
-        WHERE  estimation_id = ${estimationId}
+        SELECT COALESCE(SUM(edm.sub_total), 0) +
+               COALESCE((
+                 SELECT SUM(eds.sub_total) FROM estimation_detail_service eds
+                 WHERE eds.estimation_id = ${estimationId}
+               ), 0)
+        FROM estimation_detail_material edm
+        WHERE edm.estimation_id = ${estimationId}
       )
       WHERE estimation_id = ${estimationId}
     `;
@@ -385,6 +444,11 @@ export async function removeLeaf(project_details_id) {
     if (!pd) throw new Error(`ProjectDetails ${project_details_id} not found`);
 
     await tx`
+      DELETE FROM estimation_detail_service
+      WHERE project_details_id = ${project_details_id}
+    `;
+
+    await tx`
       DELETE FROM estimation_detail_material
       WHERE project_details_id = ${project_details_id}
     `;
@@ -397,9 +461,13 @@ export async function removeLeaf(project_details_id) {
     await tx`
       UPDATE estimation
       SET total_budget = (
-        SELECT COALESCE(SUM(sub_total), 0)
-        FROM   estimation_detail_material
-        WHERE  estimation_id = ${pd.estimation_id}
+        SELECT COALESCE(SUM(edm.sub_total), 0) +
+               COALESCE((
+                 SELECT SUM(eds.sub_total) FROM estimation_detail_service eds
+                 WHERE eds.estimation_id = ${pd.estimation_id}
+               ), 0)
+        FROM estimation_detail_material edm
+        WHERE edm.estimation_id = ${pd.estimation_id}
       )
       WHERE estimation_id = ${pd.estimation_id}
     `;

@@ -86,7 +86,10 @@
     "clearAll": "Clear All",
     "showingResults": "Showing {{count}} of {{total}} entries",
     "noResultsTitle": "No Results Found",
-    "noResultsDesc": "No calculation entries match your current search or filter criteria. Try adjusting your filters."
+    "noResultsDesc": "No calculation entries match your current search or filter criteria. Try adjusting your filters.",
+    "serviceLines": "Service Invoice",
+    "service": "Service",
+    "qty": "Qty"
   },
   "leaf": {
     "methodology": "Methodology",
@@ -108,7 +111,8 @@
     "input": "Input",
     "computed": "Computed",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "requiredServices": "Required Services"
   },
   "nonLeaf": {
     "folder": "FOLDER",

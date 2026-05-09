@@ -17,9 +17,12 @@ const UserLayout = () => {
     ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().substring(0, 2)
     : "US";
 
-  const isDashboard = window.location.pathname.includes('/dashboard');
-  const isProject = window.location.pathname.includes('/projects/');
-  const currentLocation = isDashboard ? 'DASHBOARD' : isProject ? 'PROJECT_OVERVIEW' : 'GENERAL';
+  const locationPath = window.location.pathname;
+  let currentLocation = 'GENERAL';
+  if (locationPath.includes('/dashboard')) currentLocation = 'USER_DASHBOARD';
+  else if (locationPath.includes('/profile')) currentLocation = 'USER_PROFILE';
+  else if (locationPath.includes('/history')) currentLocation = 'PROJECT_HISTORY';
+  else if (locationPath.includes('/projects/')) currentLocation = 'PROJECT_OVERVIEW';
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col font-sans transition-colors duration-300">

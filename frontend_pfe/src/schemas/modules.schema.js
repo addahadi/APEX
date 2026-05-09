@@ -40,7 +40,7 @@ export const CreateFormulaSchema = z.object({
   name_ar:       z.string().default(''),
   expression:    z.string().min(1, 'Expression is required'),
   output_unit_id: optUuid,
-  formula_type:  z.enum(['NON_MATERIAL', 'MATERIAL']).default('NON_MATERIAL'),
+  formula_type:  z.enum(['NON_MATERIAL', 'MATERIAL', 'SERVICE']).default('NON_MATERIAL'),
 });
 
 export const UpdateFormulaSchema = z.object({

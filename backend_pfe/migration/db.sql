@@ -122,10 +122,14 @@ CREATE TABLE public.estimation_detail_service (
   quantity double precision NOT NULL DEFAULT 0.0,
   sub_total double precision NOT NULL DEFAULT 0.0,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  project_details_id uuid,
+  unit_price_snapshot double precision,
+  exchange_rate_snapshot double precision,
   CONSTRAINT estimation_detail_service_pkey PRIMARY KEY (detail_id),
   CONSTRAINT estimation_detail_service_service_id_fkey FOREIGN KEY (service_id) REFERENCES public.service_config(service_id),
   CONSTRAINT estimation_detail_service_estimation_id_fkey FOREIGN KEY (estimation_id) REFERENCES public.estimation(estimation_id),
-  CONSTRAINT estimation_detail_service_unit_id_fkey FOREIGN KEY (unit_id) REFERENCES public.units(unit_id)
+  CONSTRAINT estimation_detail_service_unit_id_fkey FOREIGN KEY (unit_id) REFERENCES public.units(unit_id),
+  CONSTRAINT estimation_detail_service_project_details_id_fkey FOREIGN KEY (project_details_id) REFERENCES public.project_details(id)
 );
 CREATE TABLE public.exchange_rate_log (
   rate_id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -347,8 +351,12 @@ CREATE TABLE public.service_config (
   install_labor_price double precision DEFAULT 0.0,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  formula_id uuid,
+  unit_id uuid,
   CONSTRAINT service_config_pkey PRIMARY KEY (service_id),
-  CONSTRAINT service_config_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.categories(category_id)
+  CONSTRAINT service_config_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.categories(category_id),
+  CONSTRAINT service_config_formula_id_fkey FOREIGN KEY (formula_id) REFERENCES public.formulas(formula_id),
+  CONSTRAINT service_config_unit_id_fkey FOREIGN KEY (unit_id) REFERENCES public.units(unit_id)
 );
 CREATE TABLE public.subscriptions (
   subscription_id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -383,7 +391,7 @@ CREATE TABLE public.users (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   name character varying NOT NULL,
   email character varying NOT NULL UNIQUE,
-  status character varying,
+  status USER-DEFINED DEFAULT 'ACTIVE'::user_status,
   password character varying NOT NULL,
   role USER-DEFINED DEFAULT 'CLIENT'::user_role,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,

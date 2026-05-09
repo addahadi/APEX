@@ -325,6 +325,7 @@ export async function exportProjectReport(req, res) {
       dimensions: normalizedWithDisplay[0]?.field_values || {},
       intermediateResults: [],
       material_lines: normalizedWithDisplay.flatMap((leaf) => leaf.material_lines || []),
+      service_lines: normalizedWithDisplay.flatMap((leaf) => leaf.service_lines || []),
     };
 
     console.log("Données envoyées au PDF:", JSON.stringify(pdfData, null, 2));

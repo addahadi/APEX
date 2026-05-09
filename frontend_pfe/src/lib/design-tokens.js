@@ -25,7 +25,7 @@ export const PLAN_CONF    = { Free:{ color:P.txt2, bg:"#F1F5F9" }, Pro:{ color:P
 export const TYPE_CONF    = { NORMAL:{ color:P.cyan, bg:P.cyanL }, COMPANY:{ color:P.purple, bg:P.purpleL } };
 export const ART_TYPE_CONF   = { BLOG:{ color:P.main, bg:P.mainL }, ACTUALITE:{ color:P.warn, bg:P.warnL } };
 export const ART_STATUS_CONF = { PUBLISHED:{ color:P.success, bg:P.successL }, DRAFT:{ color:P.txt3, bg:P.borderL } };
-export const FORMULA_TYPE_CONF = { MATERIAL:{ color:P.orange, bg:P.orangeL }, NON_MATERIAL:{ color:P.purple, bg:P.purpleL } };
+export const FORMULA_TYPE_CONF = { MATERIAL:{ color:P.orange, bg:P.orangeL }, NON_MATERIAL:{ color:P.purple, bg:P.purpleL }, SERVICE:{ color:P.cyan, bg:P.cyanL } };
 export const CAT_LEVEL_CONF  = { 
   ROOT: { color:P.main, bg:P.mainL, label:"ROOT" }, 
   DOMAIN: { color:P.purple, bg:P.purpleL, label:"DOMAIN" }, 

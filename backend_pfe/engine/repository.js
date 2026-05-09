@@ -89,6 +89,30 @@ export class PostgresEngineRepository {
     `;
   }
 
+  async getServicesForCategory(category_id) {
+    return sql`
+      SELECT
+        sc.service_id,
+        sc.category_id,
+        sc.formula_id,
+        sc.unit_id,
+        sc.service_name_en,
+        sc.service_name_ar,
+        COALESCE(sc.service_name_en, sc.service_name_ar) AS service_name,
+        sc.equipment_cost,
+        sc.manpower_cost,
+        sc.install_labor_price,
+        (sc.equipment_cost + sc.manpower_cost + sc.install_labor_price) AS unit_price,
+        sc.unit_en,
+        sc.unit_ar,
+        u.symbol AS unit_symbol
+      FROM service_config sc
+      LEFT JOIN units u ON u.unit_id = sc.unit_id
+      WHERE sc.category_id = ${category_id}
+      ORDER BY sc.service_name_en
+    `;
+  }
+
   async getCoefficients(category_id, config_group_id) {
     return sql`
       SELECT

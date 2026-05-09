@@ -26,6 +26,20 @@ export default function AdminLayout() {
   
   const initials = user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : "AD";
 
+  let currentLocation = "ADMIN_DASHBOARD";
+  const path = location.pathname;
+  if (path.includes("/admin/users")) currentLocation = "ADMIN_USERS";
+  else if (path.includes("/admin/subscriptions/types")) currentLocation = "ADMIN_PLAN_TYPES";
+  else if (path.includes("/admin/subscriptions/subscribers")) currentLocation = "ADMIN_SUBSCRIBERS";
+  else if (path.includes("/admin/subscriptions")) currentLocation = "ADMIN_PLAN_FEATURES";
+  else if (path.includes("/admin/resources/units")) currentLocation = "ADMIN_UNITS";
+  else if (path.includes("/admin/resources")) currentLocation = "ADMIN_MATERIALS";
+  else if (path.includes("/admin/articles/tags")) currentLocation = "ADMIN_TAGS";
+  else if (path.includes("/admin/articles/new") || path.includes("/edit")) currentLocation = "ADMIN_ARTICLE_EDITOR";
+  else if (path.includes("/admin/articles")) currentLocation = "ADMIN_ARTICLES";
+  else if (path.includes("/admin/modules")) currentLocation = "ADMIN_MODULES";
+  else if (path.includes("/admin/settings")) currentLocation = "ADMIN_SETTINGS";
+
   // Helper to check if a nav item is active
   const isActive = (navPath, isExact) => {
     if (isExact) return location.pathname === navPath;
@@ -117,7 +131,7 @@ export default function AdminLayout() {
 
       </div>
 
-      <AIChatbot isOpen={chatOpen} onClose={() => setChatOpen(false)} location="GENERAL" />
+      <AIChatbot isOpen={chatOpen} onClose={() => setChatOpen(false)} location={currentLocation} />
 
     </div>
   );
