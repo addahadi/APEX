@@ -38,24 +38,32 @@ const LeafCategory = ({ node }) => {
   const activeFormulaName = activeFormula ? (localize(activeFormula, "name") || activeFormula.name) : "";
   const fields = activeFormula?.fields || [];
 
+  // ── Shared helper: parse SELECT options from either API shape or flat array ──
+  const parseSelectOptions = (defaultValue) => {
+    try {
+      const parsed = JSON.parse(defaultValue || '[]');
+      // API shape: { options: [{label_en, label_ar, value}, ...] }
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && Array.isArray(parsed.options)) {
+        return parsed.options;
+      }
+      // Flat array shape (local edits): [{label, value}, ...]
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
   useEffect(() => {
     if (fields.length > 0) {
       const initialValues = {};
       fields.forEach(f => {
         const typeName = (f.field_type_name || 'number').toLowerCase();
         if (typeName.includes('bool')) {
-          // BOOLEAN — default to 0 (false)
           initialValues[f.field_id] = 0;
         } else if (typeName.includes('select')) {
-          // SELECT — default to the value of the first option
-          try {
-            const opts = JSON.parse(f.default_value || '[]');
-            initialValues[f.field_id] = opts[0]?.value ?? 0;
-          } catch {
-            initialValues[f.field_id] = 0;
-          }
+          const opts = parseSelectOptions(f.default_value);
+          initialValues[f.field_id] = opts[0]?.value ?? 0;
         } else {
-          // NUMBER — original behaviour
           const parsed = parseFloat(f.default_value);
           initialValues[f.field_id] = isNaN(parsed) ? 0 : parsed;
         }
@@ -69,13 +77,10 @@ const LeafCategory = ({ node }) => {
     const typeName = (fieldTypeName || 'number').toLowerCase();
     let coerced;
     if (typeName.includes('bool')) {
-      // BOOLEAN — value is already 0 or 1 from the toggle
       coerced = value;
     } else if (typeName.includes('select')) {
-      // SELECT — value comes from <select> onChange as a string, convert to number
       coerced = Number(value);
     } else {
-      // NUMBER — original behaviour
       coerced = value === "" ? 0 : parseFloat(value);
     }
     setFieldValues(prev => ({ ...prev, [fieldId]: coerced }));
@@ -249,11 +254,8 @@ const LeafCategory = ({ node }) => {
                       const isSelect  = typeName.includes('select');
                       const currentVal = fieldValues[field.field_id];
 
-                      // Parse SELECT options from JSON stored in default_value
-                      let selectOptions = [];
-                      if (isSelect) {
-                        try { selectOptions = JSON.parse(field.default_value || '[]'); } catch { selectOptions = []; }
-                      }
+                      // Parse SELECT options — handles both API shape and flat array
+                      const selectOptions = isSelect ? parseSelectOptions(field.default_value) : [];
 
                       return (
                         <div key={field.field_id}>
@@ -286,7 +288,9 @@ const LeafCategory = ({ node }) => {
                               className="w-full border rounded-lg py-2.5 px-4 focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-all focus:outline-none dark:text-white border-slate-300 dark:border-slate-600 dark:bg-slate-800"
                             >
                               {selectOptions.map((opt, idx) => (
-                                <option key={idx} value={opt.value}>{localize(opt, 'label') || opt.label}</option>
+                                <option key={idx} value={opt.value}>
+                                  {localize(opt, 'label') || opt.label_en || opt.label}
+                                </option>
                               ))}
                             </select>
                           )}

@@ -234,8 +234,20 @@ function FieldRow({ field, formulaId, allNonMaterialFormulas, units, fieldTypes,
   const isSelect     = typeName.includes('select');
 
   // ── SELECT options — stored as JSON in default_value ──────────────────
-  // Format: [{ label: "High", value: 1.5 }, { label: "Low", value: 1.0 }]
-  const parseOptions = (v) => { try { return JSON.parse(v || '[]'); } catch { return []; } };
+  // API returns: {"options":[{label_en,label_ar,value},...]}
+  // Local edits : [{label,value},...]  (flat array)
+  const parseOptions = (v) => {
+    try {
+      const parsed = JSON.parse(v || '[]');
+      // API shape: { options: [...] }
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && Array.isArray(parsed.options)) {
+        // Normalise to flat [{label, value}] used by the editor
+        return parsed.options.map(o => ({ label: o.label_en ?? o.label ?? '', value: o.value ?? 0 }));
+      }
+      // Already a flat array (local edits)
+      return Array.isArray(parsed) ? parsed : [];
+    } catch { return []; }
+  };
   const options      = isSelect ? parseOptions(cur.default_value) : [];
   const setOptions   = (newOpts) => patch({ default_value: JSON.stringify(newOpts) });
   const addOption    = () => setOptions([...options, { label: 'Option', value: 0 }]);
