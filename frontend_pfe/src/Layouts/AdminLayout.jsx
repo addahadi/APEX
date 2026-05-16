@@ -69,7 +69,6 @@ export default function AdminLayout() {
     { path:"/admin/articles",      icon:<FileText size={16}/>,      label:t("nav.articles")       },
     { path:"/admin/modules",       icon:<FolderOpen size={16}/>,    label:t("nav.modules")        },
     { path:"/admin/resources",     icon:<Package size={16}/>,       label:t("nav.resources")      },
-    { path:"/admin/settings",      icon:<Settings size={16}/>,      label:t("nav.settings")       },
   ];
 
   let currentLocation = "ADMIN_DASHBOARD";
