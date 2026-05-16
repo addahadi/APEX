@@ -20,6 +20,7 @@ import ResourcesLayout from "@/pages/Admin/ResourcesLayout";
 import Login from "@/pages/Auth/Login";
 import Register from "@/pages/Auth/Register";
 import ForgotPassword from "@/pages/Auth/ForgetPassword";
+import ResetPassword from "@/pages/Auth/ResetPassword";
 import Subscription from "@/pages/Auth/Subscription";
 import ConfirmSwitch from "@/pages/Auth/ConfirmSwitch";
 
@@ -76,6 +77,7 @@ const App = () => (
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/register" element={<Register />} />
             <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
           </Route>
           <Route path="/choose-plan" element={<Subscription />} />
           <Route path="/confirm-switch" element={<RequireAuth><ConfirmSwitch /></RequireAuth>} />

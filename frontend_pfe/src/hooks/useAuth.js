@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 
-import { loginUser, registerUser, forgotPassword, getMe, logoutUser, updateProfile as updateProfileApi } from "@/api/auth.service";
+import { loginUser, registerUser, forgotPassword, resetPassword, getMe, logoutUser, updateProfile as updateProfileApi } from "@/api/auth.service";
 import { handleApiError } from "@/api/handleApiError";
 import { setTokens, clearTokens, getRefreshToken } from "@/utils/token";
 
@@ -113,7 +113,27 @@ export function useForgotPassword() {
   });
 }
 
-// ── useMe ────────────────────────────────────────────────────────────────────
+// ── useResetPassword ────────────────────────────────────────────────────────
+
+export function useResetPassword() {
+  const navigate = useNavigate();
+  const { t } = useTranslation("common");
+
+  return useMutation({
+    mutationFn: resetPassword,
+    onSuccess: (data) => {
+      toast.success(t("toast.passwordResetSuccess") || "Password reset successfully", {
+        description: data.message || t("toast.passwordResetDescription"),
+      });
+      navigate("/auth/login", { replace: true });
+    },
+    onError: (err) => {
+      const handled = handleApiError(err);
+      toast.error(handled.message);
+      return handled;
+    },
+  });
+}
 
 export function useMe(options = {}) {
   return useQuery({

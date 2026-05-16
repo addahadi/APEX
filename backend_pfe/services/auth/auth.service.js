@@ -300,26 +300,65 @@ export const resetPassword = async ({ token, newPassword }) => {
 ========================
 SEND RESET EMAIL
 ========================
+✅ FIX: was using SMTP_HOST/SMTP_USER/SMTP_PASS which are not set in .env.
+         Now uses EMAIL_USER / EMAIL_PASSWORD / EMAIL_SERVICE — same vars
+         that power the working subscription-switch email.
 */
 const sendResetEmail = async (email, resetLink) => {
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT) || 587,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
+  const emailUser = process.env.EMAIL_USER;
+  const emailPass = process.env.EMAIL_PASSWORD;
+
+  if (!emailUser || !emailPass) {
+    throw new Error('Email credentials not configured (EMAIL_USER / EMAIL_PASSWORD missing).');
+  }
+
+  const smtpHost = process.env.SMTP_HOST;
+  const transporter = nodemailer.createTransport(
+    smtpHost
+      ? {
+          host:   smtpHost,
+          port:   Number(process.env.SMTP_PORT) || 587,
+          secure: String(process.env.SMTP_SECURE || 'false').toLowerCase() === 'true',
+          auth:   { user: emailUser, pass: emailPass },
+        }
+      : {
+          service: process.env.EMAIL_SERVICE || 'gmail',
+          auth:    { user: emailUser, pass: emailPass },
+        }
+  );
 
   await transporter.sendMail({
-    from:    process.env.SMTP_USER,
+    from:    `"APEX Smart Construction" <${emailUser}>`,
     to:      email,
-    subject: 'Reset Your Password',
+    subject: 'Reset Your Password | إعادة تعيين كلمة المرور',
     html: `
-      <h2>Reset Your Password</h2>
-      <p>Click the link below to reset your password:</p>
-      <a href="${resetLink}">${resetLink}</a>
-      <p>This link expires in 15 minutes.</p>
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #1d4ed8;">Reset Your Password</h2>
+        <p>Click the button below to reset your password. This link expires in <strong>15 minutes</strong>.</p>
+        <div style="margin: 30px 0;">
+          <a href="${resetLink}"
+             style="display: inline-block; padding: 12px 30px; background-color: #1d4ed8;
+                    color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+            Reset Password
+          </a>
+        </div>
+        <p style="color: #666; font-size: 13px;">
+          Or copy this link into your browser:<br>
+          <span style="background:#f0f0f0; padding:6px 10px; border-radius:4px; word-break:break-all;">
+            ${resetLink}
+          </span>
+        </p>
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+        <h3 style="color: #1d4ed8;">إعادة تعيين كلمة المرور</h3>
+        <p>انقر على الزر أدناه لإعادة تعيين كلمة المرور. الرابط صالح لمدة <strong>15 دقيقة</strong>.</p>
+        <div style="margin: 30px 0;">
+          <a href="${resetLink}"
+             style="display: inline-block; padding: 12px 30px; background-color: #1d4ed8;
+                    color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+            إعادة تعيين كلمة المرور
+          </a>
+        </div>
+      </div>
     `,
   });
 };

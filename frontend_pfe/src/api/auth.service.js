@@ -27,6 +27,13 @@ export const registerUser = (data) => api.post("/register", data);
 export const forgotPassword = (data) => api.post("/forgot-password", data);
 
 /**
+ * POST /reset-password
+ * @param {{ token: string, newPassword: string }} data
+ * @returns {{ message: string }}
+ */
+export const resetPassword = (data) => api.post("/reset-password", data);
+
+/**
  * GET /me
  * @returns {{ id, name, email, role, status, created_at }}
  */

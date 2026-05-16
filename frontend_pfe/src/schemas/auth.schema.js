@@ -34,6 +34,27 @@ export const getForgotPasswordSchema = (t) =>
   });
 
 // ------------------------------------------------------------
+// Reset-password schema factory
+// ------------------------------------------------------------
+export const getResetPasswordSchema = (t) =>
+  z
+    .object({
+      password: z
+        .string()
+        .min(1, t("validation.passwordRequired"))
+        .min(8, t("validation.passwordMin"))
+        .regex(/[A-Z]/, t("validation.passwordUppercase"))
+        .regex(/[0-9]/, t("validation.passwordNumber")),
+      confirmPassword: z
+        .string()
+        .min(1, t("validation.confirmPasswordRequired")),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t("validation.passwordMismatch"),
+      path: ["confirmPassword"],
+    });
+
+// ------------------------------------------------------------
 // Register schema factory
 // ------------------------------------------------------------
 export const getRegisterSchema = (t) =>

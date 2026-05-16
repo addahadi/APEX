@@ -5,6 +5,7 @@ import { useCalculate, useSaveLeafResult } from "@/hooks/useCategories";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { useLocalizedField } from "@/hooks/useLocalizedField";
+import { useProject } from "@/hooks/useProjects";
 
 const LeafCategory = ({ node }) => {
   const { t } = useTranslation("user");
@@ -21,6 +22,10 @@ const LeafCategory = ({ node }) => {
 
   const calculateMutation = useCalculate();
   const saveResultMutation = useSaveLeafResult();
+  const { data: project } = useProject(projectId);
+
+  // DEBUG: Let's log the project data to the console so we can see what React Query has cached
+  console.log("Current Project Data:", project);
 
   const formulas = node?.formulas || [];
   const configs = node?.configs || [];
@@ -100,7 +105,8 @@ const LeafCategory = ({ node }) => {
       category_id: categoryId,
       selected_formula_id: selectedFormulaId,
       selected_config_id: selectedConfigId || null,
-      field_values: sanitizedFieldValues
+      field_values: sanitizedFieldValues,
+      budget_type: project?.budget_type || 'MEDIUM'
     }, {
       onSuccess: (data) => {
         setCalculationResult(data);

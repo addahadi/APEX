@@ -97,8 +97,14 @@ export async function calculate(req, res) {
         console.log(`🚀 Tentative d'envoi d'email à :`, req.body.email);
         await sendEmail(req.body.email, pdfData, pdfBuffer);
         console.log(`✅ Email envoyé avec succès à : ${req.body.email}`);
+        // ✅ FIX: surface email status so the client knows it was sent
+        result.email_sent = true;
+        result.email_to   = req.body.email;
       } catch (error) {
-        console.error('❌ Erreur Email Service:', error);
+        console.error('❌ Erreur Email Service:', error.message);
+        // ✅ FIX: surface the failure instead of swallowing it silently
+        result.email_sent  = false;
+        result.email_error = error.message;
       }
     }
 
@@ -334,10 +340,17 @@ export async function exportProjectReport(req, res) {
 
     // Optional email sending: only when explicitly requested by client.
     // Default export behavior is direct PDF download.
-    const destinationEmail =
+    let destinationEmail =
       (typeof req.query?.email === 'string' && req.query.email.trim()) ||
       (typeof req.body?.email === 'string' && req.body.email.trim()) ||
       null;
+
+    if (!destinationEmail && user_id) {
+      const userRows = await sql`SELECT email FROM users WHERE id = ${user_id}`;
+      if (userRows.length > 0) {
+        destinationEmail = userRows[0].email;
+      }
+    }
 
     if (destinationEmail) {
       console.log(`[EMAIL] Sending report to: ${destinationEmail}`);
@@ -347,9 +360,14 @@ export async function exportProjectReport(req, res) {
         }
         await sendEmail(destinationEmail, pdfData, pdfBuffer);
         console.log(`[EMAIL] Sent successfully to: ${destinationEmail}`);
+        // ✅ FIX: surface success to client via header (PDF download continues either way)
+        res.setHeader('X-Email-Sent', 'true');
+        res.setHeader('X-Email-To', destinationEmail);
       } catch (error) {
-        // Don't fail export download when SMTP config is missing/broken.
-        console.error('[EMAIL] Send failed, continuing with direct download:', error.message);
+        // ✅ FIX: was silently swallowed — now logged with full error and surfaced in header
+        console.error('[EMAIL] Send failed:', error.message, error.stack);
+        res.setHeader('X-Email-Sent', 'false');
+        res.setHeader('X-Email-Error', error.message.substring(0, 200));
       }
     }
 

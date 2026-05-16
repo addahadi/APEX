@@ -8,6 +8,8 @@ export const CalculationInputSchema = z.object({
   category_id:          UUID,
   selected_formula_id:  UUID,
   selected_config_id:   UUID.nullable().default(null),
+  // ✅ FIX: budget_type was missing → Zod stripped it → engine always defaulted to MEDIUM
+  budget_type:          z.enum(['LOW', 'MEDIUM', 'HIGH']).default('MEDIUM'),
   field_values: z
     .record(z.string().min(1), z.number())
     .refine(v => Object.keys(v).length > 0, {

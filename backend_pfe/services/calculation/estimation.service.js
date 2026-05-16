@@ -23,13 +23,14 @@ export async function getProjects(user_id) {
       p.created_at,
       p.image_url,
       e.estimation_id,
+      e.budget_type,
       COALESCE(e.total_budget, 0)::float AS total_cost,
       COUNT(pd.id)::int                  AS leaf_count
     FROM projects p
     LEFT JOIN estimation e       ON e.project_id   = p.project_id
     LEFT JOIN project_details pd ON pd.estimation_id = e.estimation_id
     WHERE p.user_id = ${user_id}::uuid
-    GROUP BY p.project_id, e.estimation_id, e.total_budget
+    GROUP BY p.project_id, e.estimation_id, e.budget_type, e.total_budget
     ORDER BY p.created_at DESC
   `;
 }
@@ -45,6 +46,7 @@ export async function getProjectById(project_id, user_id) {
       p.created_at,
       p.image_url,
       e.estimation_id,
+      e.budget_type,
       COALESCE(e.total_budget, 0)::float AS total_cost
     FROM projects p
     LEFT JOIN estimation e ON e.project_id = p.project_id
