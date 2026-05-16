@@ -9,7 +9,7 @@ import verifyToken from '../../middlewares/verifyToken.js';
 import { authRateLimit } from '../../middlewares/authRateLimit.js';
 
 import { forgotPasswordSchema, resetPasswordSchema } from '../../schemas/auth.schema.js';
-import { forgotPassword, verifyResetToken, resetPassword, getMe } from '../../controllers/auth/auth.controller.js';
+import { forgotPassword, verifyResetToken, resetPassword, getMe, updateProfile } from '../../controllers/auth/auth.controller.js';
 import { login, register, verify, logout, refresh } from '../../controllers/auth/auth.controller.js';
 import { validate } from '../../middlewares/validate.js';
 import { loginShema, registerSchema, refreshSchema } from '../../schemas/auth.schema.js';
@@ -45,6 +45,7 @@ router.put('/refresh', validate(refreshSchema), refresh);
 router.get('/verify', verifyToken, verify);
 router.get('/me', verifyToken, getMe);
 router.post('/logout', verifyToken, logout);
+router.patch('/me', verifyToken, updateProfile);
 
 
 /*

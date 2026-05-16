@@ -87,8 +87,19 @@ const AIChatbot = ({ isOpen, onClose, location = 'GENERAL' }) => {
       const response = await expertMutation.mutateAsync(msg);
       setMessages(prev => [...prev, { role: 'ai', text: response.message }]);
     } catch (err) {
-      const errorMsg = err.response?.data?.error?.message || tc("error");
-      setMessages(prev => [...prev, { role: 'ai', text: errorMsg, isError: true }]);
+      const errCode = err?.response?.data?.error?.code || err?.code;
+      const isAiLimit = errCode === 'LIMIT_REACHED' ||
+        (err?.response?.data?.error?.details && err.response.data.error.details[0]?.featureKey === 'ai_usage_limit');
+
+      let errorMsg;
+      if (isAiLimit) {
+        errorMsg = isAr
+          ? 'لقد وصلت إلى الحد الأقصى لاستخدام الذكاء الاصطناعي. يرجى ترقية خطتك لمزيد من الاستفسارات.'
+          : 'You have reached your AI usage limit. Please upgrade your plan for more queries.';
+      } else {
+        errorMsg = err?.response?.data?.error?.message || tc('error');
+      }
+      setMessages(prev => [...prev, { role: 'ai', text: errorMsg, isError: isAiLimit ? false : true, isLimit: isAiLimit }]);
     }
   };
 
@@ -183,9 +194,12 @@ const AIChatbot = ({ isOpen, onClose, location = 'GENERAL' }) => {
               className={`max-w-[85%] p-3 rounded-2xl text-sm ${
                 msg.role === 'user' 
                   ? 'bg-primary text-white rounded-br-sm shadow-md shadow-primary/10' 
-                  : `bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-bl-sm border border-slate-200 dark:border-slate-700 ${msg.isError ? 'border-red-200 bg-red-50 text-red-600' : ''}`
+                  : msg.isLimit
+                    ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 rounded-bl-sm border border-amber-200 dark:border-amber-700'
+                    : `bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-bl-sm border border-slate-200 dark:border-slate-700 ${msg.isError ? 'border-red-200 bg-red-50 text-red-600' : ''}`
               }`}
             >
+              {msg.isLimit && <span className="mr-1">⚠️</span>}
               {msg.text}
             </div>
           </div>

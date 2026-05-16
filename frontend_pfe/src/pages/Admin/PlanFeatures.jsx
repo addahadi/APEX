@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Plus, Pencil, Trash2, Save, X, Loader2, CheckCircle } from "lucide-react";
 import { P } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
@@ -63,6 +64,7 @@ const EMPTY_FORM = {
 
 // ── Plan form (create / edit) ─────────────────────────────────────────────────
 function PlanForm({ initial, planTypes, onSave, onCancel, isPending, title }) {
+  const { t } = useTranslation("admin");
   const [form, setForm] = useState(initial);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
   const setFeature = (key, value) => setForm(f => ({
@@ -80,29 +82,29 @@ function PlanForm({ initial, planTypes, onSave, onCancel, isPending, title }) {
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="name_en">Name (EN)</Label>
+            <Label htmlFor="name_en">{t("planFeatures.nameEN")}</Label>
             <Input id="name_en" value={form.name_en} onChange={e => set("name_en", e.target.value)} placeholder="e.g. Pro" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="name_ar">Name (AR)</Label>
+            <Label htmlFor="name_ar">{t("planFeatures.nameAR")}</Label>
             <Input id="name_ar" value={form.name_ar} onChange={e => set("name_ar", e.target.value)} placeholder="برو" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="price">Price (DA)</Label>
+            <Label htmlFor="price">{t("planFeatures.price")}</Label>
             <Input id="price" type="number" value={String(form.price)} onChange={e => set("price", Number(e.target.value) || 0)} placeholder="0" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="duration">Duration (days)</Label>
+            <Label htmlFor="duration">{t("planFeatures.duration")}</Label>
             <Input id="duration" type="number" value={String(form.duration)} onChange={e => set("duration", Number(e.target.value) || 0)} placeholder="365" />
           </div>
           <div className="space-y-2">
-            <Label>Plan Type</Label>
+            <Label>{t("planFeatures.planType")}</Label>
             <Select value={form.plan_type_id || "none"} onValueChange={v => set("plan_type_id", v === "none" ? null : v)}>
               <SelectTrigger>
                 <SelectValue placeholder="— no type —" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">— no type —</SelectItem>
+                <SelectItem value="none">{t("planFeatures.noType")}</SelectItem>
                 {planTypes.map(pt => (
                   <SelectItem key={pt.plan_type_id} value={pt.plan_type_id}>
                     {pt.name_en}
@@ -123,7 +125,7 @@ function PlanForm({ initial, planTypes, onSave, onCancel, isPending, title }) {
               return (
                 <div key={ft.key} className="flex items-center justify-between gap-4 p-3 rounded-lg border bg-muted/30">
                   <div className="flex-1">
-                    <p className="text-sm font-semibold">{meta?.label ?? ft.key}</p>
+                    <p className="text-sm font-semibold">{t(`planFeatures.features.${ft.key}`, meta?.label ?? ft.key)}</p>
                     {meta?.hint && <p className="text-[10px] text-muted-foreground">{meta.hint}</p>}
                   </div>
                   <Input
@@ -151,6 +153,7 @@ function PlanForm({ initial, planTypes, onSave, onCancel, isPending, title }) {
 
 // ── Plan card ─────────────────────────────────────────────────────────────────
 function PlanCard({ plan, planTypes, onEdit, onDelete, isDeleting }) {
+  const { t } = useTranslation("admin");
 
   return (
     <Card className="overflow-hidden border-none shadow-sm flex flex-col hover:shadow-md transition-all duration-300">
@@ -187,9 +190,9 @@ function PlanCard({ plan, planTypes, onEdit, onDelete, isDeleting }) {
               <span className="text-muted-foreground">{featureLabel(f.key)}</span>
               <span className={cn(
                 "font-mono font-bold",
-                f.value === "unlimited" ? "text-emerald-600" : "text-foreground"
+                f.value === t("planFeatures.unlimited") ? "text-emerald-600" : "text-foreground"
               )}>
-                {f.value === "unlimited" ? (
+                {f.value === t("planFeatures.unlimited") ? (
                   <span className="flex items-center gap-1">
                     <CheckCircle className="h-3 w-3" /> unlimited
                   </span>
@@ -218,6 +221,7 @@ function PlanCard({ plan, planTypes, onEdit, onDelete, isDeleting }) {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function PlanFeatures() {
+  const { t } = useTranslation("admin");
   const [modal,   setModal]   = useState(null); // null | "new" | plan object
   const [confirm, setConfirm] = useState(null);
 
@@ -251,7 +255,7 @@ export default function PlanFeatures() {
     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
       {modal && (
         <PlanForm
-          title={modal === "new" ? "Create New Plan" : `Edit: ${modal.name_en}`}
+          title={modal === "new" ? t("planFeatures.createTitle") : `${t("planFeatures.editTitle")}: ${modal.name_en}`}
           initial={modal === "new" ? EMPTY_FORM : planToForm(modal)}
           planTypes={planTypes}
           onSave={handleSave}
@@ -265,7 +269,7 @@ export default function PlanFeatures() {
           {plansLoading ? (
             <div className="flex items-center justify-center p-20 text-muted-foreground gap-2">
               <Loader2 className="h-5 w-5 animate-spin" />
-              Loading plans…
+              {t("planFeatures.loading")}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -298,9 +302,9 @@ export default function PlanFeatures() {
       <Dialog open={!!confirm} onOpenChange={() => setConfirm(null)}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle>Delete this plan?</DialogTitle>
+            <DialogTitle>{t("planFeatures.deleteTitle")}</DialogTitle>
             <DialogDescription className="py-2">
-              All active subscriptions on this plan will be deactivated. This action cannot be undone.
+              {t("planFeatures.deleteDesc")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">

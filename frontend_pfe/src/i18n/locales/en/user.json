@@ -148,7 +148,18 @@
     "noLiked": "No liked articles yet",
     "noSaved": "No saved articles yet",
     "browseArticles": "Browse articles",
-    "saved": "Saved"
+    "saved": "Saved",
+    "editProfile": "Edit Profile",
+    "editProfileTitle": "Edit Your Profile",
+    "editName": "Full Name",
+    "editEmail": "Email Address",
+    "editCurrentPassword": "Current Password",
+    "editNewPassword": "New Password (optional)",
+    "editSave": "Save Changes",
+    "editSaving": "Saving...",
+    "editCancel": "Cancel",
+    "estimations": "Leaf Calculations",
+    "allUnlimited": "All your usage limits are unlimited! 🎉"
   },
   "chatbot": {
     "name": "APEX Assistant",

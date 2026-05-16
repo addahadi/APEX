@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 
-import { loginUser, registerUser, forgotPassword, getMe, logoutUser } from "@/api/auth.service";
+import { loginUser, registerUser, forgotPassword, getMe, logoutUser, updateProfile as updateProfileApi } from "@/api/auth.service";
 import { handleApiError } from "@/api/handleApiError";
 import { setTokens, clearTokens, getRefreshToken } from "@/utils/token";
 
@@ -143,6 +143,29 @@ export function useLogout() {
       queryClient.clear();
       navigate("/auth/login", { replace: true });
       toast.success(t("toast.logoutSuccess"));
+    },
+  });
+}
+
+// ── useUpdateProfile ──────────────────────────────────────────────────────────
+
+
+export function useUpdateProfile() {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation('common');
+
+  return useMutation({
+    mutationFn: (data) => updateProfileApi(data),
+    onSuccess: (res) => {
+      // API may wrap in { data: ... }
+      const updatedUser = res?.data ?? res;
+      queryClient.setQueryData(['me'], (prev) => ({ ...prev, ...updatedUser }));
+      toast.success(t('toast.profileUpdated'));
+    },
+    onError: (err) => {
+      const handled = handleApiError(err);
+      toast.error(handled.message || t('toast.profileUpdateFailed'));
+      return handled;
     },
   });
 }

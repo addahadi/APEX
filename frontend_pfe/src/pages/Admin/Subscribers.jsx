@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Loader2, Search } from "lucide-react";
 import { P } from "@/lib/design-tokens";
@@ -67,6 +68,7 @@ function formatDate(iso) {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function Subscribers() {
+  const { t } = useTranslation("admin");
   const [statusF, setStatusF] = useState("ALL");
   const [search,  setSearch]  = useState("");
   const [page,    setPage]    = useState(1);
@@ -93,7 +95,7 @@ export default function Subscribers() {
         <div className="relative flex-1 min-w-[280px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by name or email…"
+            placeholder={t("subscribers.search")}
             value={search}
             onChange={(e) => handleSearch(e.target.value)}
             className="pl-9 bg-background"
@@ -106,7 +108,7 @@ export default function Subscribers() {
           <SelectContent>
             {STATUS_OPTIONS.map((s) => (
               <SelectItem key={s} value={s}>
-                {s === "ALL" ? "All statuses" : s}
+                {s === "ALL" ? t("subscribers.allStatuses") : s}
               </SelectItem>
             ))}
           </SelectContent>
@@ -125,7 +127,7 @@ export default function Subscribers() {
           <Table>
             <TableHeader className="bg-muted/50">
               <TableRow>
-                {["User", "Plan", "Type", "Status", "Start Date", "End Date"].map((h) => (
+                {[t("subscribers.columns.user"), t("subscribers.columns.plan"), t("subscribers.columns.type"), t("subscribers.columns.status"), t("subscribers.columns.startDate"), t("subscribers.columns.endDate")].map((h) => (
                   <TableHead key={h} className="text-xs font-semibold uppercase tracking-wider h-10">
                     {h}
                   </TableHead>
@@ -138,14 +140,14 @@ export default function Subscribers() {
                   <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                     <div className="flex items-center justify-center gap-2">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Loading…
+                      {t("subscribers.loading")}
                     </div>
                   </TableCell>
                 </TableRow>
               ) : rows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
-                    No subscriptions found.
+                    {t("subscribers.empty")}
                   </TableCell>
                 </TableRow>
               ) : (

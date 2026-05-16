@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useLocalizedField } from "@/hooks/useLocalizedField";
 
 const Subscription = () => {
-  const { t } = useTranslation("auth");
+  const { t, i18n } = useTranslation("auth");
   const { t: tc } = useTranslation("common");
   const localize = useLocalizedField();
   const { data: rawPlans, isLoading, isError, error } = usePlans();
@@ -30,7 +30,7 @@ const Subscription = () => {
       return {
         id: p.id,
         title: localize(p, 'name'),
-        price: p.price === 0 ? "Free" : `${p.price} DA`,
+        price: p.price === 0 ? t("subscription.free", "Free") : `${p.price} DA`,
         subtitle: p.duration ? t("subscription.daysPlan", { days: p.duration }) : "",
         highlight: p.price > 0 && rawPlans.indexOf(p) === rawPlans.length - 1,
         features: featureList,
@@ -71,7 +71,7 @@ const Subscription = () => {
 
   if (isLoading || activeSubLoading) {
     return (
-      <div className="group/design-root relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+      <div dir={i18n.dir()} className="group/design-root relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
         <div className="layout-container flex h-full grow flex-col">
           <div className="flex flex-1 justify-center px-4 py-5 sm:px-10 lg:px-40">
             <div className="layout-content-container flex w-full max-w-[1200px] flex-1 flex-col items-center justify-center">
@@ -107,7 +107,7 @@ const Subscription = () => {
 
   if (isError) {
     return (
-      <div className="group/design-root relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+      <div dir={i18n.dir()} className="group/design-root relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
         <div className="layout-container flex h-full grow flex-col">
           <div className="flex flex-1 items-center justify-center px-4 py-5">
             <div className="flex flex-col items-center gap-4 text-center">
@@ -133,7 +133,7 @@ const Subscription = () => {
 
   if (!plans.length) {
     return (
-      <div className="group/design-root relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+      <div dir={i18n.dir()} className="group/design-root relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
         <div className="layout-container flex h-full grow flex-col">
           <div className="flex flex-1 items-center justify-center px-4 py-5">
             <div className="flex flex-col items-center gap-4 text-center">
@@ -152,7 +152,7 @@ const Subscription = () => {
   }
 
   return (
-    <div className="group/design-root relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+    <div dir={i18n.dir()} className="group/design-root relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
       <div className="layout-container flex h-full grow flex-col">
         <div className="flex flex-1 justify-center px-4 py-5 sm:px-10 lg:px-40">
           <div className="layout-content-container flex w-full max-w-[1200px] flex-1 flex-col">

@@ -20,6 +20,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { CAT_LEVEL_CONF } from "@/lib/design-tokens";
+import { useTranslation } from "react-i18next";
 import {
   useModulesTree, useLeafDetails, useUnits, useFieldTypes,
   useCreateCategory,  useUpdateCategory,  useDeleteCategory,
@@ -526,6 +527,7 @@ function OutputRow({ output, units, categoryId, onDelete }) {
 
 // ── NON_MATERIAL Formula card ─────────────────────────────────────────────────
 function FormulaCard({ formula, allNonMaterialFormulas, units, fieldTypes, categoryId, onDelete }) {
+  const { t } = useTranslation("admin");
   const [open,  setOpen]  = useState(true);
   const [draft, setDraft] = useState(null);
   const cur     = draft ?? formula;
@@ -636,7 +638,7 @@ function FormulaCard({ formula, allNonMaterialFormulas, units, fieldTypes, categ
                   data: { output_key: `out_${Date.now().toString(36)}`, output_label_en: "New Output", output_label_ar: "", output_unit_id: cur.output_unit_id || null },
                 })}>
                 {addOutput.isPending ? <Spin size={12} className="mr-1.5" /> : <Plus size={12} className="mr-1.5" />}
-                Add Output
+                {t("modules.addOutput")}
               </Button>
             </div>
             <div className="flex flex-col gap-2">
@@ -668,7 +670,7 @@ function FormulaCard({ formula, allNonMaterialFormulas, units, fieldTypes, categ
                   });
                 }}>
                 {addField.isPending ? <Spin size={12} className="mr-1.5" /> : <Plus size={12} className="mr-1.5" />}
-                Add Field
+                {t("modules.addField")}
               </Button>
             </div>
             <div className="flex flex-col gap-2.5">
@@ -870,6 +872,7 @@ function CoeffRow({ coeff, configs, updateCoefficient, deleteCoefficient }) {
 
 // ── Modals ────────────────────────────────────────────────────────────────────
 function NewCatModal({ parentId, allNodes, onClose, onCreate, isPending }) {
+  const { t } = useTranslation("admin");
   const [form, setForm] = useState({
     name_en: "", name_ar: "", description_en: "", description_ar: "",
     icon: "folder", category_level: "ROOT", parent_id: parentId || "root",
@@ -924,9 +927,9 @@ function NewCatModal({ parentId, allNodes, onClose, onCreate, isPending }) {
           </div>
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button variant="ghost" onClick={onClose}>{t("modules.cancel")}</Button>
           <Button disabled={!valid || isPending} onClick={() => onCreate({ ...form, parent_id: form.parent_id === "root" ? null : form.parent_id, description_en: form.description_en || null, description_ar: form.description_ar || null })}>
-            {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />} Create Category
+            {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />} {t("modules.createCategory")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -935,6 +938,7 @@ function NewCatModal({ parentId, allNodes, onClose, onCreate, isPending }) {
 }
 
 function NewFormulaModal({ units, onClose, onSave, isPending }) {
+  const { t } = useTranslation("admin");
   const [form, setForm] = useState({ name_en: "", name_ar: "", expression: "", output_unit_id: "none", formula_type: "NON_MATERIAL" });
   const isMat = form.formula_type === "MATERIAL";
   const isSvc = form.formula_type === "SERVICE";
@@ -1007,7 +1011,7 @@ function NewFormulaModal({ units, onClose, onSave, isPending }) {
           )}
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button variant="ghost" onClick={onClose}>{t("modules.cancel")}</Button>
           <Button disabled={!valid || isPending} onClick={() => onSave({ ...form, output_unit_id: form.output_unit_id === "none" ? null : form.output_unit_id })}>
             {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />} Create Formula
           </Button>
@@ -1019,6 +1023,7 @@ function NewFormulaModal({ units, onClose, onSave, isPending }) {
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function Modules() {
+  const { t } = useTranslation("admin");
   const [selected,    setSelected]    = useState(null);
   const [expanded,    setExpanded]    = useState([]);
   const [modal,       setModal]       = useState(null);
@@ -1082,10 +1087,10 @@ export default function Modules() {
         {/* Sidebar Header */}
         <div className="px-4 pt-4 pb-3 border-b space-y-3">
           <div className="flex items-center justify-between">
-            <div className="text-[11px] text-muted-foreground font-bold uppercase tracking-wider">Category Tree</div>
+            <div className="text-[11px] text-muted-foreground font-bold uppercase tracking-wider">{t("modules.treeTitle")}</div>
             <div className="flex gap-1.5">
-              <span className="text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded font-semibold">{allNodes.length} nodes</span>
-              <span className="text-[10px] text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded font-semibold">{allNodes.filter(n => n.category_level === "SUB_TYPE" || (!n.children?.length)).length} leaves</span>
+              <span className="text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded font-semibold">{allNodes.length} {t("modules.nodes")}</span>
+              <span className="text-[10px] text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded font-semibold">{allNodes.filter(n => n.category_level === "SUB_TYPE" || (!n.children?.length)).length} {t("modules.leaves")}</span>
             </div>
           </div>
 
@@ -1095,7 +1100,7 @@ export default function Modules() {
             <Input
               value={filterQuery}
               onChange={e => setFilterQuery(e.target.value)}
-              placeholder="Search categories…"
+              placeholder={t("modules.searchPlaceholder")}
               className="h-8 pl-7 text-xs shadow-none border-border/60 focus-visible:ring-1 bg-muted/40"
             />
             {filterQuery && (
@@ -1111,14 +1116,14 @@ export default function Modules() {
           {treeLoading ? (
             <div className="p-5 flex flex-col items-center gap-2">
               <Spin size={20} className="text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Loading tree…</span>
+              <span className="text-xs text-muted-foreground">{t("modules.loading")}</span>
             </div>
           ) : filteredNodes !== null ? (
             /* Flat search results */
             filteredNodes.length === 0 ? (
               <div className="text-center text-xs text-muted-foreground py-8 flex flex-col items-center gap-2">
                 <Search size={20} className="text-muted-foreground/30" />
-                No categories match "{filterQuery}"
+                {t("modules.noMatch")} "{filterQuery}"
               </div>
             ) : (
               <div className="space-y-0.5">
@@ -1153,7 +1158,7 @@ export default function Modules() {
             className="w-full border-dashed shadow-sm text-muted-foreground hover:text-primary hover:border-primary border-2 h-9 text-sm"
             onClick={() => setModal("cat")}
           >
-            <Plus size={14} className="mr-2" /> Add Root Category
+            <Plus size={14} className="mr-2" /> {t("modules.addRoot")}
           </Button>
         </div>
       </div>
@@ -1165,8 +1170,8 @@ export default function Modules() {
             <div className="w-20 h-20 rounded-2xl bg-background border shadow-sm flex items-center justify-center">
               <FolderTree size={36} className="text-primary" />
             </div>
-            <div className="text-lg font-semibold text-foreground">Select a category</div>
-            <div className="text-sm text-muted-foreground text-center max-w-xs">Navigate the sidebar tree to configure formulas, coefficients, and material data.</div>
+            <div className="text-lg font-semibold text-foreground">{t("modules.selectPrompt")}</div>
+            <div className="text-sm text-muted-foreground text-center max-w-xs">{t("modules.selectDesc")}</div>
           </div>
         ) : (
           <div className="max-w-[960px] mx-auto pb-16">
@@ -1214,10 +1219,10 @@ export default function Modules() {
                 <div className="flex gap-2 shrink-0">
                   <Button variant="outline" size="sm" onClick={() => updateCat.mutate({ categoryId: node.category_id, data: { is_active: !node.is_active } }, { onSuccess: () => showToast("Updated") })}>
                     {node.is_active ? <ToggleRight size={15} className="mr-2 text-green-600" /> : <ToggleLeft size={15} className="mr-2" />}
-                    {node.is_active ? "Deactivate" : "Activate"}
+                    {node.is_active ? t("modules.deactivate") : t("modules.activate")}
                   </Button>
                   <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10 border-destructive/20" onClick={askDeleteCat}>
-                    <Trash2 size={15} className="mr-2" /> Delete
+                    <Trash2 size={15} className="mr-2" /> {t("modules.delete")}
                   </Button>
                 </div>
               </div>
@@ -1229,7 +1234,7 @@ export default function Modules() {
               {isLeaf && !leafLoading && <LeafFlowGuide />}
 
               {/* ── Category Metadata ────────────────────────────────────── */}
-              <Sec title="Category Metadata" icon={<Layers size={16} />}>
+              <Sec title={t("modules.sections.metadata")} icon={<Layers size={16} />}>
                 <div className="flex flex-col gap-4">
                   <BilingualRow valueEN={catData?.name_en || node.name_en} onChangeEN={v => setCatDraft(d => ({ ...(d ?? node), name_en: v }))} placeholderEN="Name in English" valueAR={catData?.name_ar || node.name_ar || ""} onChangeAR={v => setCatDraft(d => ({ ...(d ?? node), name_ar: v }))} placeholderAR="الاسم بالعربية" />
                   <BilingualRow labelEN="Description (EN)" labelAR="Description (AR)" valueEN={catData?.description_en || node.description_en || ""} onChangeEN={v => setCatDraft(d => ({ ...(d ?? node), description_en: v }))} placeholderEN="Brief English description…" valueAR={catData?.description_ar || node.description_ar || ""} onChangeAR={v => setCatDraft(d => ({ ...(d ?? node), description_ar: v }))} placeholderAR="وصف مختصر بالعربية…" />
@@ -1262,7 +1267,7 @@ export default function Modules() {
                   <div className="mt-5 flex justify-end pt-4 border-t">
                     <Button onClick={saveCat} className="gap-2">
                       {updateCat.isPending ? <Spin size={14} /> : <Save size={14} />}
-                      Save Metadata Changes
+                      {t("modules.saveMetadata")}
                     </Button>
                   </div>
                 )}
@@ -1271,12 +1276,12 @@ export default function Modules() {
               {/* ── Sub-categories ───────────────────────────────────────── */}
               {!isLeaf && (
                 <Sec
-                  title="Sub-categories"
+                  title={t("modules.sections.subCategories")}
                   icon={<FolderOpen size={16} />}
                   subtitle={`${node.children?.length ?? 0} children under this node`}
                   action={
                     <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setModal({ type: "cat-child", parentId: node.category_id })}>
-                      <Plus size={14} className="mr-1.5" /> Add Child
+                      <Plus size={14} className="mr-1.5" /> {t("modules.addChild")}
                     </Button>
                   }
                 >
@@ -1302,7 +1307,7 @@ export default function Modules() {
                   ) : (
                     <div className="text-sm text-muted-foreground py-8 text-center bg-muted/50 rounded-lg border border-dashed flex flex-col items-center gap-2">
                       <FolderOpen size={24} className="text-muted-foreground/30" />
-                      No sub-categories yet. Add a child to build the hierarchy.
+                      {t("modules.empty.subCats")}
                     </div>
                   )}
                 </Sec>
@@ -1311,12 +1316,12 @@ export default function Modules() {
               {/* ── NON_MATERIAL Formulas ────────────────────────────────── */}
               {isLeaf && (
                 <Sec
-                  title="Geometry Formulas (NON_MATERIAL)"
+                  title={t("modules.sections.nonMaterial")}
                   icon={<FlaskConical size={16} />}
                   subtitle={leafLoading ? "Loading…" : `${leaf?.formulas?.length ?? 0} formulas · shape inputs and intermediate mathematical results`}
                   action={!leafLoading && (
                     <Button variant="outline" size="sm" className="h-8 text-xs text-primary border-primary/30 hover:bg-primary/5" onClick={() => setModal({ type: "formula", formulaType: "NON_MATERIAL" })}>
-                      <Plus size={14} className="mr-1.5" /> Add Geometry Formula
+                      <Plus size={14} className="mr-1.5" /> {t("modules.addFormula", { type: "NON_MATERIAL" })}
                     </Button>
                   )}
                 >
@@ -1325,7 +1330,7 @@ export default function Modules() {
                   ) : (leaf?.formulas ?? []).length === 0 ? (
                     <div className="text-sm text-muted-foreground py-8 text-center bg-muted/50 rounded-lg border border-dashed flex flex-col items-center gap-2">
                       <FlaskConical size={24} className="text-muted-foreground/30" />
-                      <span>No geometry formulas yet.</span>
+                      <span>{t("modules.empty.nonMaterial")}</span>
                       <span className="text-xs max-w-xs">These define user inputs (length, width) and compute intermediate spatial values used by MATERIAL formulas.</span>
                     </div>
                   ) : (
@@ -1339,13 +1344,13 @@ export default function Modules() {
               {/* ── MATERIAL Formulas ────────────────────────────────────── */}
               {isLeaf && (
                 <Sec
-                  title="Material Formulas (MATERIAL)"
+                  title={t("modules.sections.material")}
                   icon={<Package size={16} />}
                   accentClass="border-l-orange-500 text-orange-600"
                   subtitle={leafLoading ? "Loading…" : `${leaf?.material_formulas?.length ?? 0} formulas · compute exact raw resource quantities`}
                   action={!leafLoading && (
                     <Button variant="outline" size="sm" className="h-8 text-xs text-orange-600 border-orange-500/30 hover:bg-orange-50 hover:text-orange-700" onClick={() => setModal({ type: "formula", formulaType: "MATERIAL" })}>
-                      <Plus size={14} className="mr-1.5" /> Add Material Formula
+                      <Plus size={14} className="mr-1.5" /> {t("modules.addFormula", { type: "MATERIAL" })}
                     </Button>
                   )}
                 >
@@ -1354,7 +1359,7 @@ export default function Modules() {
                   ) : (leaf?.material_formulas ?? []).length === 0 ? (
                     <div className="text-sm text-muted-foreground py-8 text-center bg-orange-50/60 rounded-lg border border-dashed border-orange-300/50 flex flex-col items-center gap-2">
                       <Package size={24} className="text-orange-300" />
-                      <span className="text-orange-800/70">No material formulas yet.</span>
+                      <span className="text-orange-800/70">{t("modules.empty.material")}</span>
                       <span className="text-xs max-w-xs text-orange-700/60">These reference NON_MATERIAL outputs and coefficients to calculate final resource requirements.</span>
                     </div>
                   ) : (
@@ -1368,13 +1373,13 @@ export default function Modules() {
               {/* ── SERVICE Formulas ─────────────────────────────────────── */}
               {isLeaf && (
                 <Sec
-                  title="Service Formulas (SERVICE)"
+                  title={t("modules.sections.service")}
                   icon={<Wrench size={16} />}
                   accentClass="border-l-cyan-500 text-cyan-600"
                   subtitle={leafLoading ? "Loading…" : `${leaf?.service_formulas?.length ?? 0} formulas · compute service quantities for labor & equipment`}
                   action={!leafLoading && (
                     <Button variant="outline" size="sm" className="h-8 text-xs text-cyan-600 border-cyan-500/30 hover:bg-cyan-50 hover:text-cyan-700" onClick={() => setModal({ type: "formula", formulaType: "SERVICE" })}>
-                      <Plus size={14} className="mr-1.5" /> Add Service Formula
+                      <Plus size={14} className="mr-1.5" /> {t("modules.addFormula", { type: "SERVICE" })}
                     </Button>
                   )}
                 >
@@ -1383,7 +1388,7 @@ export default function Modules() {
                   ) : (leaf?.service_formulas ?? []).length === 0 ? (
                     <div className="text-sm text-muted-foreground py-8 text-center bg-cyan-50/60 rounded-lg border border-dashed border-cyan-300/50 flex flex-col items-center gap-2">
                       <Wrench size={24} className="text-cyan-300" />
-                      <span className="text-cyan-800/70">No service formulas yet.</span>
+                      <span className="text-cyan-800/70">{t("modules.empty.service")}</span>
                       <span className="text-xs max-w-xs text-cyan-700/60">These compute service quantities (e.g. labor hours, equipment usage) and can be linked to services in the Resources tab.</span>
                     </div>
                   ) : (
@@ -1397,7 +1402,7 @@ export default function Modules() {
               {/* ── Configurations ───────────────────────────────────────── */}
               {isLeaf && !leafLoading && (
                 <Sec
-                  title="Material Configurations"
+                  title={t("modules.sections.configs")}
                   icon={<Settings2 size={16} />}
                   accentClass="border-l-violet-500 text-violet-600"
                   subtitle={`${leaf?.configs?.length ?? 0} grade variants (e.g. Béton C25, C30)`}
@@ -1411,11 +1416,11 @@ export default function Modules() {
                   {(leaf?.configs ?? []).length === 0 && (
                     <div className="text-sm text-muted-foreground py-5 text-center bg-muted/50 rounded-lg border border-dashed mb-4 flex flex-col items-center gap-1.5">
                       <SlidersHorizontal size={20} className="text-muted-foreground/30" />
-                      No config variants yet.
+                      {t("modules.empty.configs")}
                     </div>
                   )}
                   <Button variant="outline" size="sm" onClick={() => createCfg.mutate({ name: "New Config", description: "" }, { onSuccess: () => showToast("Config added") })}>
-                    <Plus size={14} className="mr-2" /> Add New Variant
+                    <Plus size={14} className="mr-2" /> {t("modules.addConfig")}
                   </Button>
                 </Sec>
               )}
@@ -1423,7 +1428,7 @@ export default function Modules() {
               {/* ── Coefficients ─────────────────────────────────────────── */}
               {isLeaf && !leafLoading && (
                 <Sec
-                  title="Coefficients Library"
+                  title={t("modules.sections.coefficients")}
                   icon={<Sigma size={16} />}
                   accentClass="border-l-emerald-500 text-emerald-600"
                   subtitle={`${leaf?.coefficients?.length ?? 0} constant values for MATERIAL expressions`}
@@ -1437,11 +1442,11 @@ export default function Modules() {
                   {(leaf?.coefficients ?? []).length === 0 && (
                     <div className="text-sm text-muted-foreground py-5 text-center bg-muted/50 rounded-lg border border-dashed mb-4 flex flex-col items-center gap-1.5">
                       <Sigma size={20} className="text-muted-foreground/30" />
-                      No coefficients yet.
+                      {t("modules.empty.coefficients")}
                     </div>
                   )}
                   <Button variant="outline" size="sm" onClick={() => createCoef.mutate({ name_en: `coef_${Date.now().toString(36)}`, name_ar: "", value: 0 }, { onSuccess: () => showToast("Coefficient added") })}>
-                    <Plus size={14} className="mr-2" /> Add New Coefficient
+                    <Plus size={14} className="mr-2" /> {t("modules.addCoefficient")}
                   </Button>
                 </Sec>
               )}
@@ -1463,13 +1468,13 @@ export default function Modules() {
         <DialogContent className="max-w-md z-[100]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
-              <AlertTriangle size={18} /> Confirm Deletion
+              <AlertTriangle size={18} /> {t("modules.confirmDelete")}
             </DialogTitle>
             <DialogDescription className="pt-2">{confirm?.message}</DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-4">
-            <Button variant="ghost" onClick={() => setConfirm(null)}>Cancel</Button>
-            <Button variant="destructive" onClick={confirm?.onConfirm}>Delete Permanently</Button>
+            <Button variant="ghost" onClick={() => setConfirm(null)}>{t("modules.cancel")}</Button>
+            <Button variant="destructive" onClick={confirm?.onConfirm}>{t("modules.deletePermanently")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

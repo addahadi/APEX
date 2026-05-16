@@ -57,7 +57,14 @@ export function useCreateProject() {
     },
     onError: (err) => {
       const handled = handleApiError(err);
-      toast.error(handled.message);
+      // Show localized limit-reached toast
+      if (err?.code === 'LIMIT_REACHED' || (err?.details && err.details[0]?.featureKey === 'projects_limit')) {
+        toast.error(t('toast.projectLimitReached', { ns: 'common' }), {
+          description: t('toast.switchSubscription', { ns: 'user', defaultValue: '' }),
+        });
+      } else {
+        toast.error(handled.message);
+      }
       return handled;
     },
   });

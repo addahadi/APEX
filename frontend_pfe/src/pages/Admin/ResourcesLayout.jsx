@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { P } from "@/lib/design-tokens";
@@ -8,6 +9,7 @@ import { useUnits } from "@/hooks/units.queries";
 import { useModulesTree } from "@/hooks/modules.queries";
 
 export default function ResourcesLayout() {
+  const { t } = useTranslation("admin");
   const { data: units = [], isLoading: unitsLoading } = useUnits();
   const { data: tree  = [], isLoading: treeLoading  } = useModulesTree();
   const [search, setSearch] = useState("");
@@ -23,15 +25,15 @@ export default function ResourcesLayout() {
     <div className="p-8 flex-1 overflow-y-auto animate-in fade-in slide-in-from-bottom-2 duration-300">
       <div className="mb-8">
         <SectionTitle 
-          title="Resources" 
-          subtitle="Catalogue of materials, services & units" 
+          title={t("resources.title")} 
+          subtitle={t("resources.subtitle")} 
         />
       </div>
 
       <div className="flex border-b mb-6 overflow-x-auto no-scrollbar">
-        <NavLink to="/admin/resources" end className={tabClass}>Materials</NavLink>
-        <NavLink to="/admin/resources/services" className={tabClass}>Services</NavLink>
-        <NavLink to="/admin/resources/units" className={tabClass}>Units</NavLink>
+        <NavLink to="/admin/resources" end className={tabClass}>{t("resources.materialsTab")}</NavLink>
+        <NavLink to="/admin/resources/services" className={tabClass}>{t("resources.servicesTab")}</NavLink>
+        <NavLink to="/admin/resources/units" className={tabClass}>{t("resources.unitsTab")}</NavLink>
       </div>
 
       <div className="pb-10">

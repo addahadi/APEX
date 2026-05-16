@@ -27,3 +27,6 @@ export const getUserDetails = (userId) => api.get(`/admin/users/${userId}`);
 
 export const updateUserStatus = (userId, data) =>
   api.patch(`/admin/users/${userId}/status`, data);
+
+export const createAdminUser = (data) =>
+  api.post('/admin/users/create-admin', data);

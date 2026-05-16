@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Plus, Pencil, Trash2, Save, X, Loader2 } from "lucide-react";
 import { P } from "@/lib/design-tokens";
@@ -86,6 +87,7 @@ function PlanTypeRow({ pt }) {
 }
 
 export default function PlanTypes() {
+  const { t } = useTranslation("admin");
   const [showNew, setShowNew] = useState(false);
   const [newPT,   setNewPT]   = useState({ name_en: "", name_ar: "" });
   const { data: planTypes = [], isLoading } = usePlanTypes();
@@ -106,7 +108,7 @@ export default function PlanTypes() {
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="new_name_en">Name (EN)</Label>
+                <Label htmlFor="new_name_en">{t("planTypes.nameEN")}</Label>
                 <Input 
                   id="new_name_en" 
                   value={newPT.name_en} 
@@ -115,7 +117,7 @@ export default function PlanTypes() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="new_name_ar">Name (AR)</Label>
+                <Label htmlFor="new_name_ar">{t("planTypes.nameAR")}</Label>
                 <Input 
                   id="new_name_ar" 
                   value={newPT.name_ar} 
@@ -151,9 +153,9 @@ export default function PlanTypes() {
             <Table>
               <TableHeader className="bg-muted/50">
                 <TableRow>
-                  <TableHead className="text-xs font-semibold uppercase tracking-wider h-10">Name (EN)</TableHead>
-                  <TableHead className="text-xs font-semibold uppercase tracking-wider h-10">Name (AR)</TableHead>
-                  <TableHead className="text-xs font-semibold uppercase tracking-wider h-10">Actions</TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wider h-10">{t("planTypes.nameEN")}</TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wider h-10">{t("planTypes.nameAR")}</TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wider h-10">{t("planTypes.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

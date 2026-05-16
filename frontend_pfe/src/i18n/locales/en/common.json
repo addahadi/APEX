@@ -44,6 +44,10 @@
     "checkYourEmail": "Check your email",
     "resetLinkSent": "If the email exists, a reset link was sent.",
     "networkError": "Network error, please check your connection",
-    "unexpectedError": "An unexpected error occurred"
+    "unexpectedError": "An unexpected error occurred",
+    "projectLimitReached": "Project limit reached. Upgrade your plan to create more projects.",
+    "calculationLimitReached": "Calculation limit reached. Upgrade your plan for more estimations.",
+    "profileUpdated": "Profile updated successfully.",
+    "profileUpdateFailed": "Failed to update profile."
   }
 }

@@ -340,3 +340,42 @@ export const getMe = async (userId) => {
 
   return rows[0];
 };
+
+// ── updateProfile ────────────────────────────────────────────────────────────
+export const updateProfile = async (userId, { name, currentPassword, newPassword }) => {
+  const users = await sql`SELECT * FROM users WHERE id = ${userId}`;
+  if (!users.length) throw new NotFoundError('User not found', 'المستخدم غير موجود');
+
+  const user = users[0];
+
+  // Validate + hash new password if requested
+  let hashedPassword = null;
+  if (newPassword) {
+    if (!currentPassword) throw new Error('Current password is required to set a new one');
+    const valid = await bcrypt.compare(currentPassword, user.password);
+    if (!valid) throw new Error('Current password is incorrect');
+    hashedPassword = await bcrypt.hash(newPassword, 10);
+  }
+
+  const newName = name?.trim() || user.name;
+
+  // Build the update using postgres tagged template (always update name; conditionally update password)
+  let result;
+  if (hashedPassword) {
+    result = await sql`
+      UPDATE users
+      SET name = ${newName}, password = ${hashedPassword}
+      WHERE id = ${userId}
+      RETURNING id, name, email, role, created_at
+    `;
+  } else {
+    result = await sql`
+      UPDATE users
+      SET name = ${newName}
+      WHERE id = ${userId}
+      RETURNING id, name, email, role, created_at
+    `;
+  }
+
+  return result[0];
+};

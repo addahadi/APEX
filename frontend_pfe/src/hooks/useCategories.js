@@ -1,10 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "./use-toast";
+import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import * as categoriesService from "../services/categories.service";
+import { handleApiError } from "@/api/handleApiError";
 
-/**
- * Hook to fetch full category tree
- */
 export const useCategoryTree = () => {
   return useQuery({
     queryKey: ["categories", "tree"],
@@ -12,9 +11,6 @@ export const useCategoryTree = () => {
   });
 };
 
-/**
- * Hook to fetch root categories
- */
 export const useRootCategories = () => {
   return useQuery({
     queryKey: ["categories", "root"],
@@ -22,9 +18,6 @@ export const useRootCategories = () => {
   });
 };
 
-/**
- * Hook to fetch child categories of a specific branch
- */
 export const useChildCategories = (categoryId) => {
   return useQuery({
     queryKey: ["categories", categoryId, "children"],
@@ -33,10 +26,6 @@ export const useChildCategories = (categoryId) => {
   });
 };
 
-/**
- * Hook to fetch category details (node info + formulas)
- * Used to determine category_level and configure calculation leaf.
- */
 export const useCategoryDetails = (categoryId) => {
   return useQuery({
     queryKey: ["category", categoryId, "details"],
@@ -45,60 +34,46 @@ export const useCategoryDetails = (categoryId) => {
   });
 };
 
-/**
- * Hook to run stateless calculation
- */
 export const useCalculate = () => {
-  const { toast } = useToast();
-  
+  const { t } = useTranslation("common");
   return useMutation({
     mutationFn: (data) => categoriesService.calculateEngine(data),
-    onError: (error) => {
-      toast({
-        title: "Calculation Error",
-        description: error.message || "Failed to calculate results.",
-        variant: "destructive",
-      });
+    onError: (err) => {
+      const handled = handleApiError(err);
+      toast.error(handled.message || t("error"));
     },
   });
 };
 
-/**
- * Hook to save leaf results to estimation
- */
 export const useSaveLeafResult = () => {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
+  const { t } = useTranslation("common");
 
   return useMutation({
     mutationFn: (data) => categoriesService.saveLeafResult(data),
     onSuccess: (data, variables) => {
-      // Invalidate project estimation to refresh totals
       if (variables.project_id) {
         queryClient.invalidateQueries({ queryKey: ["project-estimation", variables.project_id] });
       }
-      
-      toast({
-        title: "Success",
-        description: "Calculation results saved successfully to your estimation.",
-      });
+      toast.success(t("save"));
     },
-    onError: (error) => {
-      toast({
-        title: "Save Error",
-        description: error.message || "Failed to save calculation.",
-        variant: "destructive",
-      });
+    onError: (err) => {
+      const handled = handleApiError(err);
+      const isCalcLimit =
+        err?.code === "LIMIT_REACHED" ||
+        (err?.details && err.details[0]?.featureKey === "leaf_calculations_limit");
+      if (isCalcLimit) {
+        toast.error(t("toast.calculationLimitReached"), { duration: 6000 });
+      } else {
+        toast.error(handled.message || t("error"));
+      }
     },
   });
 };
 
-/**
- * Hook to remove a leaf calculation
- */
 export const useRemoveLeaf = () => {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
+  const { t } = useTranslation("common");
 
   return useMutation({
     mutationFn: (data) => categoriesService.removeLeaf(data.project_details_id),
@@ -106,18 +81,11 @@ export const useRemoveLeaf = () => {
       if (variables.project_id) {
         queryClient.invalidateQueries({ queryKey: ["project-estimation", variables.project_id] });
       }
-      
-      toast({
-        title: "Removed",
-        description: "Calculation step removed from estimation.",
-      });
+      toast.success(t("save"));
     },
-    onError: (error) => {
-      toast({
-        title: "Removal Error",
-        description: error.message || "Failed to remove calculation.",
-        variant: "destructive",
-      });
+    onError: (err) => {
+      const handled = handleApiError(err);
+      toast.error(handled.message || t("error"));
     },
   });
 };

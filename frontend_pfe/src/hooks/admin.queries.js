@@ -67,3 +67,21 @@ export function useUpdateAdminUserStatus() {
     },
   });
 }
+
+export function useCreateAdminUser() {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation('admin');
+
+  return useMutation({
+    mutationFn: (data) => api.createAdminUser(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.usersRoot });
+      toast.success(t('toast.adminCreated'));
+    },
+    onError: (err) => {
+      const handled = handleApiError(err);
+      toast.error(handled.message || t('toast.adminCreateFailed'));
+      return handled;
+    },
+  });
+}

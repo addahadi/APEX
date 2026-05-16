@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Plus, Pencil, Trash2, Save, X, Loader2 } from "lucide-react";
 import { P } from "@/lib/design-tokens";
@@ -111,6 +112,7 @@ function UnitRow({ unit, onDelete }) {
 }
 
 function NewUnitModal({ open, onClose }) {
+  const { t } = useTranslation("admin");
   const [form, setForm] = useState({ name_en: "", name_ar: "", symbol: "" });
   const createUnit = useCreateUnit();
   const valid = form.name_en.trim() && form.symbol.trim();
@@ -123,15 +125,15 @@ function NewUnitModal({ open, onClose }) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New Measurement Unit</DialogTitle>
+          <DialogTitle>{t("units.modal.title")}</DialogTitle>
           <DialogDescription>
-            Add a unit to be used in material and formula calculations.
+            {t("units.modal.desc")}
           </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-1 gap-6 py-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Name (EN)</Label>
+              <Label>{t("units.modal.nameEN")}</Label>
               <Input 
                 value={form.name_en} 
                 onChange={e => setForm(f => ({ ...f, name_en: e.target.value }))} 
@@ -139,7 +141,7 @@ function NewUnitModal({ open, onClose }) {
               />
             </div>
             <div className="space-y-2">
-              <Label>Name (AR)</Label>
+              <Label>{t("units.modal.nameAR")}</Label>
               <Input 
                 value={form.name_ar} 
                 onChange={e => setForm(f => ({ ...f, name_ar: e.target.value }))} 
@@ -150,7 +152,7 @@ function NewUnitModal({ open, onClose }) {
             </div>
           </div>
           <div className="space-y-2">
-            <Label>Symbol</Label>
+            <Label>{t("units.modal.symbol")}</Label>
             <Input 
               value={form.symbol} 
               onChange={e => setForm(f => ({ ...f, symbol: e.target.value }))} 
@@ -173,6 +175,7 @@ function NewUnitModal({ open, onClose }) {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function Units() {
+  const { t } = useTranslation("admin");
   const [showNew, setShowNew] = useState(false);
   const [confirm, setConfirm] = useState(null);
   const { data: units = [], isLoading } = useUnits();
@@ -187,7 +190,7 @@ export default function Units() {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
       <div className="flex justify-end">
         <Button onClick={() => setShowNew(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Add Unit
+          <Plus className="mr-2 h-4 w-4" /> {t("units.add")}
         </Button>
       </div>
 
@@ -197,10 +200,10 @@ export default function Units() {
         <Table>
           <TableHeader className="bg-muted/50">
             <TableRow>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider">Name (EN)</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider">Name (AR)</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider">Symbol</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider text-right">Actions</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider">{t("units.columns.nameEN")}</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider">{t("units.columns.nameAR")}</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider">{t("units.columns.symbol")}</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-right">{t("units.columns.actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -209,14 +212,14 @@ export default function Units() {
                 <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
                   <div className="flex items-center justify-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Loading units…
+                    {t("units.loading")}
                   </div>
                 </TableCell>
               </TableRow>
             ) : units.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
-                  No units defined.
+                  {t("units.empty")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -230,7 +233,7 @@ export default function Units() {
       <Dialog open={!!confirm} onOpenChange={() => setConfirm(null)}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle>Delete measurement unit?</DialogTitle>
+            <DialogTitle>{t("units.deleteTitle")}</DialogTitle>
             <DialogDescription className="py-2">
               This will fail if any materials or formulas still reference this unit. 
               This action cannot be undone.

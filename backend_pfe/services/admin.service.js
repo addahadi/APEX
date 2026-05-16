@@ -1,5 +1,6 @@
 import sql from '../config/database.js';
-import { NotFoundError } from '../utils/AppError.js';
+import bcrypt from 'bcrypt';
+import { NotFoundError, ConflictError } from '../utils/AppError.js';
 
 const CLIENT_ROLE = 'CLIENT';
 
@@ -549,3 +550,17 @@ export async function updateAdminUserStatus({ userId, status }) {
     updated_at: rows[0].updated_at,
   };
 }
+
+// ── createAdminUser ───────────────────────────────────────────────────────────
+export const createAdminUser = async ({ name, email, password }) => {
+  const existing = await sql`SELECT id FROM users WHERE email = ${email}`;
+  if (existing.length > 0) throw new ConflictError('Email already exists', 'البريد الإلكتروني مسجل بالفعل');
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const result = await sql`
+    INSERT INTO users (name, email, password, role)
+    VALUES (${name}, ${email}, ${hashedPassword}, 'ADMIN')
+    RETURNING id, name, email, role, created_at
+  `;
+  return result[0];
+};

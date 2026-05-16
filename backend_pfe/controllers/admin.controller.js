@@ -57,3 +57,11 @@ export async function updateUserStatus(req, res) {
     handleError(res, e);
   }
 }
+
+export async function createAdminUser(req, res) {
+  try {
+    ok(res, await svc.createAdminUser(req.body), 201);
+  } catch (e) {
+    handleError(res, e);
+  }
+}

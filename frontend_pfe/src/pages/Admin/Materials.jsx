@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Plus, Pencil, Trash2, Save, X, FlaskConical, Loader2, Search } from "lucide-react";
 import { P } from "@/lib/design-tokens";
@@ -66,6 +67,7 @@ const EMPTY = {
 
 // ── Edit modal ────────────────────────────────────────────────────────────────
 function MaterialModal({ initial, units, materialFormulas, onClose, onSave, isPending, title }) {
+  const { t } = useTranslation("admin");
   const [form, setForm] = useState(initial);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -78,13 +80,13 @@ function MaterialModal({ initial, units, materialFormulas, onClose, onSave, isPe
         <DialogHeader>
           <DialogTitle className="text-xl font-bold tracking-tight">{title}</DialogTitle>
           <DialogDescription>
-            Fill in the details for this material. Formulas are linked to specific calculation modules.
+            {t("materials.modal.desc")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
           <div className="space-y-2">
-            <Label htmlFor="material_name_en">Name (EN)</Label>
+            <Label htmlFor="material_name_en">{t("materials.modal.nameEN")}</Label>
             <Input 
               id="material_name_en" 
               value={form.material_name_en} 
@@ -93,7 +95,7 @@ function MaterialModal({ initial, units, materialFormulas, onClose, onSave, isPe
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="material_name_ar">Name (AR)</Label>
+            <Label htmlFor="material_name_ar">{t("materials.modal.nameAR")}</Label>
             <Input 
               id="material_name_ar" 
               value={form.material_name_ar} 
@@ -105,10 +107,10 @@ function MaterialModal({ initial, units, materialFormulas, onClose, onSave, isPe
           </div>
 
           <div className="md:col-span-2 space-y-2">
-            <Label>MATERIAL Formula</Label>
+            <Label>{t("materials.modal.formula")}</Label>
             <Select value={form.formula_id} onValueChange={v => set("formula_id", v)}>
               <SelectTrigger className={cn(form.formula_id && "border-primary/50 bg-primary/5")}>
-                <SelectValue placeholder="— select a formula —" />
+                <SelectValue placeholder={t("materials.modal.selectFormula")} />
               </SelectTrigger>
               <SelectContent>
                 {materialFormulas.map(f => (
@@ -121,16 +123,16 @@ function MaterialModal({ initial, units, materialFormulas, onClose, onSave, isPe
             {selectedFormula && (
               <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground bg-muted/50 px-2 py-1 rounded">
                 <FlaskConical size={12} className="text-primary" />
-                Category auto-set to: <span className="font-bold text-foreground">{selectedFormula.category_name}</span>
+                {t("materials.modal.categoryAuto")} <span className="font-bold text-foreground">{selectedFormula.category_name}</span>
               </div>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label>Unit</Label>
+            <Label>{t("materials.modal.unit")}</Label>
             <Select value={form.unit_id || "none"} onValueChange={v => set("unit_id", v === "none" ? null : v)}>
               <SelectTrigger>
-                <SelectValue placeholder="— no unit —" />
+                <SelectValue placeholder={t("materials.modal.noUnit")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">— no unit —</SelectItem>
@@ -144,7 +146,7 @@ function MaterialModal({ initial, units, materialFormulas, onClose, onSave, isPe
           </div>
 
           <div className="space-y-2">
-            <Label>Material Type</Label>
+            <Label>{t("materials.modal.type")}</Label>
             <Select value={form.material_type} onValueChange={v => set("material_type", v)}>
               <SelectTrigger>
                 <SelectValue />
@@ -158,11 +160,11 @@ function MaterialModal({ initial, units, materialFormulas, onClose, onSave, isPe
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="unit_price_usd">Unit Price (USD)</Label>
+            <Label htmlFor="unit_price_usd">{t("materials.modal.price")}</Label>
             <Input id="unit_price_usd" type="number" value={String(form.unit_price_usd)} onChange={e => set("unit_price_usd", Number(e.target.value) || 0)} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="waste_factor">Waste Factor (0–1)</Label>
+            <Label htmlFor="waste_factor">{t("materials.modal.waste")}</Label>
             <Input id="waste_factor" type="number" step="0.01" value={String(form.default_waste_factor)} onChange={e => set("default_waste_factor", Math.min(1, Math.max(0, Number(e.target.value) || 0)))} placeholder="0.05" />
           </div>
         </div>
@@ -171,7 +173,7 @@ function MaterialModal({ initial, units, materialFormulas, onClose, onSave, isPe
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
           <Button disabled={!valid || isPending} onClick={() => onSave(form)}>
             {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-            {title.startsWith("Edit") ? "Save Changes" : "Create Material"}
+            {title.startsWith(t("materials.modal.editPrefix").split(":")[0]) || title.startsWith("Edit") ? t("materials.modal.save") : t("materials.modal.create")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -181,6 +183,7 @@ function MaterialModal({ initial, units, materialFormulas, onClose, onSave, isPe
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function Materials() {
+  const { t } = useTranslation("admin");
   const [search,   setSearch]   = useState("");
   const [page,     setPage]     = useState(1);
   const [modal,    setModal]    = useState(null); // null | "new" | {material}
@@ -212,14 +215,14 @@ export default function Materials() {
         <div className="relative flex-1 min-w-[300px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search materials by name…"
+            placeholder={t("materials.search")}
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
             className="pl-9 bg-background"
           />
         </div>
         <Button onClick={() => setModal("new")}>
-          <Plus className="mr-2 h-4 w-4" /> Add Material
+          <Plus className="mr-2 h-4 w-4" /> {t("materials.add")}
         </Button>
       </div>
 
@@ -232,14 +235,14 @@ export default function Materials() {
         <Table>
           <TableHeader className="bg-muted/50">
             <TableRow>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider">Material</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider">Category</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider">Unit</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider">Type</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider">Price (USD)</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider">Formula</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider">Waste</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider text-right">Actions</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider">{t("materials.columns.material")}</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider">{t("materials.columns.category")}</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider">{t("materials.columns.unit")}</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider">{t("materials.columns.type")}</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider">{t("materials.columns.price")}</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider">{t("materials.columns.formula")}</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider">{t("materials.columns.waste")}</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-right">{t("materials.columns.actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -248,14 +251,14 @@ export default function Materials() {
                 <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
                   <div className="flex items-center justify-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Loading materials…
+                    {t("materials.loading")}
                   </div>
                 </TableCell>
               </TableRow>
             ) : rows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
-                  No materials found.
+                  {t("materials.empty")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -351,9 +354,7 @@ export default function Materials() {
       {pagination.total_pages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-xs text-muted-foreground">
-            Showing <span className="font-medium">{((page - 1) * PAGE_SIZE) + 1}</span> to{" "}
-            <span className="font-medium">{Math.min(page * PAGE_SIZE, pagination.total)}</span> of{" "}
-            <span className="font-medium">{pagination.total}</span> materials
+            {t("materials.showing", { from: ((page-1)*PAGE_SIZE)+1, to: Math.min(page*PAGE_SIZE, pagination.total), total: pagination.total })}
           </p>
           <Pagination className="justify-end w-auto mx-0">
             <PaginationContent>
@@ -415,9 +416,9 @@ export default function Materials() {
       <Dialog open={!!confirm} onOpenChange={() => setConfirm(null)}>
         <DialogContent className="sm:max-w-[400px] z-[100]">
           <DialogHeader>
-            <DialogTitle>Delete material?</DialogTitle>
+            <DialogTitle>{t("materials.deleteTitle")}</DialogTitle>
             <DialogDescription className="py-2">
-              This will permanently remove the material from the resource catalog. This action cannot be undone.
+              {t("materials.deleteDesc")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">

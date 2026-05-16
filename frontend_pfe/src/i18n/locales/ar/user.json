@@ -148,7 +148,18 @@
     "noLiked": "لا توجد مقالات معجب بها بعد",
     "noSaved": "لا توجد مقالات محفوظة بعد",
     "browseArticles": "تصفح المقالات",
-    "saved": "حُفظ في"
+    "saved": "حُفظ في",
+    "editProfile": "تعديل الملف الشخصي",
+    "editProfileTitle": "تعديل ملفك الشخصي",
+    "editName": "الاسم الكامل",
+    "editEmail": "البريد الإلكتروني",
+    "editCurrentPassword": "كلمة المرور الحالية",
+    "editNewPassword": "كلمة المرور الجديدة (اختياري)",
+    "editSave": "حفظ التغييرات",
+    "editSaving": "جاري الحفظ...",
+    "editCancel": "إلغاء",
+    "estimations": "الحسابات",
+    "allUnlimited": "!🎉 جميع حدود استخدامك غير محدودة"
   },
   "chatbot": {
     "name": "مساعد APEX",

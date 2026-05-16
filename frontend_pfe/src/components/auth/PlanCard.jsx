@@ -1,5 +1,6 @@
 import React from "react";
 import { P } from "../../lib/design-tokens";
+import { useTranslation } from "react-i18next";
 
 export default function PlanCard({
   title,
@@ -11,8 +12,10 @@ export default function PlanCard({
   onClick,
   disabled,
 }) {
+  const { i18n } = useTranslation();
   return (
     <div
+      dir={i18n.dir()}
       style={{
         background: highlight ? P.main : P.surface,
         color: highlight ? "#fff" : P.txt,

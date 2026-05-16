@@ -132,3 +132,14 @@ export const resetPassword = async (req, res) => {
     handleError(res, error);
   }
 };
+
+// ── updateProfile ─────────────────────────────────────────────────────────────
+export const updateProfile = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const result = await authService.updateProfile(userId, req.body);
+    ok(res, result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};

@@ -12,6 +12,7 @@ import {
   getUserDetails,
   getUsers,
   updateUserStatus,
+  createAdminUser,
 } from '../controllers/admin.controller.js';
 
 const router = Router();
@@ -28,5 +29,8 @@ router.patch(
   validate(updateAdminUserStatusSchema),
   updateUserStatus
 );
+router.post('/users/create-admin', createAdminUser);
 
 export default router;
+
+// ── Add this import at the top block (already imported from controller) ───────

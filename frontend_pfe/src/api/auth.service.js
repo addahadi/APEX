@@ -39,3 +39,9 @@ export const getMe = () => api.get("/me");
  */
 export const logoutUser = (refreshToken) =>
   api.post("/logout", { refreshToken });
+
+/**
+ * PATCH /me
+ * @param {{ name?: string, currentPassword?: string, newPassword?: string }} data
+ */
+export const updateProfile = (data) => api.patch('/me', data);

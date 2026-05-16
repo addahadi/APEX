@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
 import { Plus, Pencil, Trash2, Save, X, Wrench, Loader2, Search, FlaskConical } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,7 @@ const EMPTY = {
 
 // ── Edit / Create modal ───────────────────────────────────────────────────────
 function ServiceModal({ initial, units, serviceFormulas, onClose, onSave, isPending, title }) {
+  const { t } = useTranslation("admin");
   const [form, setForm] = useState(initial);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -59,13 +61,13 @@ function ServiceModal({ initial, units, serviceFormulas, onClose, onSave, isPend
         <DialogHeader>
           <DialogTitle className="text-xl font-bold tracking-tight">{title}</DialogTitle>
           <DialogDescription>
-            Define the service cost structure. Optionally link a formula to compute quantity automatically.
+            {t("services.modal.desc")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
           <div className="space-y-2">
-            <Label htmlFor="service_name_en">Name (EN)</Label>
+            <Label htmlFor="service_name_en">{t("services.modal.nameEN")}</Label>
             <Input
               id="service_name_en"
               value={form.service_name_en}
@@ -74,7 +76,7 @@ function ServiceModal({ initial, units, serviceFormulas, onClose, onSave, isPend
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="service_name_ar">Name (AR)</Label>
+            <Label htmlFor="service_name_ar">{t("services.modal.nameAR")}</Label>
             <Input
               id="service_name_ar"
               value={form.service_name_ar}
@@ -86,7 +88,7 @@ function ServiceModal({ initial, units, serviceFormulas, onClose, onSave, isPend
           </div>
 
           <div className="md:col-span-2 space-y-2">
-            <Label>Linked Formula (SERVICE)</Label>
+            <Label>{t("services.modal.formula")}</Label>
             <Select value={form.formula_id || "none"} onValueChange={v => {
               if (v === "none") {
                 setForm(f => ({ ...f, formula_id: "", category_id: "" }));
@@ -95,7 +97,7 @@ function ServiceModal({ initial, units, serviceFormulas, onClose, onSave, isPend
               }
             }}>
               <SelectTrigger className={cn(form.formula_id && "border-cyan-500/50 bg-cyan-500/5")}>
-                <SelectValue placeholder="— no formula (skip) —" />
+                <SelectValue placeholder={t("services.modal.noFormula")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">— no formula (skip) —</SelectItem>
@@ -109,16 +111,16 @@ function ServiceModal({ initial, units, serviceFormulas, onClose, onSave, isPend
             {selectedFormula && (
               <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground bg-muted/50 px-2 py-1 rounded">
                 <Wrench size={12} className="text-cyan-600" />
-                Category auto-set to: <span className="font-bold text-foreground">{selectedFormula.category_name}</span>
+                {t("services.modal.categoryAuto")} <span className="font-bold text-foreground">{selectedFormula.category_name}</span>
               </div>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label>Unit</Label>
+            <Label>{t("services.modal.unit")}</Label>
             <Select value={form.unit_id || "none"} onValueChange={v => set("unit_id", v === "none" ? "" : v)}>
               <SelectTrigger>
-                <SelectValue placeholder="— no unit —" />
+                <SelectValue placeholder={t("services.modal.noUnit")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">— no unit —</SelectItem>
@@ -132,24 +134,24 @@ function ServiceModal({ initial, units, serviceFormulas, onClose, onSave, isPend
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="equipment_cost">Equipment Cost (DA)</Label>
+            <Label htmlFor="equipment_cost">{t("services.modal.equipment")}</Label>
             <Input id="equipment_cost" type="number" value={String(form.equipment_cost)} onChange={e => set("equipment_cost", Number(e.target.value) || 0)} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="manpower_cost">Manpower Cost (DA)</Label>
+            <Label htmlFor="manpower_cost">{t("services.modal.manpower")}</Label>
             <Input id="manpower_cost" type="number" value={String(form.manpower_cost)} onChange={e => set("manpower_cost", Number(e.target.value) || 0)} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="install_labor_price">Install Labor (DA)</Label>
+            <Label htmlFor="install_labor_price">{t("services.modal.install")}</Label>
             <Input id="install_labor_price" type="number" value={String(form.install_labor_price)} onChange={e => set("install_labor_price", Number(e.target.value) || 0)} />
           </div>
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button variant="ghost" onClick={onClose}>{t("services.modal.cancel")}</Button>
           <Button disabled={!valid || isPending} onClick={() => onSave(form)}>
             {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-            {title.startsWith("Edit") ? "Save Changes" : "Create Service"}
+            {title.startsWith(t("services.modal.save").replace("Save Changes","Edit")) ? "Save Changes" : "Create Service"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -159,6 +161,7 @@ function ServiceModal({ initial, units, serviceFormulas, onClose, onSave, isPend
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function Services() {
+  const { t } = useTranslation("admin");
   const [search,  setSearch]  = useState("");
   const [page,    setPage]    = useState(1);
   const [modal,   setModal]   = useState(null); // null | "new" | {service}
@@ -199,14 +202,14 @@ export default function Services() {
         <div className="relative flex-1 min-w-[300px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search services by name…"
+            placeholder={t("services.search")}
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
             className="pl-9 bg-background"
           />
         </div>
         <Button onClick={() => setModal("new")}>
-          <Plus className="mr-2 h-4 w-4" /> Add Service
+          <Plus className="mr-2 h-4 w-4" /> {t("services.add")}
         </Button>
       </div>
 
@@ -219,14 +222,14 @@ export default function Services() {
         <Table>
           <TableHeader className="bg-muted/50">
             <TableRow>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider">Service</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider">Category</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider">Unit</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider">Equipment (DA)</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider">Manpower (DA)</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider">Install Labor</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider">Formula</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider text-right">Actions</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider">{t("services.columns.service")}</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider">{t("services.columns.category")}</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider">{t("services.columns.unit")}</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider">{t("services.columns.equipment")}</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider">{t("services.columns.manpower")}</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider">{t("services.columns.install")}</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider">{t("services.columns.formula")}</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-right">{t("services.columns.actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -235,14 +238,14 @@ export default function Services() {
                 <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
                   <div className="flex items-center justify-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Loading services…
+                    {t("services.loading")}
                   </div>
                 </TableCell>
               </TableRow>
             ) : rows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
-                  No services found.
+                  {t("services.empty")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -321,9 +324,7 @@ export default function Services() {
       {pagination.total_pages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-xs text-muted-foreground">
-            Showing <span className="font-medium">{((page - 1) * PAGE_SIZE) + 1}</span> to{" "}
-            <span className="font-medium">{Math.min(page * PAGE_SIZE, pagination.total)}</span> of{" "}
-            <span className="font-medium">{pagination.total}</span> services
+            {t("services.showing", { from: ((page-1)*PAGE_SIZE)+1, to: Math.min(page*PAGE_SIZE, pagination.total), total: pagination.total })}
           </p>
           <Pagination className="justify-end w-auto mx-0">
             <PaginationContent>
@@ -358,7 +359,7 @@ export default function Services() {
       {/* Create Modal */}
       {modal === "new" && (
         <ServiceModal
-          title="New Service"
+          title={t("services.modal.newTitle")}
           initial={{ ...EMPTY }}
           units={units}
           serviceFormulas={sFormulas}
@@ -371,7 +372,7 @@ export default function Services() {
       {/* Edit Modal */}
       {modal && modal !== "new" && (
         <ServiceModal
-          title={`Edit: ${modal.service_name_en}`}
+          title={`${t('services.modal.editPrefix')} ${modal.service_name_en}`}
           initial={modal}
           units={units}
           serviceFormulas={sFormulas}
@@ -385,9 +386,9 @@ export default function Services() {
       <Dialog open={!!confirm} onOpenChange={() => setConfirm(null)}>
         <DialogContent className="sm:max-w-[400px] z-[100]">
           <DialogHeader>
-            <DialogTitle>Delete service?</DialogTitle>
+            <DialogTitle>{t("services.deleteTitle")}</DialogTitle>
             <DialogDescription className="py-2">
-              This will permanently remove the service from the catalog. This action cannot be undone.
+              {t("services.deleteDesc")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
