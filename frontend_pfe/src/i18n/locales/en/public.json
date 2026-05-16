@@ -9,94 +9,122 @@
     "tagline": "Next-Gen AEC Estimation Engine",
     "titleLine1": "Precision in Every",
     "titleLine2": "Calculation.",
-    "description": "The definitive platform for AEC professionals. Build complex, multi-layered estimations with our dynamic formula engine and structural analysis tools.",
+    "description": "The definitive platform for AEC professionals. Build complex, multi-layered construction estimations with our dynamic formula engine — covering foundations, finishing, doors, windows, interior fit-out, and more.",
     "startTrial": "Explore Engine",
     "watchDemo": "View Case Studies",
-    "socialProof": "Trusted by leading engineering firms worldwide",
+    "socialProof": "Built for the Algerian construction industry by engineers",
     "liveAI": "Live Engine Logic",
     "projectName": "Structural Analysis: Tower B",
     "accuracyRate": "Precision Rate"
   },
   "modules": {
     "title": "Specialized AEC Modules",
-    "subtitle": "Native support for complex engineering categories with pre-defined logic sets.",
+    "subtitle": "Native support for complex engineering categories with pre-defined logic sets and configurable formulas.",
     "explore": "Explore Logic",
     "majorWorks": {
       "title": "Major Works",
-      "desc": "Foundations, structural frames, and heavy masonry logic for large-scale infrastructure."
+      "desc": "Foundations, excavation volumes, reinforced concrete dosing (C25/C30), and heavy structural logic for large-scale infrastructure."
     },
     "interior": {
       "title": "Interior Fit-out",
-      "desc": "Smart estimation for partitions, flooring, and comprehensive interior architectural works."
+      "desc": "Smart estimation for kitchens, sanitary fixtures, partitions, and comprehensive interior architectural works with DZD pricing."
     },
     "doorsWindows": {
       "title": "Doors & Windows",
-      "desc": "Precision tracking for openings, glazing, and intricate joinery specifications."
+      "desc": "Precision tracking for glazing surfaces, frame quantities, material coefficients, and joinery specifications using hauteur × largeur formulas."
     },
     "finishing": {
       "title": "Finishing Works",
-      "desc": "Mathematical modeling for painting, plastering, and high-end aesthetic touches."
+      "desc": "Mathematical modeling for painting, plastering, tiling, and high-end aesthetic touches with waste margin calculation."
     }
   },
   "features": {
     "title": "Unrivaled Estimation Control",
-    "subtitle": "Harness the power of our hierarchical calculation engine built for complex infrastructure projects.",
+    "subtitle": "Harness the power of our hierarchical calculation engine, purpose-built for the complexity of Algerian construction projects.",
     "calc": {
-      "title": "Dynamic Formula Orchestration",
-      "desc": "Define complex variables and mathematical expressions once, then apply them across thousands of categories with surgical precision."
+      "title": "Dynamic Formula Engine",
+      "desc": "Mathematical expressions evaluated in real time via math.js. Define formulas once (e.g. hauteur × largeur) and apply them across all categories — no code changes required."
     },
     "bookmark": {
-      "title": "Hierarchical Data Mapping",
-      "desc": "Organize your projects into nested categories, sub-categories, and leaf nodes for perfect structural integrity."
+      "title": "Hierarchical Category Tree",
+      "desc": "Organize projects into nested categories, sub-categories, and leaf nodes. Navigate progressively from root domain to precise material specification."
     },
     "blog": {
-      "title": "Unified Unit Conversions",
-      "desc": "Seamlessly handle meters, cubic volume, weight, and custom engineering units within a single calculation flow."
+      "title": "DZD Cost Estimation",
+      "desc": "Real-time USD→DZD currency conversion via external Exchange Rate API, with automatic Algerian parallel market factor (×1.7) applied to imported materials."
     }
   },
   "cta": {
-    "title": "Ready to Engineering the Future?",
-    "subtitle": "Join the elite engineering firms using APEX to automate their estimation ecosystem."
+    "title": "Ready to Engineer the Future?",
+    "subtitle": "Join Algeria's leading construction professionals using APEX to automate quantity surveying and cost estimation."
   },
   "aboutUs": {
-    "title": "Architecting the Future of Estimation",
-    "subtitle": "APEX was born from a simple observation: AEC calculation tools haven't kept pace with modern complexity.",
+    "title": "Architecting the Future of Construction Estimation",
+    "subtitle": "APEX is a smart digital platform for the accurate calculation and estimation of construction material quantities — built by computer science students at Ibn Khaldoun University, Tiaret.",
+    "missionLabel": "Our Purpose",
     "mission": "Our Mission",
-    "missionDesc": "To provide engineers and architects with the absolute precision they need to bring world-class infrastructure to life.",
+    "missionDesc": "To eliminate manual estimation errors in the Algerian construction industry by providing engineers, architects, and quantity surveyors with a precise, automated, and standards-compliant calculation platform.",
+    "storyLabel": "The Origin",
     "story": "The APEX Story",
-    "storyDesc": "Founded in 2018, we set out to build more than just a spreadsheet. We built an engine—a powerful, multi-dimensional logic processor that understands the nuance of structural engineering.",
-    "stats": {
-      "accuracy": "Engine Accuracy",
-      "tracked": "Projects Tracked",
-      "users": "Engineering Users",
-      "logic": "Lines of Logic"
+    "storyDesc": "Born from a final-year Bachelor's project in Computer Systems at Ibn Khaldoun University (2025–2026), APEX was built by 11 specialized sub-groups, each tackling a distinct construction domain. Together, they created a platform where structural logic, material databases, and AI-assisted guidance converge into one cohesive engine.",
+    "quote": "APEX isn't just software — it's the digital backbone of modern construction planning in Algeria.",
+    "quoteAuthor": "Dr. Abdelkader BOUGUESSA, Supervisor · MCB, University of Tiaret",
+    "modulesLabel": "Platform Architecture",
+    "modulesTitle": "11 Specialized Sub-Modules",
+    "modulesSubtitle": "Each module is responsible for a distinct construction domain, sharing the same backend infrastructure, REST API layer, and PostgreSQL database schema.",
+    "modules": {
+      "majorWorks": "Major Works",
+      "majorWorksDesc": "Foundations (insulated footings, raft slabs), excavation & backfill volumes, C25/C30 concrete dosing, reinforcement, and truck transport calculation.",
+      "finishing": "Finishing Works",
+      "finishingDesc": "Painting, plastering, tiling, and high-end aesthetic finishes with configurable waste margins per material type.",
+      "doorsWindows": "Doors & Windows",
+      "doorsWindowsDesc": "Glazing surface calculation (hauteur × largeur), timber, aluminium, PVC, and security door coefficients, with PDF report export and email delivery.",
+      "interior": "Interior Fit-out",
+      "interiorDesc": "Kitchen estimation (MDF/marble/inox), sanitary fixtures (washbasins, toilets, showers), with full DZD material catalog and quantity formulas.",
+      "costService": "External Cost Estimation",
+      "costServiceDesc": "Real-time USD→DZD conversion via Exchange Rate API. Three budget levels (Optimistic / Normal / Pessimistic) with automatic parallel market factor (×1.7) for imported materials.",
+      "aiAssistant": "AI Assistant",
+      "aiAssistantDesc": "Bilingual (EN/AR) chatbot powered by Llama 3.3 70B via Groq API. 168 predefined Q&A entries covering Algerian construction standards, plus free-text expert mode with quota-based subscription control."
     },
-    "coreLogic": "Our Core Logic",
+    "techLabel": "Built With",
+    "techTitle": "A Modern, Production-Grade Stack",
+    "techSubtitle": "Every component of APEX is designed for interoperability, maintainability, and real-world Algerian construction workflows.",
+    "stats": {
+      "modules": "Sub-Modules",
+      "modulesSub": "Specialized construction domains",
+      "entries": "FAQ Entries",
+      "entriesSub": "Bilingual EN/AR Q&A database",
+      "languages": "Languages",
+      "languagesSub": "English & Arabic, end to end",
+      "accuracy": "Response Time",
+      "accuracySub": "< 2s for any calculation"
+    },
+    "coreLogic": "Our Core Engineering Logic",
     "coreLogicDesc": "The principles that drive every line of code in the APEX Engine.",
     "builtBy": "Built by Engineers, for Engineers.",
-    "joinUs": "We're always looking for brilliant minds in AEC and Computer Science.",
+    "joinUs": "A collaborative academic project by computer science students dedicated to solving real-world AEC estimation challenges in Algeria.",
     "viewRoles": "View Open Roles",
     "values": {
       "precision": "Mathematical Precision",
-      "precisionDesc": "Every calculation is verified against structural logic patterns to ensure absolute data integrity.",
-      "flexibility": "Infinite Flexibility",
-      "flexibilityDesc": "A recursive engine architecture that adapts to any project scale, from residential to urban infrastructure.",
-      "innovation": "Modern AEC Stack",
-      "innovationDesc": "Deploying the latest in reactive computation and AI-augmented logic to automate tedious surveyed data."
+      "precisionDesc": "Every calculation is evaluated in real time against structural logic patterns using math.js. Results are rounded to Algerian civil engineering standards and verified through functional test suites.",
+      "flexibility": "Hierarchical Flexibility",
+      "flexibilityDesc": "A recursive category engine that adapts from residential door frames to full urban infrastructure — with configurable formulas, field definitions, and coefficient tables per category.",
+      "innovation": "AI-Augmented Estimation",
+      "innovationDesc": "Llama 3.3 70B powers domain-constrained expert guidance. The system prompt restricts responses strictly to civil engineering in Algeria, with per-user quota tracking and automatic cycle resets."
     }
   },
   "faq": {
     "title": "Technical Insights",
     "subtitle": "Everything you need to know about the APEX calculation engine.",
     "q1": "How does the formula evaluation work?",
-    "a1": "Our engine parses mathematical expressions in real-time, mapping field variables (like length, depth, height) to their specific category definitions for instant results.",
-    "q2": "Can I define custom units for finishing works?",
-    "a2": "Absolutely. The platform supports arbitrary unit definitions, allowing you to track everything from linear meters of cabling to metric tons of reinforced concrete.",
-    "q3": "Is the system compatible with existing Revit or CAD exports?",
-    "a3": "Yes. APEX is designed to be the logic layer that sits after your design phase, accepting structural data for comprehensive cost and quantity analysis."
+    "a1": "APEX uses math.js to parse and evaluate mathematical expressions in real time. Field variables (hauteur, largeur, quantite) are mapped to their category definitions and evaluated dynamically — no code changes are required to update a formula.",
+    "q2": "How are costs converted to Algerian Dinars?",
+    "a2": "The External Cost Estimation module fetches live USD/DZD exchange rates via an external API, then applies a ×1.7 parallel market factor to reflect real Algerian import costs. Three budget levels (Optimistic, Normal, Pessimistic) are generated from each material's min/unit/max price.",
+    "q3": "How does the AI Assistant work?",
+    "a3": "The AI chatbot offers two modes: a static FAQ from 168 predefined bilingual Q&A entries, and a free-text expert mode powered by Llama 3.3 70B via Groq API — constrained to civil engineering and construction topics in Algeria, with per-subscription usage quotas."
   },
   "footer": {
-    "description": "The logic layer for modern infrastructure. Engineering the digital transformation of AEC estimation workflows.",
+    "description": "The logic layer for modern construction. Smart estimation for Algerian AEC professionals — precise, automated, bilingual.",
     "platform": "Platform",
     "home": "Home",
     "pricingPlans": "System Architecture",
@@ -108,14 +136,14 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "connect": "Connect",
-    "copyright": "© 2026 APEX Engine Inc. All rights reserved.",
+    "copyright": "© 2026 APEX · Ibn Khaldoun University, Tiaret. All rights reserved.",
     "privacy": "Privacy",
     "cookies": "Cookies",
     "sitemap": "Sitemap"
   },
   "articles": {
     "title": "Engineering Insights",
-    "subtitle": "Deep dives into structural estimation, quantity surveying, and digital AEC workflows.",
+    "subtitle": "Deep dives into structural estimation, quantity surveying, and digital AEC workflows for the Algerian construction industry.",
     "readMore": "View Report",
     "search": "Search",
     "searchPlaceholder": "Search technical papers...",
