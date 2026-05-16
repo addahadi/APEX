@@ -29,9 +29,9 @@ const Subscription = () => {
 
       return {
         id: p.id,
-        title: localize(p, 'name'),
-        price: p.price === 0 ? t("subscription.free", "Free") : `${p.price} DA`,
-        subtitle: p.duration ? t("subscription.daysPlan", { days: p.duration }) : "",
+        title: localize(p, 'name') === 'Normal' ? t("subscription.planNames.normal", "Normal") : localize(p, 'name') === 'Company' ? t("subscription.planNames.company", "Company") : localize(p, 'name'),
+        price: p.price === 0 ? t("subscription.free", "Free") : `${p.price.toLocaleString()} ${t("subscription.currency", "DA")}`,
+        subtitle: p.duration ? t("subscription.daysPlan", { days: String(p.duration).replace('d', '') }) : "",
         highlight: p.price > 0 && rawPlans.indexOf(p) === rawPlans.length - 1,
         features: featureList,
         buttonText: t("subscription.selectPlan"),

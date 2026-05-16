@@ -108,7 +108,7 @@ export default function Subscribers() {
           <SelectContent>
             {STATUS_OPTIONS.map((s) => (
               <SelectItem key={s} value={s}>
-                {s === "ALL" ? t("subscribers.allStatuses") : s}
+                {s === "ALL" ? t("subscribers.allStatuses") : s === "ACTIVE" ? t("subscribers.active") : t("subscribers.inactive")}
               </SelectItem>
             ))}
           </SelectContent>
@@ -205,9 +205,7 @@ export default function Subscribers() {
       {pagination.total_pages > 1 && (
         <div className="flex items-center justify-between mt-6 px-2">
           <p className="text-xs text-muted-foreground">
-            Showing <span className="font-medium">{((page - 1) * PAGE_SIZE) + 1}</span> to{" "}
-            <span className="font-medium">{Math.min(page * PAGE_SIZE, pagination.total)}</span> of{" "}
-            <span className="font-medium">{pagination.total}</span> subscribers
+            {t("subscribers.showing", { from: ((page - 1) * PAGE_SIZE) + 1, to: Math.min(page * PAGE_SIZE, pagination.total), total: pagination.total })}
           </p>
           <Pagination className="justify-end w-auto mx-0">
             <PaginationContent>
@@ -219,7 +217,7 @@ export default function Subscribers() {
                   disabled={page <= 1}
                   className="h-8 px-2 lg:px-3"
                 >
-                  Previous
+                  {t("subscribers.previous")}
                 </Button>
               </PaginationItem>
 
@@ -255,7 +253,7 @@ export default function Subscribers() {
                   disabled={page >= pagination.total_pages}
                   className="h-8 px-2 lg:px-3"
                 >
-                  Next
+                  {t("subscribers.next")}
                 </Button>
               </PaginationItem>
             </PaginationContent>

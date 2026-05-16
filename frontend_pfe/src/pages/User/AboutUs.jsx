@@ -25,20 +25,12 @@ const AboutUs = () => {
             x: isRTL ? 50 : -50, opacity: 0, stagger: 0.2, duration: 1,
         });
 
-        gsap.from(".module-card", {
-            scrollTrigger: { trigger: ".modules-section", start: "top 75%" },
-            y: 50, opacity: 0, stagger: 0.1, duration: 0.7,
-        });
 
         gsap.from(".tech-pill", {
             scrollTrigger: { trigger: ".tech-section", start: "top 80%" },
             scale: 0, opacity: 0, stagger: 0.05, duration: 0.4, ease: "back.out(2)",
         });
 
-        gsap.from(".value-card", {
-            scrollTrigger: { trigger: ".values-section", start: "top 80%" },
-            y: 40, opacity: 0, stagger: 0.15, duration: 0.8,
-        });
 
     }, { scope: container, dependencies: [isRTL] });
 

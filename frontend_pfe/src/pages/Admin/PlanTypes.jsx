@@ -23,6 +23,7 @@ import { usePlanTypes, useCreatePlanType, useUpdatePlanType, useDeletePlanType }
 function Spin() { return <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} />; }
 
 function PlanTypeRow({ pt }) {
+  const { t } = useTranslation("admin");
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(null);
   const update = useUpdatePlanType();
@@ -42,7 +43,7 @@ function PlanTypeRow({ pt }) {
         <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <Button variant="outline" size="sm" className="h-8"
             onClick={() => { setDraft({ name_en: pt.name_en, name_ar: pt.name_ar ?? "" }); setEditing(true); }}>
-            <Pencil className="mr-2 h-3 w-3" /> Edit
+            <Pencil className="mr-2 h-3 w-3" /> {t("planTypes.edit")}
           </Button>
           <Button variant="destructive" size="sm" className="h-8 w-8 p-0"
             onClick={() => remove.mutate(pt.plan_type_id)}>
@@ -75,7 +76,7 @@ function PlanTypeRow({ pt }) {
         <div className="flex gap-2">
           <Button size="sm" className="h-8" onClick={save} disabled={update.isPending}>
             {update.isPending ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : <Save className="mr-2 h-3 w-3" />}
-            Save
+            {t("planTypes.save")}
           </Button>
           <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => { setEditing(false); setDraft(null); }}>
             <X className="h-3 w-3" />
@@ -103,7 +104,7 @@ export default function PlanTypes() {
       {showNew && (
         <Card className="shadow-sm border-none bg-card animate-in fade-in slide-in-from-top-4 duration-300">
           <CardHeader>
-            <CardTitle className="text-lg font-bold tracking-tight">New Plan Type</CardTitle>
+            <CardTitle className="text-lg font-bold tracking-tight">{t("planTypes.newTitle")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -130,13 +131,13 @@ export default function PlanTypes() {
             </div>
           </CardContent>
           <CardFooter className="flex gap-2 justify-end bg-muted/20 p-4">
-            <Button variant="ghost" onClick={() => setShowNew(false)}>Cancel</Button>
+            <Button variant="ghost" onClick={() => setShowNew(false)}>{t("planTypes.cancel")}</Button>
             <Button 
               disabled={!newPT.name_en.trim() || create.isPending} 
               onClick={handleCreate}
             >
               {create.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-              Save Type
+              {t("planTypes.saveType")}
             </Button>
           </CardFooter>
         </Card>
@@ -147,7 +148,7 @@ export default function PlanTypes() {
           {isLoading ? (
             <div className="flex items-center justify-center p-20 text-muted-foreground gap-2">
               <Loader2 className="h-5 w-5 animate-spin" />
-              Loading…
+              {t("planTypes.loading")}
             </div>
           ) : (
             <Table>
@@ -163,7 +164,7 @@ export default function PlanTypes() {
                 {planTypes.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={3} className="h-32 text-center text-muted-foreground italic">
-                      No plan types yet.
+                      {t("planTypes.empty")}
                     </TableCell>
                   </TableRow>
                 )}
@@ -175,7 +176,7 @@ export default function PlanTypes() {
 
       {!showNew && (
         <Button onClick={() => setShowNew(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Add Plan Type
+          <Plus className="mr-2 h-4 w-4" /> {t("planTypes.add")}
         </Button>
       )}
     </div>

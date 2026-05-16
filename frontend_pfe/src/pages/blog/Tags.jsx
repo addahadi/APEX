@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { Plus, Trash2, AlertTriangle, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Plus, Trash2, AlertTriangle, Loader2, Tag } from 'lucide-react';
 import { useAdminTags, useCreateTag, useDeleteTag } from '@/hooks/useBlog';
 import { toast } from "sonner";
 
@@ -65,6 +66,7 @@ const ConfirmDialog = ({ title, message, subMessage, confirmText, cancelText, on
 // Main Tags Component
 // ═══════════════════════════════════════════════════════════════════════════════
 const Tags = () => {
+  const { t } = useTranslation("admin");
   const [newTagName, setNewTagName] = useState("");
   const [confirmDialog, setConfirmDialog] = useState(null);
 
@@ -81,10 +83,10 @@ const Tags = () => {
       setConfirmDialog({
         type: 'warning',
         tag,
-        title: 'Tag In Use',
-        message: `"${tag.name}" is used in ${tag.articles_count} article${tag.articles_count !== 1 ? 's' : ''}.`,
+        title: t("blog.tags.dialog.tagInUse"),
+        message: t("blog.tags.dialog.tagInUseMsg", { name: tag.name, count: tag.articles_count }),
         subMessage: null,
-        confirmText: 'OK',
+        confirmText: t("blog.tags.dialog.ok"),
         cancelText: null,
         isDanger: false,
         onConfirm: closeDialog,
@@ -93,11 +95,11 @@ const Tags = () => {
       setConfirmDialog({
         type: 'delete',
         tag,
-        title: 'Delete Tag?',
-        message: 'You are about to delete:',
+        title: t("blog.tags.dialog.deleteTitle"),
+        message: t("blog.tags.dialog.deleteMsg"),
         subMessage: tag.name,
-        confirmText: 'Yes, Delete',
-        cancelText: 'Cancel',
+        confirmText: t("blog.tags.dialog.confirmDelete"),
+        cancelText: t("blog.tags.dialog.cancel"),
         isDanger: true,
       });
     }
@@ -108,12 +110,12 @@ const Tags = () => {
     deleteMutation.mutate(confirmDialog.tag.tag_id, {
       onSuccess: () => {
         setConfirmDialog(null);
-        toast.success("Tag deleted successfully");
+        toast.success(t("blog.tags.toast.deleted"));
       },
       onError: (err) => {
         console.error('Error deleting tag:', err);
         setConfirmDialog(null);
-        toast.error("Failed to delete tag");
+        toast.error(t("blog.tags.toast.deleteFailed"));
       },
     });
   }, [confirmDialog, deleteMutation]);
@@ -126,10 +128,10 @@ const Tags = () => {
     if (exists) {
       setConfirmDialog({
         type: 'warning',
-        title: 'Tag Already Exists',
-        message: `"${trimmed}" already exists.`,
+        title: t("blog.tags.dialog.alreadyExists"),
+        message: t("blog.tags.dialog.alreadyExistsMsg", { name: trimmed }),
         subMessage: null,
-        confirmText: 'OK',
+        confirmText: t("blog.tags.dialog.ok"),
         cancelText: null,
         isDanger: false,
         onConfirm: closeDialog,
@@ -140,11 +142,11 @@ const Tags = () => {
     createMutation.mutate(trimmed, {
       onSuccess: () => {
         setNewTagName("");
-        toast.success("Tag added successfully");
+        toast.success(t("blog.tags.toast.added"));
       },
       onError: (err) => {
         console.error('Error adding tag:', err);
-        toast.error(err?.response?.data?.error || "Failed to add tag");
+        toast.error(err?.response?.data?.error || t("blog.tags.toast.addFailed"));
       },
     });
   }, [newTagName, tags, closeDialog, createMutation]);
@@ -169,7 +171,7 @@ const Tags = () => {
               value={newTagName}
               onChange={(e) => setNewTagName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
-              placeholder="New tag name..."
+              placeholder={t("blog.tags.newPlaceholder")}
               disabled={isProcessing}
               className="flex-1"
             />
@@ -179,7 +181,7 @@ const Tags = () => {
               className="gap-2 shrink-0 w-full sm:w-auto"
             >
               {createMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-              Add Tag
+              {t("blog.tags.addTag")}
             </Button>
           </CardContent>
         </Card>
@@ -197,10 +199,10 @@ const Tags = () => {
             <Table>
               <TableHeader className="bg-muted/50">
                 <TableRow>
-                  <TableHead className="font-semibold h-10 uppercase text-xs tracking-wider">Tag Name</TableHead>
-                  <TableHead className="font-semibold h-10 uppercase text-xs tracking-wider text-center w-32">ID</TableHead>
-                  <TableHead className="font-semibold h-10 uppercase text-xs tracking-wider text-center w-32">Used in</TableHead>
-                  <TableHead className="font-semibold h-10 uppercase text-xs tracking-wider text-center w-32">Action</TableHead>
+                  <TableHead className="font-semibold h-10 uppercase text-xs tracking-wider">{t("blog.tags.columns.tagName")}</TableHead>
+                  <TableHead className="font-semibold h-10 uppercase text-xs tracking-wider text-center w-32">{t("blog.tags.columns.id")}</TableHead>
+                  <TableHead className="font-semibold h-10 uppercase text-xs tracking-wider text-center w-32">{t("blog.tags.columns.usedIn")}</TableHead>
+                  <TableHead className="font-semibold h-10 uppercase text-xs tracking-wider text-center w-32">{t("blog.tags.columns.action")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -212,7 +214,7 @@ const Tags = () => {
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge variant={tag.articles_count > 0 ? "default" : "secondary"}>
-                        {tag.articles_count} {tag.articles_count === 1 ? 'article' : 'articles'}
+                        {tag.articles_count} {tag.articles_count === 1 ? t("blog.tags.article") : t("blog.tags.articles")}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-center">
@@ -225,7 +227,7 @@ const Tags = () => {
                         title={tag.articles_count > 0 ? "Cannot delete tags that are in use" : "Delete this tag"}
                       >
                         {tag.articles_count > 0 ? <AlertTriangle className="h-3.5 w-3.5 mr-1" /> : <Trash2 className="h-3.5 w-3.5 mr-1" />}
-                        {tag.articles_count > 0 ? 'In Use' : 'Delete'}
+                        {tag.articles_count > 0 ? t("blog.tags.inUse") : t("blog.tags.delete")}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -238,8 +240,8 @@ const Tags = () => {
                         <div className="w-12 h-12 bg-muted/50 rounded-full flex items-center justify-center">
                           <Tag className="h-5 w-5 text-muted-foreground/50" />
                         </div>
-                        <p className="text-sm font-medium">No tags yet</p>
-                        <p className="text-xs">Add your first tag above</p>
+                        <p className="text-sm font-medium">{t("blog.tags.noTags")}</p>
+                        <p className="text-xs">{t("blog.tags.noTagsDesc")}</p>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -253,11 +255,11 @@ const Tags = () => {
         <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-amber-400" />
-            <span>Tags in use cannot be deleted</span>
+            <span>{t("blog.tags.legendInUse")}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-destructive" />
-            <span>Available for deletion</span>
+            <span>{t("blog.tags.legendDelete")}</span>
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useAdminTags, useCreateArticle, useUpdateArticle, useArticleTypes } from "@/hooks/useBlog";
 import { Save, Globe, ImageIcon, X, Tag, ArrowLeft, Loader2, Info } from "lucide-react";
 import { $getRoot } from "lexical";
@@ -59,6 +60,7 @@ const AUTO_LINK_MATCHERS = [
 
 const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation = false }) => {
 
+  const { t } = useTranslation("admin");
   const isEditMode = !!articleToEdit;
 
   // ── API hooks ──
@@ -109,34 +111,34 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
     const newErrors = {};
 
     if (!title.trim()) {
-      newErrors.title = "Title is required for publishing";
+      newErrors.title = t("blog.editor.titleRequired");
     }
 
     if (!excerpt.trim()) {
-      newErrors.excerpt = "Excerpt is required for publishing";
+      newErrors.excerpt = t("blog.editor.excerptRequired");
     }
 
     if (!coverImage) {
-      newErrors.coverImage = "Cover image is required for publishing";
+      newErrors.coverImage = t("blog.editor.coverRequired");
     }
 
     if (editorState) {
       editorState.read(() => {
         const textContent = $getRoot().getTextContent().trim();
         if (!textContent) {
-          newErrors.content = "Content is required for publishing";
+          newErrors.content = t("blog.editor.contentRequired");
         }
       });
     } else {
       if (!articleToEdit?.content || articleToEdit.content === "{}" || articleToEdit.content === "") {
-        newErrors.content = "Content is required for publishing";
+        newErrors.content = t("blog.editor.contentRequired");
       }
     }
 
     setErrors(newErrors);
 
     if (showMessages && Object.keys(newErrors).length > 0) {
-      showToast("Please complete all required fields before publishing", "error");
+      showToast(t("blog.editor.toast.validationError"), "error");
 
       setTimeout(() => {
         const errorElements = document.querySelectorAll('.border-destructive, .ring-destructive');
@@ -218,10 +220,10 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
 
       if (publish) {
         setStatus("PUBLISHED");
-        showToast("🎉 Article published successfully!", "success");
+        showToast(t("blog.editor.toast.published"), "success");
       } else {
-        const action = isEditMode ? "updated" : "saved";
-        showToast(`📝 Draft ${action} successfully!`, "draft");
+        const action = isEditMode ? t("blog.editor.toast.draftUpdated") : t("blog.editor.toast.draftSaved");
+        showToast(action, "draft");
       }
 
       // Auto-close after a short delay for create
@@ -229,7 +231,7 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
         setTimeout(() => onClose(), 1200);
       }
     } catch (err) {
-      showToast(err?.response?.data?.error || "Failed to save article", "error");
+      showToast(err?.response?.data?.error || t("blog.editor.toast.saveFailed"), "error");
     } finally {
       setIsSaving(false);
     }
@@ -272,7 +274,7 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
 
             {isEditMode && (
               <Badge variant="secondary" className="px-3 py-1.5 flex items-center gap-2 bg-primary/5 text-primary border-primary/20 hover:bg-primary/10 transition-colors w-fit">
-                <span className="font-semibold uppercase tracking-wider text-[10px] opacity-70">Editing</span>
+                <span className="font-semibold uppercase tracking-wider text-[10px] opacity-70">{t("blog.editor.editing")}</span>
                 <span className="truncate max-w-[200px] sm:max-w-[300px]">{articleToEdit.title}</span>
               </Badge>
             )}
@@ -286,7 +288,7 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
               {/* Title */}
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Title <span className="text-destructive">*</span>
+                  {t("blog.editor.title")} <span className="text-destructive">{t("blog.editor.required")}</span>
                 </label>
                 <Input
                   type="text"
@@ -295,7 +297,7 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
                     setTitle(e.target.value);
                     if (errors.title) setErrors(prev => ({ ...prev, title: null }));
                   }}
-                  placeholder="Enter your article title…"
+                  placeholder={t("blog.editor.titlePlaceholder")}
                   className={cn("text-lg font-medium py-6", errors.title && "border-destructive focus-visible:ring-destructive")}
                 />
                 {errors.title && (
@@ -308,18 +310,18 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
               {/* Slug */}
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none text-muted-foreground flex items-center gap-2">
-                  Slug <span className="text-[10px] uppercase tracking-wider bg-muted px-1.5 py-0.5 rounded">Auto-generated</span>
+                  {t("blog.editor.slug")} <span className="text-[10px] uppercase tracking-wider bg-muted px-1.5 py-0.5 rounded">{t("blog.editor.slugAuto")}</span>
                 </label>
                 <div className="flex items-center h-10 w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
                   <span className="opacity-50">/articles/</span>
-                  <span className="font-mono truncate">{slug || "your-article-title"}</span>
+                  <span className="font-mono truncate">{slug || t("blog.editor.slugPlaceholder")}</span>
                 </div>
               </div>
 
               {/* Excerpt */}
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none">
-                  Excerpt <span className="text-destructive">*</span>
+                  {t("blog.editor.excerpt")} <span className="text-destructive">{t("blog.editor.required")}</span>
                 </label>
                 <Textarea
                   value={excerpt}
@@ -329,7 +331,7 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
                   }}
                   rows={3}
                   maxLength={200}
-                  placeholder="Short summary shown in article previews…"
+                  placeholder={t("blog.editor.excerptPlaceholder")}
                   className={cn("resize-none", errors.excerpt && "border-destructive focus-visible:ring-destructive")}
                 />
                 <div className="flex justify-between items-center">
@@ -345,7 +347,7 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
               {/* Content */}
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none">
-                  Content <span className="text-destructive">*</span>
+                  {t("blog.editor.content")} <span className="text-destructive">{t("blog.editor.required")}</span>
                 </label>
                 <div className={cn("rounded-md overflow-hidden transition-all", errors.content && "ring-1 ring-destructive ring-offset-1")}>
                   <LexicalComposer initialConfig={initialConfig} key={editorKey}>
@@ -358,7 +360,7 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
                           }
                           placeholder={
                             <div className="editor-placeholder px-5 py-4 text-sm text-muted-foreground pointer-events-none">
-                              Start writing your article… (Markdown shortcuts supported)
+                              {t("blog.editor.contentPlaceholder")}
                             </div>
                           }
                           ErrorBoundary={LexicalErrorBoundary}
@@ -398,7 +400,7 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
                   className="gap-2"
                 >
                   {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                  {isEditMode ? "Update Draft" : "Save Draft"}
+                  {isEditMode ? t("blog.editor.updateDraft") : t("blog.editor.saveDraft")}
                 </Button>
 
                 <Button
@@ -408,7 +410,7 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
                   className="gap-2 border-primary text-primary hover:bg-primary/5"
                 >
                   <Globe className="h-4 w-4" /> 
-                  {isEditMode ? "Update & Publish" : "Publish"}
+                  {isEditMode ? t("blog.editor.updatePublish") : t("blog.editor.publishBtn")}
                 </Button>
 
                 <Button
@@ -416,7 +418,7 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
                   variant="ghost"
                   className="text-muted-foreground"
                 >
-                  Cancel
+                  {t("blog.editor.cancel")}
                 </Button>
               </div>
             </div>
@@ -428,12 +430,12 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
                 <CardHeader className="p-4 border-b pb-3">
                   <CardTitle className="text-sm font-semibold flex items-center gap-2">
                     <Info className="h-4 w-4 text-muted-foreground" />
-                    Metadata
+                    {t("blog.editor.metadata")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 space-y-5">
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Type</label>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t("blog.editor.type")}</label>
                     <div className="flex gap-2 flex-wrap">
                       {articleTypes.map((at) => (
                         <Badge
@@ -455,25 +457,25 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
                   </div>
                   
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</label>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t("blog.editor.status")}</label>
                     <div className="flex gap-2">
                       <Badge
                         variant={status === "DRAFT" ? "default" : "secondary"}
                         className={cn("cursor-pointer", status === "DRAFT" ? "bg-amber-500 hover:bg-amber-600" : "hover:bg-muted/80")}
                         onClick={() => setStatus("DRAFT")}
                       >
-                        Draft
+                        {t("blog.editor.draft")}
                       </Badge>
                       <Badge
                         variant={status === "PUBLISHED" ? "default" : "secondary"}
                         className={cn("cursor-pointer", status === "PUBLISHED" ? "bg-green-500 hover:bg-green-600 text-white" : "hover:bg-muted/80")}
                         onClick={() => setStatus("PUBLISHED")}
                       >
-                        Published
+                        {t("blog.editor.published")}
                       </Badge>
                     </div>
                     <p className="text-[11px] text-muted-foreground mt-1">
-                      {status === "PUBLISHED" ? "Visible to public." : "Hidden from public view."}
+                      {status === "PUBLISHED" ? t("blog.editor.publishedDesc") : t("blog.editor.draftDesc")}
                     </p>
                   </div>
                 </CardContent>
@@ -483,7 +485,7 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
                 <CardHeader className="p-4 border-b pb-3">
                   <CardTitle className="text-sm font-semibold flex items-center gap-2">
                     <Tag className="h-4 w-4 text-muted-foreground" />
-                    Tags
+                    {t("blog.editor.tags")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
@@ -496,7 +498,7 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
                 <CardHeader className="p-4 border-b pb-3">
                   <CardTitle className="text-sm font-semibold flex items-center gap-2">
                     <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                    Cover Image <span className="text-destructive">*</span>
+                    {t("blog.editor.coverImage")} <span className="text-destructive">{t("blog.editor.required")}</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
@@ -519,14 +521,14 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
                         <img src={coverImage} alt="cover" className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 backdrop-blur-sm">
                           <ImageIcon className="h-6 w-6 text-foreground" />
-                          <span className="text-foreground text-xs font-medium">Change Image</span>
+                          <span className="text-foreground text-xs font-medium">{t("blog.editor.changeImage")}</span>
                         </div>
                       </>
                     ) : (
                       <div className="h-full flex flex-col items-center justify-center gap-2 text-muted-foreground group-hover:text-primary transition-colors">
                         <ImageIcon className="h-6 w-6 opacity-50 group-hover:opacity-100" />
-                        <span className="text-xs font-medium">Click to upload</span>
-                        <span className="text-[10px] opacity-60 uppercase tracking-wider">PNG, JPG, WebP</span>
+                        <span className="text-xs font-medium">{t("blog.editor.clickUpload")}</span>
+                        <span className="text-[10px] opacity-60 uppercase tracking-wider">{t("blog.editor.imageFormats")}</span>
                       </div>
                     )}
                   </label>
@@ -546,7 +548,7 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
                         if (errors.coverImage) setErrors(prev => ({ ...prev, coverImage: null }));
                       }}
                     >
-                      <X className="mr-2 h-3.5 w-3.5" /> Remove image
+                      <X className="mr-2 h-3.5 w-3.5" /> {t("blog.editor.removeImage")}
                     </Button>
                   )}
                 </CardContent>
@@ -556,20 +558,20 @@ const ArticleEditor = ({ articleToEdit = null, onClose = null, forceValidation =
               <Card className="shadow-none border-border bg-muted/20">
                 <CardContent className="p-4 space-y-2 text-[13px]">
                   <div className="flex justify-between items-center py-1">
-                    <span className="text-muted-foreground">Words</span>
+                    <span className="text-muted-foreground">{t("blog.editor.words")}</span>
                     <span className="font-semibold text-foreground">{wordCount}</span>
                   </div>
                   <div className="flex justify-between items-center py-1 border-t border-border/50">
-                    <span className="text-muted-foreground">Reading time</span>
-                    <span className="font-semibold text-foreground">~{Math.max(1, Math.round(wordCount / 200))} min</span>
+                    <span className="text-muted-foreground">{t("blog.editor.readingTime")}</span>
+                    <span className="font-semibold text-foreground">~{Math.max(1, Math.round(wordCount / 200))} {t("blog.editor.min")}</span>
                   </div>
                   <div className="flex justify-between items-center py-1 border-t border-border/50">
-                    <span className="text-muted-foreground">Tags count</span>
+                    <span className="text-muted-foreground">{t("blog.editor.tagsCount")}</span>
                     <span className="font-semibold text-foreground">{selectedTags.length}</span>
                   </div>
                   {isEditMode && (
                     <div className="flex justify-between items-center py-1 border-t border-border/50">
-                      <span className="text-muted-foreground">Article ID</span>
+                      <span className="text-muted-foreground">{t("blog.editor.articleId")}</span>
                       <span className="font-mono text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded truncate max-w-[120px]">{articleToEdit.article_id}</span>
                     </div>
                   )}

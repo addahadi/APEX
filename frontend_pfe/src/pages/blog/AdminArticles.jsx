@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAdminArticles, useDeleteArticle, useUpdateArticle } from "@/hooks/useBlog";
 import { ConfirmDialog, TypeBadge, StatusBadge } from "../../components/Blog";
 import { toast } from "sonner";
@@ -39,6 +40,7 @@ import {
 const PAGE_SIZE = 8;
 
 const AdminArticles = () => {
+  const { t } = useTranslation("admin");
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -65,10 +67,10 @@ const AdminArticles = () => {
     deleteMutation.mutate(confirmTarget.article_id, {
       onSuccess: () => {
         setConfirmTarget(null);
-        toast.success("Article deleted successfully");
+        toast.success(t("blog.articles.toast.deleted"));
       },
       onError: (err) => {
-        toast.error(err?.response?.data?.error || "Failed to delete article");
+        toast.error(err?.response?.data?.error || t("blog.articles.toast.deleteFailed"));
       }
     });
   };
@@ -77,10 +79,10 @@ const AdminArticles = () => {
     const newStatus = article.status === "PUBLISHED" ? "DRAFT" : "PUBLISHED";
     updateMutation.mutate({ id: article.article_id, data: { status: newStatus } }, {
       onSuccess: () => {
-        toast.success(`Article ${newStatus === "PUBLISHED" ? "published" : "unpublished"} successfully`);
+        toast.success(newStatus === "PUBLISHED" ? t("blog.articles.toast.published") : t("blog.articles.toast.unpublished"));
       },
       onError: (err) => {
-        toast.error(err?.response?.data?.error || "Failed to update article status");
+        toast.error(err?.response?.data?.error || t("blog.articles.toast.statusFailed"));
       }
     });
   };
@@ -165,17 +167,17 @@ const AdminArticles = () => {
             <Input
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
-              placeholder="Search title..."
+              placeholder={t("blog.articles.search")}
               className="pl-9 bg-background"
             />
           </div>
 
           <Select value={typeFilter} onValueChange={handleType}>
             <SelectTrigger className="w-[180px] bg-background">
-              <SelectValue placeholder="Type" />
+              <SelectValue placeholder={t("blog.articles.typeFilter")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">All Types</SelectItem>
+              <SelectItem value="ALL">{t("blog.articles.allTypes")}</SelectItem>
               <SelectItem value="BLOG">BLOG</SelectItem>
               <SelectItem value="ACTUALITE">ACTUALITE</SelectItem>
             </SelectContent>
@@ -183,10 +185,10 @@ const AdminArticles = () => {
 
           <Select value={statusFilter} onValueChange={handleStatus}>
             <SelectTrigger className="w-[180px] bg-background">
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder={t("blog.articles.statusFilter")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">All Status</SelectItem>
+              <SelectItem value="ALL">{t("blog.articles.allStatus")}</SelectItem>
               <SelectItem value="PUBLISHED">PUBLISHED</SelectItem>
               <SelectItem value="DRAFT">DRAFT</SelectItem>
             </SelectContent>
@@ -205,7 +207,7 @@ const AdminArticles = () => {
             <Table>
               <TableHeader className="bg-muted/50">
                 <TableRow>
-                  {["Title", "Type", "Status", "Tags", "Engagement", "Actions"].map((header) => (
+                  {[t("blog.articles.columns.title"), t("blog.articles.columns.type"), t("blog.articles.columns.status"), t("blog.articles.columns.tags"), t("blog.articles.columns.engagement"), t("blog.articles.columns.actions")].map((header) => (
                     <TableHead key={header} className="text-xs font-semibold uppercase tracking-wider h-10">
                       {header}
                     </TableHead>
@@ -218,14 +220,14 @@ const AdminArticles = () => {
                     <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                       <div className="flex items-center justify-center gap-2">
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Loading articles...
+                        {t("blog.articles.loading")}
                       </div>
                     </TableCell>
                   </TableRow>
                 ) : articles.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
-                      No articles match your current filters.
+                      {t("blog.articles.empty")}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -245,7 +247,7 @@ const AdminArticles = () => {
                             )}
                           </div>
                           <div className="text-[11px] text-muted-foreground truncate max-w-[250px] mt-0.5">
-                            {article.excerpt || "No excerpt"}
+                            {article.excerpt || t("blog.articles.noExcerpt")}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -286,7 +288,7 @@ const AdminArticles = () => {
                               className="h-7 text-[11px] px-2.5"
                               onClick={() => handleEdit(article)}
                             >
-                              <Edit2 className="h-3 w-3 mr-1" /> Edit
+                              <Edit2 className="h-3 w-3 mr-1" /> {t("blog.articles.edit")}
                             </Button>
 
                             {article.status === "PUBLISHED" ? (
@@ -296,7 +298,7 @@ const AdminArticles = () => {
                                 className="h-7 text-[11px] px-2.5"
                                 onClick={() => handleToggleStatus(article)}
                               >
-                                <Archive className="h-3 w-3 mr-1" /> Archive
+                                <Archive className="h-3 w-3 mr-1" /> {t("blog.articles.archive")}
                               </Button>
                             ) : (
                               <Button
@@ -307,9 +309,9 @@ const AdminArticles = () => {
                                   !checks.isComplete && "text-amber-600 border-amber-500/30 bg-amber-50 hover:bg-amber-100"
                                 )}
                                 onClick={() => handlePublishFromList(article)}
-                                title={checks.isComplete ? "Publish now" : "Complete required fields to publish"}
+                                title={checks.isComplete ? t("blog.articles.publishTitle") : t("blog.articles.completeTitle")}
                               >
-                                <Globe className="h-3 w-3 mr-1" /> {checks.isComplete ? "Publish" : "Complete"}
+                                <Globe className="h-3 w-3 mr-1" /> {checks.isComplete ? t("blog.articles.publish") : t("blog.articles.complete")}
                               </Button>
                             )}
 
@@ -336,9 +338,7 @@ const AdminArticles = () => {
         {pagination.total_pages > 1 && (
           <div className="flex items-center justify-between mt-6 px-2">
             <p className="text-xs text-muted-foreground">
-              Showing <span className="font-medium">{((page - 1) * PAGE_SIZE) + 1}</span> to{" "}
-              <span className="font-medium">{Math.min(page * PAGE_SIZE, pagination.total)}</span> of{" "}
-              <span className="font-medium">{pagination.total}</span> articles
+              {t("blog.articles.showing", { from: ((page - 1) * PAGE_SIZE) + 1, to: Math.min(page * PAGE_SIZE, pagination.total), total: pagination.total })}
             </p>
             <Pagination className="justify-end w-auto mx-0">
               <PaginationContent>
@@ -350,7 +350,7 @@ const AdminArticles = () => {
                     disabled={page <= 1}
                     className="h-8 px-2 lg:px-3"
                   >
-                    Previous
+                    {t("blog.articles.previous")}
                   </Button>
                 </PaginationItem>
 
@@ -386,7 +386,7 @@ const AdminArticles = () => {
                     disabled={page >= pagination.total_pages}
                     className="h-8 px-2 lg:px-3"
                   >
-                    Next
+                    {t("blog.articles.next")}
                   </Button>
                 </PaginationItem>
               </PaginationContent>

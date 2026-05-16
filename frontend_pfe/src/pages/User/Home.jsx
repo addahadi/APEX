@@ -53,17 +53,9 @@ const Home = () => {
       .from(".hero-social", { y: 10, opacity: 0 }, "-=0.6")
       .from(".hero-card",   { scale: 0.92, opacity: 0, x: isRTL ? -40 : 40 }, "-=1.1");
 
-    gsap.from(".module-card", {
-      scrollTrigger: { trigger: ".modules-section", start: "top 78%" },
-      y: 50, opacity: 0, stagger: 0.1, duration: 0.7, ease: "power2.out",
-    });
     gsap.from(".stat-item", {
       scrollTrigger: { trigger: ".stats-section", start: "top 80%" },
       y: 30, opacity: 0, stagger: 0.12, duration: 0.6,
-    });
-    gsap.from(".feature-card", {
-      scrollTrigger: { trigger: ".features-section", start: "top 80%" },
-      y: 60, opacity: 0, stagger: 0.2, duration: 1, ease: "power2.out",
     });
     gsap.from(".faq-item", {
       scrollTrigger: { trigger: ".faq-section", start: "top 80%" },

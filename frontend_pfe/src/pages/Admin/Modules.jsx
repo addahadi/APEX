@@ -6,7 +6,7 @@ import {
   Key, Home, Palette, DoorOpen, Pickaxe, Construction, Box, Landmark,
   Wrench, Droplets, Zap, Layout, Shield, HardHat, Hammer, Paintbrush,
   BrickWall, AppWindow, Package, Search, Copy, Check, ArrowRight,
-  GitBranch, Braces, ListOrdered, SlidersHorizontal, BookOpen,
+  GitBranch, Braces, ListOrdered, SlidersHorizontal, BookOpen, ChevronLeft
 } from "lucide-react";
 
 // shadcn/ui components
@@ -134,11 +134,12 @@ function Sec({ title, icon, subtitle, children, action, accentClass = "border-l-
 
 // ── Leaf Data-Flow Guide ──────────────────────────────────────────────────────
 function LeafFlowGuide() {
+  const { t } = useTranslation("admin");
   const steps = [
-    { icon: <FlaskConical size={13} />, label: "Geometry Formulas", desc: "Shape inputs & spatial math", color: "text-primary bg-primary/10 border-primary/20" },
-    { icon: <Package size={13} />, label: "Material Formulas", desc: "Quantity expressions", color: "text-orange-600 bg-orange-50 border-orange-200" },
-    { icon: <Settings2 size={13} />, label: "Configurations", desc: "Grade variants (e.g. C25, C30)", color: "text-violet-600 bg-violet-50 border-violet-200" },
-    { icon: <Sigma size={13} />, label: "Coefficients", desc: "Named constant variables", color: "text-emerald-600 bg-emerald-50 border-emerald-200" },
+    { icon: <FlaskConical size={13} />, label: t("modules.flowGuide.geometry"), desc: t("modules.flowGuide.geometryDesc"), color: "text-primary bg-primary/10 border-primary/20" },
+    { icon: <Package size={13} />, label: t("modules.flowGuide.material"), desc: t("modules.flowGuide.materialDesc"), color: "text-orange-600 bg-orange-50 border-orange-200" },
+    { icon: <Settings2 size={13} />, label: t("modules.flowGuide.configs"), desc: t("modules.flowGuide.configsDesc"), color: "text-violet-600 bg-violet-50 border-violet-200" },
+    { icon: <Sigma size={13} />, label: t("modules.flowGuide.coefficients"), desc: t("modules.flowGuide.coefficientsDesc"), color: "text-emerald-600 bg-emerald-50 border-emerald-200" },
   ];
   return (
     <div className="flex items-center gap-1 mb-6 p-3 rounded-xl bg-muted/40 border border-dashed overflow-x-auto">
@@ -160,6 +161,8 @@ function LeafFlowGuide() {
 
 // ── Tree Row ──────────────────────────────────────────────────────────────────
 function TreeRow({ node, depth, selected, onSelect, expanded, onToggle }) {
+  const { t, i18n } = useTranslation("admin");
+  const isAr = i18n.language === 'ar';
   const isExp = expanded.includes(node.category_id);
   const isSel = selected === node.category_id;
   const hasC  = !!node.children?.length;
@@ -176,7 +179,7 @@ function TreeRow({ node, depth, selected, onSelect, expanded, onToggle }) {
             : "border-transparent hover:bg-accent/60 hover:border-accent",
           !node.is_active && "opacity-55"
         )}
-        style={{ paddingLeft: `${12 + depth * 18}px` }}
+        style={{ paddingInlineStart: `${12 + depth * 18}px` }}
       >
         <span
           onClick={e => { e.stopPropagation(); if (hasC) onToggle(node.category_id); }}
@@ -185,7 +188,7 @@ function TreeRow({ node, depth, selected, onSelect, expanded, onToggle }) {
             hasC ? "cursor-pointer hover:bg-accent" : "cursor-default"
           )}
         >
-          {hasC ? (isExp ? <ChevronDown size={13} /> : <ChevronRight size={13} />) : <span className="w-3.5" />}
+          {hasC ? (isExp ? <ChevronDown size={13} /> : (isAr ? <ChevronLeft size={13} /> : <ChevronRight size={13} />)) : <span className="w-3.5" />}
         </span>
 
         {/* Level indicator dot */}
@@ -198,9 +201,9 @@ function TreeRow({ node, depth, selected, onSelect, expanded, onToggle }) {
 
         <CatIcon icon={node.icon} size={13} className={cn("shrink-0", isSel ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
         <span className={cn("flex-1 text-[13px] truncate whitespace-nowrap", isSel ? "font-semibold text-primary" : "text-foreground")}>
-          {node.name_en}
+          {isAr && node.name_ar ? node.name_ar : node.name_en}
         </span>
-        {!node.is_active && <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">OFF</Badge>}
+        {!node.is_active && <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">{t("modules.inactiveBadge", { defaultValue: "OFF" })}</Badge>}
         {isLeafNode && !isSel && <span className="w-1 h-1 rounded-full bg-orange-400/60 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />}
       </div>
       {isExp && node.children?.map(c => (
@@ -213,6 +216,7 @@ function TreeRow({ node, depth, selected, onSelect, expanded, onToggle }) {
 
 // ── Field row ─────────────────────────────────────────────────────────────────
 function FieldRow({ field, formulaId, allNonMaterialFormulas, units, fieldTypes, categoryId }) {
+  const { t } = useTranslation("admin");
   const [draft, setDraft] = useState(null);
   const cur     = draft ?? field;
   const isDirty = draft !== null;
@@ -283,17 +287,17 @@ function FieldRow({ field, formulaId, allNonMaterialFormulas, units, fieldTypes,
         {/* Row 1: Labels + Type + Variable + Unit + Required/Badge + Actions */}
         <div className="grid grid-cols-[1fr_1fr_110px_110px_80px_auto_56px] gap-2.5 items-end">
           <div>
-            <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">Label EN</div>
+            <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">{t("modules.labelEN")}</div>
             <InlineInput value={cur.label_en} onChange={v => patch({ label_en: v })} placeholder="e.g. Length…" />
           </div>
           <div>
-            <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">Label AR</div>
+            <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">{t("modules.labelAR")}</div>
             <InlineInput value={cur.label_ar} onChange={v => patch({ label_ar: v })} placeholder="الطول…" dir="rtl" />
           </div>
 
           {/* ── Type selector ───────────────────────────────────────────── */}
           <div>
-            <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">Type</div>
+            <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">{t("modules.type")}</div>
             <Select
               value={cur.field_type_id || "none"}
               onValueChange={v => patch({
@@ -309,7 +313,7 @@ function FieldRow({ field, formulaId, allNonMaterialFormulas, units, fieldTypes,
                 <SelectValue placeholder="number" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">— number (default) —</SelectItem>
+                <SelectItem value="none">{t("modules.numberDefault")}</SelectItem>
                 {fieldTypes.map(t => (
                   <SelectItem key={t.field_type_id} value={t.field_type_id}>{t.name_en}</SelectItem>
                 ))}
@@ -319,7 +323,7 @@ function FieldRow({ field, formulaId, allNonMaterialFormulas, units, fieldTypes,
 
           <div>
             <div className={cn("text-[10px] mb-1 font-semibold uppercase tracking-wide", isInvalid ? "text-destructive" : "text-muted-foreground")}>
-              Variable {isInvalid && <span className="normal-case">(invalid)</span>}
+              {t("modules.variable")} {isInvalid && <span className="normal-case">({t("modules.invalid")})</span>}
             </div>
             <InlineInput
               mono
@@ -334,7 +338,7 @@ function FieldRow({ field, formulaId, allNonMaterialFormulas, units, fieldTypes,
 
           {/* Unit — replaced with "0 / 1" badge for BOOLEAN */}
           <div>
-            <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">Unit</div>
+            <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">{t("modules.unit")}</div>
             {isBoolean ? (
               <div className="h-8 flex items-center px-2 rounded-md border border-dashed border-violet-300/50 bg-violet-50/50">
                 <span className="text-[10px] text-violet-500 font-semibold">0 / 1</span>
@@ -343,7 +347,7 @@ function FieldRow({ field, formulaId, allNonMaterialFormulas, units, fieldTypes,
               <Select value={cur.unit_id || "none"} onValueChange={v => patch({ unit_id: v === "none" ? null : v })}>
                 <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="—" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">— none —</SelectItem>
+                  <SelectItem value="none">{t("modules.noneUnit")}</SelectItem>
                   {units.map(u => <SelectItem key={u.unit_id} value={u.unit_id}>{u.symbol}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -353,16 +357,16 @@ function FieldRow({ field, formulaId, allNonMaterialFormulas, units, fieldTypes,
           <div className="h-8 flex items-center">
             {isComp ? (
               <span className="inline-flex items-center gap-1 text-[11px] text-primary font-semibold px-2 py-0.5 bg-primary/10 rounded-md border border-primary/20">
-                <GitBranch size={10} /> Computed
+                <GitBranch size={10} /> {t("modules.computed")}
               </span>
             ) : isBoolean ? (
               <span className="inline-flex items-center gap-1 text-[11px] text-violet-600 font-semibold px-2 py-0.5 bg-violet-100 rounded-md border border-violet-200">
-                <ToggleLeft size={10} /> Bool
+                <ToggleLeft size={10} /> {t("modules.bool")}
               </span>
             ) : (
               <label className="flex items-center gap-1.5 cursor-pointer text-xs text-muted-foreground whitespace-nowrap">
                 <Checkbox checked={!!cur.required} onCheckedChange={c => patch({ required: c })} className="w-3.5 h-3.5" />
-                Required
+                {t("modules.required")}
               </label>
             )}
           </div>
@@ -386,20 +390,20 @@ function FieldRow({ field, formulaId, allNonMaterialFormulas, units, fieldTypes,
             isComp ? "bg-background border-primary/30" : "bg-muted/50 border-border"
           )}>
             <span className={cn("font-semibold flex items-center gap-1", isComp ? "text-primary" : "text-muted-foreground")}>
-              <Sigma size={11} /> {isComp ? "Computed via:" : "Chain source:"}
+              <Sigma size={11} /> {isComp ? t("modules.computedVia") : t("modules.chainSource")}
             </span>
             <Select value={cur.source_formula_id || "none"} onValueChange={v => patch({ source_formula_id: v === "none" ? null : v })}>
               <SelectTrigger className={cn("h-7 text-xs w-[220px] shrink-0", isComp && "border-primary/50 bg-primary/5 text-primary")}>
-                <SelectValue placeholder="— Requires User Input —" />
+                <SelectValue placeholder={t("modules.requiresInput")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">— Requires User Input —</SelectItem>
+                <SelectItem value="none">{t("modules.requiresInput")}</SelectItem>
                 {chainable.map(f => <SelectItem key={f.formula_id} value={f.formula_id}>{f.name_en}</SelectItem>)}
               </SelectContent>
             </Select>
             {linked && cur.variable_name && (
               <span className="text-muted-foreground">
-                → injects <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded font-mono text-[11px]">{cur.variable_name}</code>
+                → {t("modules.injects")} <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded font-mono text-[11px]">{cur.variable_name}</code>
               </span>
             )}
           </div>
@@ -410,18 +414,18 @@ function FieldRow({ field, formulaId, allNonMaterialFormulas, units, fieldTypes,
           <div className="mt-2.5 px-2 py-2 rounded-lg border border-dashed border-amber-300/60 bg-amber-50/40">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-[10px] font-semibold text-amber-700 flex items-center gap-1 uppercase tracking-wide">
-                <ListOrdered size={11} /> Options
-                <span className="text-amber-500 font-normal normal-case ml-0.5">(label shown to user · numeric value used in formula)</span>
+                <ListOrdered size={11} /> {t("modules.options")}
+                <span className="text-amber-500 font-normal normal-case ml-0.5">({t("modules.optionsHint")})</span>
               </span>
               <button
                 onClick={addOption}
                 className="ml-auto flex items-center gap-1 text-[10px] font-semibold text-amber-700 hover:text-amber-900 px-1.5 py-0.5 rounded hover:bg-amber-100 transition-colors"
               >
-                <Plus size={10} /> Add option
+                <Plus size={10} /> {t("modules.addOption")}
               </button>
             </div>
             {options.length === 0 && (
-              <div className="text-[11px] text-amber-600/70 italic py-1 px-1">No options yet — add at least one.</div>
+              <div className="text-[11px] text-amber-600/70 italic py-1 px-1">{t("modules.noOptions")}</div>
             )}
             {options.map((opt, idx) => (
               <div key={idx} className="flex items-center gap-1.5 mb-1.5">
@@ -452,6 +456,7 @@ function FieldRow({ field, formulaId, allNonMaterialFormulas, units, fieldTypes,
 
 // ── Output row ────────────────────────────────────────────────────────────────
 function OutputRow({ output, units, categoryId, onDelete }) {
+  const { t } = useTranslation("admin");
   const [draft, setDraft] = useState(null);
   const [copied, setCopied] = useState(false);
   const cur     = draft ?? output;
@@ -473,7 +478,7 @@ function OutputRow({ output, units, categoryId, onDelete }) {
         <div className="grid grid-cols-[170px_1fr_1fr_110px_auto] gap-2.5 items-end">
           <div>
             <div className="text-[10px] text-primary font-mono mb-1 font-bold uppercase tracking-wide flex items-center gap-1">
-              <Key size={10} /> Output Key
+              <Key size={10} /> {t("modules.outputKey")}
             </div>
             <div className="relative flex items-center gap-1">
               <InlineInput
@@ -492,19 +497,19 @@ function OutputRow({ output, units, categoryId, onDelete }) {
             </div>
           </div>
           <div>
-            <div className="text-[11px] text-muted-foreground mb-1 font-medium">Label (EN)</div>
+            <div className="text-[11px] text-muted-foreground mb-1 font-medium">{t("modules.labelEN")}</div>
             <InlineInput value={cur.output_label_en} onChange={v => set({ output_label_en: v })} placeholder="e.g. Concrete Volume" />
           </div>
           <div>
-            <div className="text-[11px] text-muted-foreground mb-1 font-medium">Label (AR)</div>
+            <div className="text-[11px] text-muted-foreground mb-1 font-medium">{t("modules.labelAR")}</div>
             <InlineInput value={cur.output_label_ar} onChange={v => set({ output_label_ar: v })} placeholder="حجم الخرسانة" dir="rtl" />
           </div>
           <div>
-            <div className="text-[11px] text-muted-foreground mb-1 font-medium">Unit</div>
+            <div className="text-[11px] text-muted-foreground mb-1 font-medium">{t("modules.unit")}</div>
             <Select value={cur.output_unit_id || "none"} onValueChange={v => set({ output_unit_id: v === "none" ? null : v })}>
               <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="— none —" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">— none —</SelectItem>
+                <SelectItem value="none">{t("modules.noneUnit")}</SelectItem>
                 {units.map(u => <SelectItem key={u.unit_id} value={u.unit_id}>{u.symbol}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -563,11 +568,11 @@ function FormulaCard({ formula, allNonMaterialFormulas, units, fieldTypes, categ
           </div>
           <div className="flex-1 grid grid-cols-2 gap-3 min-w-0">
             <div>
-              <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">Name (EN)</div>
+              <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">{t("modules.nameEN")}</div>
               <InlineInput value={cur.name_en || ""} onChange={v => setDraft(d => ({ ...(d ?? formula), name_en: v }))} className="font-semibold" />
             </div>
             <div>
-              <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">Name (AR)</div>
+              <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">{t("modules.nameAR")}</div>
               <InlineInput dir="rtl" value={cur.name_ar || ""} onChange={v => setDraft(d => ({ ...(d ?? formula), name_ar: v }))} placeholder="اسم الصيغة…" />
             </div>
           </div>
@@ -586,7 +591,7 @@ function FormulaCard({ formula, allNonMaterialFormulas, units, fieldTypes, categ
         <div className="flex gap-2.5 items-end">
           <div className="flex-1">
             <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide flex items-center gap-1">
-              <Braces size={10} /> Expression
+              <Braces size={10} /> {t("modules.expression")}
             </div>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-primary/50 font-mono text-xs font-bold select-none pointer-events-none">ƒ</span>
@@ -599,11 +604,11 @@ function FormulaCard({ formula, allNonMaterialFormulas, units, fieldTypes, categ
             </div>
           </div>
           <div className="w-[120px] shrink-0">
-            <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">Output Unit</div>
+            <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">{t("modules.outputUnit")}</div>
             <Select value={cur.output_unit_id || "none"} onValueChange={v => setDraft(d => ({ ...(d ?? formula), output_unit_id: v === "none" ? null : v }))}>
               <SelectTrigger className="h-9 text-xs bg-background"><SelectValue placeholder="— unit —" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">— none —</SelectItem>
+                <SelectItem value="none">{t("modules.noneUnit")}</SelectItem>
                 {units.map(u => <SelectItem key={u.unit_id} value={u.unit_id}>{u.symbol}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -616,7 +621,7 @@ function FormulaCard({ formula, allNonMaterialFormulas, units, fieldTypes, categ
             onClick={save}
           >
             {upd.isPending ? <Spin size={13} className="mr-1.5" /> : <Save size={13} className="mr-1.5" />}
-            Save
+            {t("modules.save")}
           </Button>
         </div>
       </div>
@@ -629,7 +634,7 @@ function FormulaCard({ formula, allNonMaterialFormulas, units, fieldTypes, categ
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <div className="p-1 rounded-md bg-primary/10 border border-primary/10 text-primary"><Key size={13} /></div>
-                <span className="text-[13px] font-semibold">Output Keys</span>
+                <span className="text-[13px] font-semibold">{t("modules.outputKeys")}</span>
                 <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/10 h-5 text-[10px]">{outputCount}</Badge>
 
               </div>
@@ -648,7 +653,7 @@ function FormulaCard({ formula, allNonMaterialFormulas, units, fieldTypes, categ
               {!hasOutputs && (
                 <div className="text-[13px] text-muted-foreground py-4 text-center bg-muted/40 rounded-lg border border-dashed flex flex-col items-center gap-1.5">
                   <Key size={18} className="text-muted-foreground/40" />
-                  <span>No output keys yet. Add one so MATERIAL formulas can reference this formula's result.</span>
+                  <span>{t("modules.noOutputKeys")}</span>
                 </div>
               )}
             </div>
@@ -659,7 +664,7 @@ function FormulaCard({ formula, allNonMaterialFormulas, units, fieldTypes, categ
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <div className="p-1 rounded-md bg-background border text-muted-foreground"><Hash size={13} /></div>
-                <span className="text-[13px] font-semibold">Input Fields</span>
+                <span className="text-[13px] font-semibold">{t("modules.inputFields")}</span>
                 <Badge variant="secondary" className="h-5 text-[10px]">{fieldCount}</Badge>
               </div>
               <Button size="sm" variant="outline" className="h-7 text-xs px-2.5" onClick={() => {
@@ -680,7 +685,7 @@ function FormulaCard({ formula, allNonMaterialFormulas, units, fieldTypes, categ
               {(!formula.fields || formula.fields.length === 0) && (
                 <div className="text-[13px] text-muted-foreground py-4 text-center bg-muted/40 rounded-lg border border-dashed flex flex-col items-center gap-1.5">
                   <Hash size={18} className="text-muted-foreground/40" />
-                  <span>No input fields. Add fields to define user-provided values (e.g. L, W, H).</span>
+                  <span>{t("modules.noInputFields")}</span>
                 </div>
               )}
             </div>
@@ -693,6 +698,7 @@ function FormulaCard({ formula, allNonMaterialFormulas, units, fieldTypes, categ
 
 // ── MATERIAL Formula card ─────────────────────────────────────────────────────
 function MaterialFormulaCard({ formula, units, categoryId, onDelete }) {
+  const { t } = useTranslation("admin");
   const [open,  setOpen]  = useState(true);
   const [draft, setDraft] = useState(null);
   const cur     = draft ?? formula;
@@ -720,11 +726,11 @@ function MaterialFormulaCard({ formula, units, categoryId, onDelete }) {
           </div>
           <div className="flex-1 grid grid-cols-2 gap-3 min-w-0">
             <div>
-              <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">Name (EN)</div>
+              <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">{t("modules.nameEN")}</div>
               <InlineInput value={cur.name_en || ""} onChange={v => setDraft(d => ({ ...(d ?? formula), name_en: v }))} className="font-semibold bg-background" />
             </div>
             <div>
-              <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">Name (AR)</div>
+              <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">{t("modules.nameAR")}</div>
               <InlineInput dir="rtl" value={cur.name_ar || ""} onChange={v => setDraft(d => ({ ...(d ?? formula), name_ar: v }))} placeholder="اسم الصيغة…" className="bg-background" />
             </div>
           </div>
@@ -743,7 +749,7 @@ function MaterialFormulaCard({ formula, units, categoryId, onDelete }) {
         <div className="flex gap-2.5 items-end">
           <div className="flex-1">
             <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide flex items-center gap-1">
-              <Braces size={10} /> Quantity Expression
+              <Braces size={10} /> {t("modules.quantityExpression")}
             </div>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-orange-500/60 font-mono text-xs font-bold select-none pointer-events-none">ƒ</span>
@@ -756,11 +762,11 @@ function MaterialFormulaCard({ formula, units, categoryId, onDelete }) {
             </div>
           </div>
           <div className="w-[120px] shrink-0">
-            <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">Unit</div>
+            <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">{t("modules.unit")}</div>
             <Select value={cur.output_unit_id || "none"} onValueChange={v => setDraft(d => ({ ...(d ?? formula), output_unit_id: v === "none" ? null : v }))}>
               <SelectTrigger className="h-9 text-xs bg-background"><SelectValue placeholder="— unit —" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">— unit —</SelectItem>
+                <SelectItem value="none">{t("modules.noneUnit")}</SelectItem>
                 {units.map(u => <SelectItem key={u.unit_id} value={u.unit_id}>{u.symbol}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -773,7 +779,7 @@ function MaterialFormulaCard({ formula, units, categoryId, onDelete }) {
             onClick={save}
           >
             {upd.isPending ? <Spin size={13} className="mr-1.5" /> : <Save size={13} className="mr-1.5" />}
-            Save
+            {t("modules.save")}
           </Button>
         </div>
       </div>
@@ -785,6 +791,7 @@ function MaterialFormulaCard({ formula, units, categoryId, onDelete }) {
 
 // ── Config row ────────────────────────────────────────────────────────────────
 function ConfigRow({ config, updateConfig, deleteConfig }) {
+  const { t } = useTranslation("admin");
   const [draft, setDraft] = useState(null);
   const cur = draft ?? config;
   return (
@@ -792,8 +799,8 @@ function ConfigRow({ config, updateConfig, deleteConfig }) {
       <div className="flex items-center gap-1.5 shrink-0 text-muted-foreground">
         <SlidersHorizontal size={13} />
       </div>
-      <InlineInput value={cur.name} onChange={v => setDraft(d => ({ ...(d ?? config), name: v }))} placeholder="Config name…" className="flex-1 font-medium" />
-      <InlineInput value={cur.description || ""} onChange={v => setDraft(d => ({ ...(d ?? config), description: v }))} placeholder="Description (optional)…" className="flex-[1.5] text-muted-foreground" />
+      <InlineInput value={cur.name} onChange={v => setDraft(d => ({ ...(d ?? config), name: v }))} placeholder={t("modules.configName")} className="flex-1 font-medium" />
+      <InlineInput value={cur.description || ""} onChange={v => setDraft(d => ({ ...(d ?? config), description: v }))} placeholder={t("modules.configDesc")} className="flex-[1.5] text-muted-foreground" />
       {draft !== null && (
         <Button size="icon" className="w-8 h-8 shrink-0" onClick={() => updateConfig.mutate({ configId: config.config_id, data: cur }, { onSuccess: () => setDraft(null) })}>
           <Save size={14} />
@@ -808,6 +815,7 @@ function ConfigRow({ config, updateConfig, deleteConfig }) {
 
 // ── Coefficient row ───────────────────────────────────────────────────────────
 function CoeffRow({ coeff, configs, updateCoefficient, deleteCoefficient }) {
+  const { t } = useTranslation("admin");
   const [draft, setDraft] = useState(null);
   const cur = draft ?? coeff;
   const isLinked = !!cur.config_group_id;
@@ -818,7 +826,7 @@ function CoeffRow({ coeff, configs, updateCoefficient, deleteCoefficient }) {
       isLinked ? "bg-amber-50/50 border-amber-200/60" : "bg-background border-border"
     )}>
       <div>
-        <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">Variable Name</div>
+        <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">{t("modules.variableName")}</div>
         <div className="relative">
           <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-primary/50 font-mono text-[11px] select-none pointer-events-none">$</span>
           <InlineInput
@@ -830,12 +838,12 @@ function CoeffRow({ coeff, configs, updateCoefficient, deleteCoefficient }) {
         </div>
       </div>
       <div>
-        <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">Name (AR)</div>
+        <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">{t("modules.nameAR")}</div>
         <InlineInput dir="rtl" value={cur.name_ar || ""} onChange={v => setDraft(d => ({ ...(d ?? coeff), name_ar: v }))} placeholder="الاسم بالعربية" />
       </div>
       <div>
         <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide flex items-center gap-1">
-          Value
+          {t("modules.value")}
         </div>
         <Input
           type="number"
@@ -845,13 +853,13 @@ function CoeffRow({ coeff, configs, updateCoefficient, deleteCoefficient }) {
         />
       </div>
       <div>
-        <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">Linked Config</div>
+        <div className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase tracking-wide">{t("modules.linkedConfig")}</div>
         <Select value={cur.config_group_id || "global"} onValueChange={v => setDraft(d => ({ ...(d ?? coeff), config_group_id: v === "global" ? null : v }))}>
           <SelectTrigger className={cn("h-8 text-xs", isLinked && "border-amber-500/50 bg-amber-50 text-amber-700")}>
             <SelectValue placeholder="— global —" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="global">— global (all configs) —</SelectItem>
+            <SelectItem value="global">{t("modules.globalConfig")}</SelectItem>
             {configs.map(c => <SelectItem key={c.config_id} value={c.config_id}>{c.name}</SelectItem>)}
           </SelectContent>
         </Select>
@@ -883,7 +891,7 @@ function NewCatModal({ parentId, allNodes, onClose, onCreate, isPending }) {
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-lg z-[100]">
         <DialogHeader>
-          <DialogTitle>New Category</DialogTitle>
+          <DialogTitle>{t("modules.newCategory")}</DialogTitle>
           <DialogDescription>
             {form.parent_id !== "root" ? `Under: ${allNodes.find(n => n.category_id === form.parent_id)?.name_en ?? "…"}` : "Root level"}
           </DialogDescription>
@@ -893,7 +901,7 @@ function NewCatModal({ parentId, allNodes, onClose, onCreate, isPending }) {
           <BilingualRow labelEN="Description (EN)" labelAR="Description (AR)" valueEN={form.description_en} onChangeEN={v => setForm(f => ({ ...f, description_en: v }))} placeholderEN="Brief English description…" valueAR={form.description_ar} onChangeAR={v => setForm(f => ({ ...f, description_ar: v }))} placeholderAR="وصف مختصر…" />
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-muted-foreground">Level</label>
+              <label className="text-xs font-semibold text-muted-foreground">{t("modules.level")}</label>
               <Select value={form.category_level} onValueChange={v => setForm(f => ({ ...f, category_level: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -902,18 +910,18 @@ function NewCatModal({ parentId, allNodes, onClose, onCreate, isPending }) {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-muted-foreground">Parent</label>
+              <label className="text-xs font-semibold text-muted-foreground">{t("modules.parent")}</label>
               <Select value={form.parent_id} onValueChange={v => setForm(f => ({ ...f, parent_id: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="root">— Root —</SelectItem>
+                  <SelectItem value="root">{t("modules.rootParent")}</SelectItem>
                   {allNodes.map(n => <SelectItem key={n.category_id} value={n.category_id}>{n.name_en}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
           </div>
           <div>
-            <div className="text-xs font-semibold text-muted-foreground mb-2">Icon</div>
+            <div className="text-xs font-semibold text-muted-foreground mb-2">{t("modules.icon")}</div>
             <div className="flex gap-2 flex-wrap">
               {ICON_KEYS.map(ic => (
                 <button key={ic} onClick={() => setForm(f => ({ ...f, icon: ic }))} className={cn(
@@ -948,38 +956,38 @@ function NewFormulaModal({ units, onClose, onSave, isPending }) {
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-xl z-[100]">
         <DialogHeader>
-          <DialogTitle>New {isMat ? "Material" : isSvc ? "Service" : "Geometry"} Formula</DialogTitle>
+          <DialogTitle>{t("modules.newFormula", { type: isMat ? t("modules.formulaTypes.material") : isSvc ? t("modules.formulaTypes.service") : t("modules.flowGuide.geometry") })}</DialogTitle>
         </DialogHeader>
         <div className="flex gap-0 mb-2 rounded-lg overflow-hidden border">
           {[
-            { t: "NON_MATERIAL", label: "NON_MATERIAL", hint: "Geometry — defines shape inputs", icon: <FlaskConical size={14} />, colorClass: "text-primary bg-primary/10", defaultBg: "bg-background" },
-            { t: "MATERIAL",     label: "MATERIAL",     hint: "Quantity — computes resource needs", icon: <Package size={14} />, colorClass: "text-orange-600 bg-orange-50", defaultBg: "bg-background" },
-            { t: "SERVICE",      label: "SERVICE",      hint: "Service — computes service quantities", icon: <Wrench size={14} />, colorClass: "text-cyan-600 bg-cyan-50", defaultBg: "bg-background" }
-          ].map(({ t, label, hint, icon, colorClass, defaultBg }) => (
-            <button key={t} onClick={() => setForm(f => ({ ...f, formula_type: t }))} className={cn(
+            { t: "NON_MATERIAL", label: "NON_MATERIAL", hint: t("modules.formulaInfo.nonMaterialEmpty"), icon: <FlaskConical size={14} />, colorClass: "text-primary bg-primary/10", defaultBg: "bg-background" },
+            { t: "MATERIAL",     label: "MATERIAL",     hint: t("modules.formulaInfo.materialEmpty"), icon: <Package size={14} />, colorClass: "text-orange-600 bg-orange-50", defaultBg: "bg-background" },
+            { t: "SERVICE",      label: "SERVICE",      hint: t("modules.formulaInfo.serviceEmpty"), icon: <Wrench size={14} />, colorClass: "text-cyan-600 bg-cyan-50", defaultBg: "bg-background" }
+          ].map(({ t: typeKey, label, hint, icon, colorClass, defaultBg }) => (
+            <button key={typeKey} onClick={() => setForm(f => ({ ...f, formula_type: typeKey }))} className={cn(
               "flex-1 p-3 text-left transition-colors border-r last:border-r-0 flex gap-2.5",
-              form.formula_type === t ? colorClass : defaultBg
+              form.formula_type === typeKey ? colorClass : defaultBg
             )}>
-              <div className={cn("mt-0.5 shrink-0", form.formula_type === t ? "" : "text-muted-foreground")}>{icon}</div>
+              <div className={cn("mt-0.5 shrink-0", form.formula_type === typeKey ? "" : "text-muted-foreground")}>{icon}</div>
               <div>
-                <div className={cn("text-sm font-bold mb-0.5", form.formula_type === t ? "" : "text-muted-foreground")}>{label}</div>
+                <div className={cn("text-sm font-bold mb-0.5", form.formula_type === typeKey ? "" : "text-muted-foreground")}>{label}</div>
                 <div className="text-[11px] text-muted-foreground">{hint}</div>
               </div>
             </button>
           ))}
         </div>
         <div className="flex flex-col gap-4">
-          <BilingualRow valueEN={form.name_en} onChangeEN={v => setForm(f => ({ ...f, name_en: v }))} placeholderEN={isMat ? "e.g. Cement Quantity" : "e.g. Volume Béton"} valueAR={form.name_ar} onChangeAR={v => setForm(f => ({ ...f, name_ar: v }))} placeholderAR={isMat ? "كمية الأسمنت" : "حجم الخرسانة"} />
+          <BilingualRow valueEN={form.name_en} onChangeEN={v => setForm(f => ({ ...f, name_en: v }))} placeholderEN="e.g. Volume" valueAR={form.name_ar} onChangeAR={v => setForm(f => ({ ...f, name_ar: v }))} placeholderAR="حجم الخرسانة" />
           <div>
             <div className="text-xs font-semibold text-muted-foreground mb-1.5 flex items-center gap-1">
-              <Braces size={11} /> {isMat ? "Quantity Expression" : isSvc ? "Service Expression" : "Expression"}
+              <Braces size={11} /> {t("modules.expression")}
             </div>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs font-bold select-none pointer-events-none" style={{ color: isMat ? "rgb(234,88,12,0.5)" : isSvc ? "rgb(8,145,178,0.5)" : "rgb(16,78,216,0.5)" }}>ƒ</span>
               <Input
                 value={form.expression}
                 onChange={e => setForm(f => ({ ...f, expression: e.target.value }))}
-                placeholder={isMat ? "e.g. volume_beton * ciment_per_m3" : "e.g. L * l * h"}
+                placeholder="e.g. L * W * H"
                 className={cn(
                   "pl-7 font-mono border-2 h-9",
                   isMat ? "border-orange-500/30 text-orange-600 focus-visible:ring-orange-500/40" : isSvc ? "border-cyan-500/30 text-cyan-600 focus-visible:ring-cyan-500/40" : "border-primary/30 text-primary focus-visible:ring-primary/40"
@@ -988,11 +996,11 @@ function NewFormulaModal({ units, onClose, onSave, isPending }) {
             </div>
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground">Output unit (optional)</label>
+            <label className="text-xs font-semibold text-muted-foreground">{t("modules.outputUnit")}</label>
             <Select value={form.output_unit_id} onValueChange={v => setForm(f => ({ ...f, output_unit_id: v }))}>
               <SelectTrigger><SelectValue placeholder="— none —" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">— none —</SelectItem>
+                <SelectItem value="none">{t("modules.noneUnit")}</SelectItem>
                 {units.map(u => <SelectItem key={u.unit_id} value={u.unit_id}>{u.symbol} · {u.name_en}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -1000,20 +1008,20 @@ function NewFormulaModal({ units, onClose, onSave, isPending }) {
           {!isMat && !isSvc && (
             <div className="text-sm p-3 bg-primary/10 rounded-lg border border-primary/20 text-foreground flex items-start gap-2">
               <BookOpen size={14} className="text-primary shrink-0 mt-0.5" />
-              <span>After creating, add <strong>Output keys</strong> so MATERIAL formulas can reference this formula's computed values.</span>
+              <span>{t("modules.formulaInfo.nonMaterial")}</span>
             </div>
           )}
           {isSvc && (
             <div className="text-sm p-3 bg-cyan-50 rounded-lg border border-cyan-200 text-foreground flex items-start gap-2">
               <Wrench size={14} className="text-cyan-600 shrink-0 mt-0.5" />
-              <span>This formula will be available to link with services in the <strong>Resources → Services</strong> page.</span>
+              <span>{t("modules.formulaInfo.service")}</span>
             </div>
           )}
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>{t("modules.cancel")}</Button>
           <Button disabled={!valid || isPending} onClick={() => onSave({ ...form, output_unit_id: form.output_unit_id === "none" ? null : form.output_unit_id })}>
-            {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />} Create Formula
+            {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />} {t("modules.createFormula")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -1023,7 +1031,8 @@ function NewFormulaModal({ units, onClose, onSave, isPending }) {
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function Modules() {
-  const { t } = useTranslation("admin");
+  const { t, i18n } = useTranslation("admin");
+  const isAr = i18n.language === 'ar';
   const [selected,    setSelected]    = useState(null);
   const [expanded,    setExpanded]    = useState([]);
   const [modal,       setModal]       = useState(null);
@@ -1139,8 +1148,8 @@ export default function Modules() {
                     )}
                   >
                     <CatIcon icon={n.icon} size={13} className="shrink-0 text-muted-foreground" />
-                    <span className="flex-1 truncate">{n.name_en}</span>
-                    {n.category_level && (() => { const c = CAT_LEVEL_CONF[n.category_level]; return c ? <Badge style={{ backgroundColor: c.bg, color: c.color }} className="border-transparent text-[9px] px-1 py-0 h-4 shrink-0">{c.label}</Badge> : null; })()}
+                    <span className="flex-1 truncate">{isAr && n.name_ar ? n.name_ar : n.name_en}</span>
+                    {n.category_level && (() => { const c = CAT_LEVEL_CONF[n.category_level]; return c ? <Badge style={{ backgroundColor: c.bg, color: c.color }} className="border-transparent text-[9px] px-1 py-0 h-4 shrink-0">{t(`modules.levels.${n.category_level}`, { defaultValue: c.label })}</Badge> : null; })()}
                   </div>
                 ))}
               </div>
@@ -1182,7 +1191,7 @@ export default function Modules() {
               <div className="flex items-center gap-1 mb-4 flex-wrap">
                 {crumb?.map((n, i) => (
                   <span key={n.category_id} className="flex items-center gap-1">
-                    {i > 0 && <ChevronRight size={13} className="text-muted-foreground/60" />}
+                    {i > 0 && (isAr ? <ChevronLeft size={13} className="text-muted-foreground/60" /> : <ChevronRight size={13} className="text-muted-foreground/60" />)}
                     <span
                       onClick={() => handleSelect(n.category_id)}
                       className={cn(
@@ -1190,7 +1199,7 @@ export default function Modules() {
                         i === crumb.length - 1 ? "text-primary font-semibold" : "text-muted-foreground"
                       )}
                     >
-                      <CatIcon icon={n.icon} size={11} /> {n.name_en}
+                      <CatIcon icon={n.icon} size={11} /> {isAr && n.name_ar ? n.name_ar : n.name_en}
                     </span>
                   </span>
                 ))}
@@ -1207,7 +1216,7 @@ export default function Modules() {
                     <div className="flex gap-2 mt-2 flex-wrap">
                       <Badge className="bg-primary/10 text-primary hover:bg-primary/10 border-primary/20">{isLeaf ? "LEAF" : "BRANCH"}</Badge>
                       {node.category_level && (() => { const c = CAT_LEVEL_CONF[node.category_level]; return c ? <Badge style={{ backgroundColor: c.bg, color: c.color }} className="border-transparent">{c.label}</Badge> : null; })()}
-                      <Badge variant={node.is_active ? "default" : "secondary"} className={node.is_active ? "bg-green-100 text-green-700 hover:bg-green-100 border-green-200" : ""}>{node.is_active ? "Active" : "Inactive"}</Badge>
+                      <Badge variant={node.is_active ? "default" : "secondary"} className={node.is_active ? "bg-green-100 text-green-700 hover:bg-green-100 border-green-200" : ""}>{node.is_active ? t("modules.activate") : t("modules.deactivate")}</Badge>
                       {isLeaf && leaf && !leafLoading && (
                         <Badge variant="secondary" className="text-muted-foreground text-[10px]">
                           {leaf.formulas?.length ?? 0} NON_MAT · {leaf.material_formulas?.length ?? 0} MAT · {leaf.service_formulas?.length ?? 0} SVC · {leaf.coefficients?.length ?? 0} coef
@@ -1240,7 +1249,7 @@ export default function Modules() {
                   <BilingualRow labelEN="Description (EN)" labelAR="Description (AR)" valueEN={catData?.description_en || node.description_en || ""} onChangeEN={v => setCatDraft(d => ({ ...(d ?? node), description_en: v }))} placeholderEN="Brief English description…" valueAR={catData?.description_ar || node.description_ar || ""} onChangeAR={v => setCatDraft(d => ({ ...(d ?? node), description_ar: v }))} placeholderAR="وصف مختصر بالعربية…" />
                   <div className="grid grid-cols-[240px_1fr] gap-5 items-start bg-muted/40 p-4 rounded-lg border">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-muted-foreground">Hierarchy Level</label>
+                      <label className="text-xs font-semibold text-muted-foreground">{t("modules.hierarchyLevel")}</label>
                       <Select value={catData?.category_level || node.category_level || "ROOT"} onValueChange={v => setCatDraft(d => ({ ...(d ?? node), category_level: v }))}>
                         <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
                         <SelectContent>
@@ -1249,7 +1258,7 @@ export default function Modules() {
                       </Select>
                     </div>
                     <div>
-                      <div className="text-xs font-semibold text-muted-foreground mb-2">Interface Icon</div>
+                      <div className="text-xs font-semibold text-muted-foreground mb-2">{t("modules.interfaceIcon")}</div>
                       <div className="flex gap-2 flex-wrap">
                         {ICON_KEYS.map(ic => (
                           <button key={ic} onClick={() => setCatDraft(d => ({ ...(d ?? node), icon: ic }))} className={cn(
@@ -1278,7 +1287,7 @@ export default function Modules() {
                 <Sec
                   title={t("modules.sections.subCategories")}
                   icon={<FolderOpen size={16} />}
-                  subtitle={`${node.children?.length ?? 0} children under this node`}
+                  subtitle={t("modules.subtitles.children", { count: node.children?.length ?? 0 })}
                   action={
                     <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setModal({ type: "cat-child", parentId: node.category_id })}>
                       <Plus size={14} className="mr-1.5" /> {t("modules.addChild")}
@@ -1318,7 +1327,7 @@ export default function Modules() {
                 <Sec
                   title={t("modules.sections.nonMaterial")}
                   icon={<FlaskConical size={16} />}
-                  subtitle={leafLoading ? "Loading…" : `${leaf?.formulas?.length ?? 0} formulas · shape inputs and intermediate mathematical results`}
+                  subtitle={leafLoading ? t("modules.loading") : t("modules.subtitles.nonMaterial", { count: leaf?.formulas?.length ?? 0 })}
                   action={!leafLoading && (
                     <Button variant="outline" size="sm" className="h-8 text-xs text-primary border-primary/30 hover:bg-primary/5" onClick={() => setModal({ type: "formula", formulaType: "NON_MATERIAL" })}>
                       <Plus size={14} className="mr-1.5" /> {t("modules.addFormula", { type: "NON_MATERIAL" })}
@@ -1331,7 +1340,7 @@ export default function Modules() {
                     <div className="text-sm text-muted-foreground py-8 text-center bg-muted/50 rounded-lg border border-dashed flex flex-col items-center gap-2">
                       <FlaskConical size={24} className="text-muted-foreground/30" />
                       <span>{t("modules.empty.nonMaterial")}</span>
-                      <span className="text-xs max-w-xs">These define user inputs (length, width) and compute intermediate spatial values used by MATERIAL formulas.</span>
+                      <span className="text-xs max-w-xs">{t("modules.formulaInfo.nonMaterialEmpty")}</span>
                     </div>
                   ) : (
                     (leaf.formulas).map(f => (
@@ -1347,7 +1356,7 @@ export default function Modules() {
                   title={t("modules.sections.material")}
                   icon={<Package size={16} />}
                   accentClass="border-l-orange-500 text-orange-600"
-                  subtitle={leafLoading ? "Loading…" : `${leaf?.material_formulas?.length ?? 0} formulas · compute exact raw resource quantities`}
+                  subtitle={leafLoading ? t("modules.loading") : t("modules.subtitles.material", { count: leaf?.material_formulas?.length ?? 0 })}
                   action={!leafLoading && (
                     <Button variant="outline" size="sm" className="h-8 text-xs text-orange-600 border-orange-500/30 hover:bg-orange-50 hover:text-orange-700" onClick={() => setModal({ type: "formula", formulaType: "MATERIAL" })}>
                       <Plus size={14} className="mr-1.5" /> {t("modules.addFormula", { type: "MATERIAL" })}
@@ -1360,7 +1369,7 @@ export default function Modules() {
                     <div className="text-sm text-muted-foreground py-8 text-center bg-orange-50/60 rounded-lg border border-dashed border-orange-300/50 flex flex-col items-center gap-2">
                       <Package size={24} className="text-orange-300" />
                       <span className="text-orange-800/70">{t("modules.empty.material")}</span>
-                      <span className="text-xs max-w-xs text-orange-700/60">These reference NON_MATERIAL outputs and coefficients to calculate final resource requirements.</span>
+                      <span className="text-xs max-w-xs text-orange-700/60">{t("modules.formulaInfo.materialEmpty")}</span>
                     </div>
                   ) : (
                     (leaf.material_formulas).map(f => (
@@ -1376,7 +1385,7 @@ export default function Modules() {
                   title={t("modules.sections.service")}
                   icon={<Wrench size={16} />}
                   accentClass="border-l-cyan-500 text-cyan-600"
-                  subtitle={leafLoading ? "Loading…" : `${leaf?.service_formulas?.length ?? 0} formulas · compute service quantities for labor & equipment`}
+                  subtitle={leafLoading ? t("modules.loading") : t("modules.subtitles.service", { count: leaf?.service_formulas?.length ?? 0 })}
                   action={!leafLoading && (
                     <Button variant="outline" size="sm" className="h-8 text-xs text-cyan-600 border-cyan-500/30 hover:bg-cyan-50 hover:text-cyan-700" onClick={() => setModal({ type: "formula", formulaType: "SERVICE" })}>
                       <Plus size={14} className="mr-1.5" /> {t("modules.addFormula", { type: "SERVICE" })}
@@ -1389,7 +1398,7 @@ export default function Modules() {
                     <div className="text-sm text-muted-foreground py-8 text-center bg-cyan-50/60 rounded-lg border border-dashed border-cyan-300/50 flex flex-col items-center gap-2">
                       <Wrench size={24} className="text-cyan-300" />
                       <span className="text-cyan-800/70">{t("modules.empty.service")}</span>
-                      <span className="text-xs max-w-xs text-cyan-700/60">These compute service quantities (e.g. labor hours, equipment usage) and can be linked to services in the Resources tab.</span>
+                      <span className="text-xs max-w-xs text-cyan-700/60">{t("modules.formulaInfo.serviceEmpty")}</span>
                     </div>
                   ) : (
                     (leaf.service_formulas).map(f => (
@@ -1405,10 +1414,10 @@ export default function Modules() {
                   title={t("modules.sections.configs")}
                   icon={<Settings2 size={16} />}
                   accentClass="border-l-violet-500 text-violet-600"
-                  subtitle={`${leaf?.configs?.length ?? 0} grade variants (e.g. Béton C25, C30)`}
+                  subtitle={t("modules.subtitles.configs", { count: leaf?.configs?.length ?? 0 })}
                 >
                   <div className="text-[13px] text-muted-foreground mb-4 leading-relaxed bg-muted/40 p-3 rounded-lg border">
-                    Configs group coefficients into selectable variants. Leave empty if no structural grades apply to this element.
+                    {t("modules.configsInfo")}
                   </div>
                   <div className="flex flex-col gap-2.5 mb-4">
                     {(leaf?.configs ?? []).map(c => <ConfigRow key={c.config_id} config={c} updateConfig={updateCfg} deleteConfig={deleteCfg} />)}
@@ -1431,10 +1440,10 @@ export default function Modules() {
                   title={t("modules.sections.coefficients")}
                   icon={<Sigma size={16} />}
                   accentClass="border-l-emerald-500 text-emerald-600"
-                  subtitle={`${leaf?.coefficients?.length ?? 0} constant values for MATERIAL expressions`}
+                  subtitle={t("modules.subtitles.coefficients", { count: leaf?.coefficients?.length ?? 0 })}
                 >
                   <div className="text-[13px] text-muted-foreground mb-4 leading-relaxed bg-muted/40 p-3 rounded-lg border">
-                    Coefficients act as static named variables (e.g. <code className="bg-background border px-1.5 py-0.5 rounded text-primary text-xs">ciment_per_m3</code>) injected into MATERIAL calculations. Assign to a Config for grade-specific values.
+                    {t("modules.coeffsInfo")}
                   </div>
                   <div className="flex flex-col gap-2.5 mb-4">
                     {(leaf?.coefficients ?? []).map(c => <CoeffRow key={c.coefficient_id} coeff={c} configs={leaf?.configs ?? []} updateCoefficient={updateCoef} deleteCoefficient={deleteCoef} />)}

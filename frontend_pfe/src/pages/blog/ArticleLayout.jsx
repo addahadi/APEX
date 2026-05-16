@@ -2,8 +2,10 @@ import { NavLink, Outlet, Link, useLocation } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 export default function ArticleLayout() {
+  const { t } = useTranslation("admin");
   const location = useLocation(); 
   const isEditor =
     location.pathname.includes("/articles/new") ||
@@ -23,16 +25,16 @@ export default function ArticleLayout() {
         {/* Header */}
         <div className="flex justify-between items-end mb-8">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Blog System</h1>
+            <h1 className="text-2xl font-bold tracking-tight">{t("blog.layout.title")}</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Content management & tags
+              {t("blog.layout.subtitle")}
             </p>
           </div>
           
           <Link to="/admin/articles/new">
             <Button size="sm" className="gap-2">
               <Plus className="h-4 w-4" />
-              New Article
+              {t("blog.layout.newArticle")}
             </Button>
           </Link>
         </div>
@@ -40,15 +42,15 @@ export default function ArticleLayout() {
         {/* Tabs */}
         <div className="flex border-b mb-6 overflow-x-auto no-scrollbar">
           <NavLink to="/admin/articles" end className={tabClass}>
-            All Articles
+            {t("blog.layout.allArticles")}
           </NavLink>
           <NavLink to="/admin/articles/tags" className={tabClass}>
-            Tags
+            {t("blog.layout.tags")}
           </NavLink>
           
           {isEditor && (
             <span className={cn(tabClass({ isActive: true }), "cursor-default border-primary text-primary")}>
-              {location.pathname.includes("edit") ? "Edit Article" : "New Article"}
+              {location.pathname.includes("edit") ? t("blog.layout.editArticle") : t("blog.layout.newArticle")}
             </span>
           )}
         </div>

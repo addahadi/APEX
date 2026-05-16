@@ -6,9 +6,11 @@ import { Btn, SectionTitle, Modal } from "../components/admin/ui-atoms.jsx";
 import PlanForm, { PREDEFINED_FEATURES } from "../components/admin/PlanForm.jsx";
 import { useCreatePlan } from "@/hooks/plan.queries";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 
 export default function SubscriptionLayout() {
+  const { t } = useTranslation("admin");
   const { toast } = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const createMutation = useCreatePlan();
@@ -24,9 +26,9 @@ export default function SubscriptionLayout() {
         features: data.features
       });
       setIsModalOpen(false);
-      toast({ title: "Success", description: "New plan created successfully!" });
+      toast({ title: t("subscriptions.toast.successTitle"), description: t("subscriptions.toast.planCreated") });
     } catch (err) {
-      toast({ variant: "destructive", title: "Error", description: err.response?.data?.message || "Failed to create plan" });
+      toast({ variant: "destructive", title: t("subscriptions.toast.errorTitle"), description: err.response?.data?.message || t("subscriptions.toast.planFailed") });
     }
   };
 
@@ -50,15 +52,15 @@ export default function SubscriptionLayout() {
     <div style={{ padding: "28px 30px", animation: "fadeUp .3s ease" }}>
       {/* Header section with Dynamic Action button */}
       <SectionTitle 
-        title="Subscriptions" 
-        subtitle="Manage billing plans and monitor active subscribers" 
-        action={<Btn onClick={() => setIsModalOpen(true)} icon={<Plus size={14}/>}>Create New Plan</Btn>} 
+        title={t("subscriptions.title")} 
+        subtitle={t("subscriptions.subtitle")} 
+        action={<Btn onClick={() => setIsModalOpen(true)} icon={<Plus size={14}/>}>{t("subscriptions.createPlan")}</Btn>} 
       />
 
       <Modal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        title="Create New Subscription Plan"
+        title={t("subscriptions.createPlanTitle")}
       >
         <PlanForm 
           onSave={handleCreatePlan} 
@@ -71,13 +73,13 @@ export default function SubscriptionLayout() {
 
       <div style={{ display: "flex", borderBottom: `1px solid ${P.border}`, marginBottom: 24 }}>
         <NavLink to="/admin/subscriptions" end style={tabStyle}>
-          Plan Features
+          {t("subscriptions.plansTab")}
         </NavLink>
         <NavLink to="/admin/subscriptions/types" style={tabStyle}>
-          Plan Types
+          {t("subscriptions.planTypesTab")}
         </NavLink>
         <NavLink to="/admin/subscriptions/subscribers" style={tabStyle}>
-          Subscribers List
+          {t("subscriptions.subscribersTab")}
         </NavLink>
       </div>
 

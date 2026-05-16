@@ -117,7 +117,7 @@ function PlanForm({ initial, planTypes, onSave, onCancel, isPending, title }) {
 
         <div className="space-y-4">
           <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Feature Limits
+            {t("planFeatures.featureLimits")}
           </h3>
           <div className="space-y-3">
             {form.features.map(ft => {
@@ -126,7 +126,7 @@ function PlanForm({ initial, planTypes, onSave, onCancel, isPending, title }) {
                 <div key={ft.key} className="flex items-center justify-between gap-4 p-3 rounded-lg border bg-muted/30">
                   <div className="flex-1">
                     <p className="text-sm font-semibold">{t(`planFeatures.features.${ft.key}`, meta?.label ?? ft.key)}</p>
-                    {meta?.hint && <p className="text-[10px] text-muted-foreground">{meta.hint}</p>}
+                    {meta?.hint && <p className="text-[10px] text-muted-foreground">{t("planFeatures.features.hint")}</p>}
                   </div>
                   <Input
                     value={ft.value}
@@ -141,10 +141,10 @@ function PlanForm({ initial, planTypes, onSave, onCancel, isPending, title }) {
         </div>
       </CardContent>
       <CardFooter className="flex gap-2 justify-end bg-muted/20 p-4">
-        <Button variant="ghost" onClick={onCancel}>Cancel</Button>
+        <Button variant="ghost" onClick={onCancel}>{t("planFeatures.cancel")}</Button>
         <Button disabled={!valid || isPending} onClick={() => onSave(form)}>
           {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-          Save Plan
+          {t("planFeatures.save")}
         </Button>
       </CardFooter>
     </Card>
@@ -153,20 +153,21 @@ function PlanForm({ initial, planTypes, onSave, onCancel, isPending, title }) {
 
 // ── Plan card ─────────────────────────────────────────────────────────────────
 function PlanCard({ plan, planTypes, onEdit, onDelete, isDeleting }) {
-  const { t } = useTranslation("admin");
+  const { t, i18n } = useTranslation("admin");
+  const isAr = i18n.language === 'ar';
 
   return (
     <Card className="overflow-hidden border-none shadow-sm flex flex-col hover:shadow-md transition-all duration-300">
       <CardHeader className="pb-3 border-b bg-muted/20">
         <div className="flex justify-between items-start mb-2">
-          <CardTitle className="text-lg font-bold tracking-tight">{plan.name_en}</CardTitle>
+          <CardTitle className="text-lg font-bold tracking-tight">{isAr && plan.name_ar ? plan.name_ar : plan.name_en}</CardTitle>
           <div className="text-right">
             {plan.price > 0 ? (
               <div className="text-lg font-bold text-primary">
-                {plan.price.toLocaleString()} <span className="text-[10px] text-muted-foreground uppercase">DA</span>
+                {plan.price.toLocaleString()} <span className="text-[10px] text-muted-foreground uppercase">{t("subscriptions.currency", "DA")}</span>
               </div>
             ) : (
-              <div className="text-sm font-bold text-emerald-600">Free</div>
+              <div className="text-sm font-bold text-emerald-600">{t("planFeatures.free")}</div>
             )}
           </div>
         </div>
@@ -177,7 +178,7 @@ function PlanCard({ plan, planTypes, onEdit, onDelete, isDeleting }) {
             </Badge>
           )}
           <Badge variant="secondary" className="text-[10px] font-semibold h-5">
-            {plan.duration}d
+            {t("subscriptions.daysPlan", { days: plan.duration, defaultValue: `${plan.duration}d` })}
           </Badge>
           {plan.name_ar && <span className="text-[11px] text-muted-foreground font-arabic ml-auto" dir="rtl">{plan.name_ar}</span>}
         </div>
@@ -194,7 +195,7 @@ function PlanCard({ plan, planTypes, onEdit, onDelete, isDeleting }) {
               )}>
                 {f.value === t("planFeatures.unlimited") ? (
                   <span className="flex items-center gap-1">
-                    <CheckCircle className="h-3 w-3" /> unlimited
+                    <CheckCircle className="h-3 w-3" /> {t("planFeatures.unlimited", "unlimited")}
                   </span>
                 ) : (
                   f.value
@@ -203,13 +204,13 @@ function PlanCard({ plan, planTypes, onEdit, onDelete, isDeleting }) {
             </div>
           ))
         ) : (
-          <p className="text-xs text-muted-foreground italic">No features defined.</p>
+          <p className="text-xs text-muted-foreground italic">{t("planFeatures.noFeatures")}</p>
         )}
       </CardContent>
 
       <CardFooter className="p-4 pt-0 flex gap-2">
         <Button variant="outline" size="sm" className="flex-1 h-8" onClick={onEdit}>
-          <Pencil className="mr-2 h-3 w-3" /> Edit
+          <Pencil className="mr-2 h-3 w-3" /> {t("planFeatures.edit")}
         </Button>
         <Button variant="destructive" size="sm" className="h-8 w-8 p-0" onClick={onDelete} disabled={isDeleting}>
           {isDeleting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
@@ -291,7 +292,7 @@ export default function PlanFeatures() {
                   <Plus className="h-6 w-6" />
                 </div>
                 <span className="text-sm font-semibold text-muted-foreground group-hover:text-primary transition-colors">
-                  New Plan
+                  {t("planFeatures.newPlan")}
                 </span>
               </Card>
             </div>
@@ -308,14 +309,14 @@ export default function PlanFeatures() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
-            <Button variant="ghost" onClick={() => setConfirm(null)}>Cancel</Button>
+            <Button variant="ghost" onClick={() => setConfirm(null)}>{t("planFeatures.cancel")}</Button>
             <Button
               variant="destructive"
               onClick={() => deletePlan.mutate(confirm, { onSuccess: () => setConfirm(null) })}
               disabled={deletePlan.isPending}
             >
               {deletePlan.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-              Delete Plan
+              {t("planFeatures.confirmDelete")}
             </Button>
           </DialogFooter>
         </DialogContent>
