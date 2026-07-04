@@ -1,6 +1,6 @@
 import postgres from 'postgres';
 
-const sql = postgres(process.env.SUPABASE_DB_URL, { prepare: false });
+const sql = postgres(process.env.DATABASE_URL, { prepare: false });
 
 async function run() {
   console.log('Running migration...');

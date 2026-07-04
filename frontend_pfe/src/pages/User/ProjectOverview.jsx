@@ -244,7 +244,7 @@ const ProjectOverview = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 font-black text-emerald-600 dark:text-emerald-400">
-                        ${calc.leaf_total?.toFixed(2) || 0}
+                        {calc.leaf_total?.toFixed(2) || 0} <span className="text-sm opacity-80 font-normal">{tc("currency")}</span>
                       </td>
                       <td className="px-6 py-4 text-xs font-medium text-slate-500">
                         {new Date(calc.created_at).toLocaleDateString()}

@@ -12,4 +12,4 @@ if (result.error) {
   console.error('Dotenv Error:', result.error);
 }
 
-console.log('SUPABASE_DB_URL:', process.env.SUPABASE_DB_URL ? 'Loaded (redacted)' : 'Not Found');
+console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'Loaded (redacted)' : 'Not Found');

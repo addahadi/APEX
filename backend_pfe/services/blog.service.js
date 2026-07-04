@@ -5,25 +5,25 @@ import { NotFoundError } from '../utils/AppError.js';
 
 function buildArticle(row) {
   return {
-    article_id:  row.article_id,
-    slug:        row.slug,
-    title:       row.title_en,
-    excerpt:     row.excerpt_en,
-    cover_img:   row.cover_img,
-    status:      row.status,
-    type:        row.article_type ?? null,
+    article_id: row.article_id,
+    slug: row.slug,
+    title: row.title_en,
+    excerpt: row.excerpt_en,
+    cover_img: row.cover_img,
+    status: row.status,
+    type: row.article_type ?? null,
     published_at: row.published_at,
-    created_at:  row.created_at,
+    created_at: row.created_at,
     likes_count: Number(row.likes_count ?? 0),
-    tags:        row.tags ?? [],          // array of { tag_id, name }
-    related:     row.related ?? [],       // only present on single-article fetch
+    tags: row.tags ?? [], // array of { tag_id, name }
+    related: row.related ?? [], // only present on single-article fetch
   };
 }
 
 function buildTag(row) {
   return {
-    tag_id:        row.tag_id,
-    name:          row.name_en,
+    tag_id: row.tag_id,
+    name: row.name_en,
     articles_count: Number(row.articles_count ?? 0),
   };
 }
@@ -141,7 +141,7 @@ export async function getArticleBySlug(slug) {
   if (!rows.length) throw new NotFoundError('Article not found');
 
   const article = rows[0];
-  const tagIds  = article.tags.map((t) => t.tag_id).filter(Boolean);
+  const tagIds = article.tags.map((t) => t.tag_id).filter(Boolean);
 
   // Fetch related articles (same tags, exclude self, max 3)
   const related = await getRelatedArticles(article.article_id, tagIds, 3);
@@ -368,7 +368,13 @@ export async function getTags() {
 // Admin: Article CRUD
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export async function getAllArticlesAdmin({ search = '', status = null, type = null, page = 1, limit = 20 }) {
+export async function getAllArticlesAdmin({
+  search = '',
+  status = null,
+  type = null,
+  page = 1,
+  limit = 20,
+}) {
   const offset = (page - 1) * limit;
 
   const conditions = [sql`TRUE`];
@@ -434,21 +440,21 @@ export async function getAllArticlesAdmin({ search = '', status = null, type = n
 
   return {
     data: rows.map((r) => ({
-      article_id:    r.article_id,
-      slug:          r.slug,
-      title:         r.title_en,
-      excerpt:       r.excerpt_en,
-      content:       r.content_en,
-      cover_img:     r.cover_img,
-      status:        r.status,
-      type:          r.article_type ?? null,
+      article_id: r.article_id,
+      slug: r.slug,
+      title: r.title_en,
+      excerpt: r.excerpt_en,
+      content: r.content_en,
+      cover_img: r.cover_img,
+      status: r.status,
+      type: r.article_type ?? null,
       article_type_id: r.article_type_id,
-      published_at:  r.published_at,
-      created_at:    r.created_at,
-      updated_at:    r.updated_at,
-      likes_count:   Number(r.likes_count ?? 0),
-      saves_count:   Number(r.saves_count ?? 0),
-      tags:          r.tags ?? [],
+      published_at: r.published_at,
+      created_at: r.created_at,
+      updated_at: r.updated_at,
+      likes_count: Number(r.likes_count ?? 0),
+      saves_count: Number(r.saves_count ?? 0),
+      tags: r.tags ?? [],
     })),
     pagination: {
       total,
@@ -496,40 +502,75 @@ export async function getArticleByIdAdmin(articleId) {
 
   const r = rows[0];
   return {
-    article_id:    r.article_id,
-    slug:          r.slug,
-    title:         r.title_en,
-    excerpt:       r.excerpt_en,
-    content:       r.content_en,
-    cover_img:     r.cover_img,
-    status:        r.status,
-    type:          r.article_type ?? null,
+    article_id: r.article_id,
+    slug: r.slug,
+    title: r.title_en,
+    excerpt: r.excerpt_en,
+    content: r.content_en,
+    cover_img: r.cover_img,
+    status: r.status,
+    type: r.article_type ?? null,
     article_type_id: r.article_type_id,
-    published_at:  r.published_at,
-    created_at:    r.created_at,
-    updated_at:    r.updated_at,
-    likes_count:   Number(r.likes_count ?? 0),
-    saves_count:   Number(r.saves_count ?? 0),
-    tags:          r.tags ?? [],
+    published_at: r.published_at,
+    created_at: r.created_at,
+    updated_at: r.updated_at,
+    likes_count: Number(r.likes_count ?? 0),
+    saves_count: Number(r.saves_count ?? 0),
+    tags: r.tags ?? [],
   };
 }
 
-export async function createArticleAdmin({ title, slug, excerpt, content, cover_img, status, article_type_id, tags: tagIds = [] }) {
+export async function createArticleAdmin({
+  title,
+  title_ar = 'ar',
+
+  slug,
+
+  excerpt,
+  excerpt_ar = 'ar',
+
+  content,
+  content_ar = 'ar',
+
+  cover_img,
+  status,
+  article_type_id,
+  tags: tagIds = [],
+}) {
   // Create the article
   const [article] = await sql`
-    INSERT INTO articles (title_en, slug, excerpt_en, content_en, cover_img, status, article_type_id, published_at)
-    VALUES (
-      ${title},
-      ${slug},
-      ${excerpt || ''},
-      ${content || ''},
-      ${cover_img || ''},
-      ${status || 'DRAFT'},
-      ${article_type_id || null},
-      ${status === 'PUBLISHED' ? sql`NOW()` : null}
-    )
-    RETURNING article_id
-  `;
+ INSERT INTO articles (
+  title_en,
+  title_ar,
+
+  slug,
+
+  excerpt_en,
+  excerpt_ar,
+
+  content_en,
+  content_ar,
+
+  cover_img,
+  status,
+  article_type_id,
+  published_at
+)
+  VALUES (
+    ${title},
+    ${title_ar},
+    ${slug},
+    ${excerpt || ''},
+    ${excerpt_ar || ''},
+    ${content || ''},
+    ${content_ar || ''},
+    ${cover_img || ''},
+    ${status || 'DRAFT'},
+    ${article_type_id || null},
+    ${status === 'PUBLISHED' ? new Date() : null}
+  )
+  RETURNING article_id
+`;
 
   // Insert tag associations
   if (tagIds.length > 0) {
@@ -540,9 +581,13 @@ export async function createArticleAdmin({ title, slug, excerpt, content, cover_
   return getArticleByIdAdmin(article.article_id);
 }
 
-export async function updateArticleAdmin(articleId, { title, slug, excerpt, content, cover_img, status, article_type_id, tags: tagIds }) {
+export async function updateArticleAdmin(
+  articleId,
+  { title, slug, excerpt, content, cover_img, status, article_type_id, tags: tagIds }
+) {
   // Verify article exists
-  const existing = await sql`SELECT article_id, status FROM articles WHERE article_id = ${articleId} LIMIT 1`;
+  const existing =
+    await sql`SELECT article_id, status FROM articles WHERE article_id = ${articleId} LIMIT 1`;
   if (!existing.length) throw new NotFoundError('Article not found');
 
   const wasPublished = existing[0].status === 'PUBLISHED';
@@ -551,11 +596,11 @@ export async function updateArticleAdmin(articleId, { title, slug, excerpt, cont
   // Build update fields
   const updates = {};
   if (title !== undefined) updates.title_en = title;
-  if (slug !== undefined)  updates.slug = slug;
+  if (slug !== undefined) updates.slug = slug;
   if (excerpt !== undefined) updates.excerpt_en = excerpt;
   if (content !== undefined) updates.content_en = content;
   if (cover_img !== undefined) updates.cover_img = cover_img;
-  if (status !== undefined)   updates.status = status;
+  if (status !== undefined) updates.status = status;
   if (article_type_id !== undefined) updates.article_type_id = article_type_id;
 
   // Set published_at when first publishing
@@ -579,7 +624,8 @@ export async function updateArticleAdmin(articleId, { title, slug, excerpt, cont
 }
 
 export async function deleteArticleAdmin(articleId) {
-  const existing = await sql`SELECT article_id FROM articles WHERE article_id = ${articleId} LIMIT 1`;
+  const existing =
+    await sql`SELECT article_id FROM articles WHERE article_id = ${articleId} LIMIT 1`;
   if (!existing.length) throw new NotFoundError('Article not found');
 
   // Cascading delete: tags, likes, saves, then article
@@ -608,27 +654,41 @@ export async function getAdminTags() {
   `;
 
   return rows.map((r) => ({
-    tag_id:         r.tag_id,
-    name:           r.name_en,
+    tag_id: r.tag_id,
+    name: r.name_en,
     articles_count: Number(r.articles_count ?? 0),
   }));
 }
 
 export async function createTagAdmin(name) {
-  const existing = await sql`SELECT tag_id FROM tags WHERE LOWER(name_en) = LOWER(${name}) LIMIT 1`;
+  const existing = await sql`
+    SELECT tag_id
+    FROM tags
+    WHERE LOWER(name_en) = LOWER(${name})
+    LIMIT 1
+  `;
+
   if (existing.length) {
     const err = new Error('Tag already exists');
     err.statusCode = 409;
     throw err;
   }
 
+  // Temporary fake Arabic value
+  const name_ar = 'ar';
+
   const [tag] = await sql`
-    INSERT INTO tags (name_en)
-    VALUES (${name})
-    RETURNING tag_id, name_en
+    INSERT INTO tags (name_en, name_ar)
+    VALUES (${name}, ${name_ar})
+    RETURNING tag_id, name_en, name_ar
   `;
 
-  return { tag_id: tag.tag_id, name: tag.name_en, articles_count: 0 };
+  return {
+    tag_id: tag.tag_id,
+    name: tag.name_en,
+    name_ar: tag.name_ar,
+    articles_count: 0,
+  };
 }
 
 export async function deleteTagAdmin(tagId) {
@@ -638,7 +698,9 @@ export async function deleteTagAdmin(tagId) {
   `;
 
   if (usage.count > 0) {
-    const err = new Error(`Tag is used in ${usage.count} article(s). Remove it from those articles first.`);
+    const err = new Error(
+      `Tag is used in ${usage.count} article(s). Remove it from those articles first.`
+    );
     err.statusCode = 409;
     throw err;
   }
